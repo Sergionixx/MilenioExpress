@@ -1,0 +1,10 @@
+{
+  "description": "Streamline logistics with a mobile app offering secure login, shipment tracking via timeline, QR scanning, delivery confirmation, and shipment history management.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
