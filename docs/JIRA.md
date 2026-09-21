@@ -1,10 +1,10 @@
 # Kanban en Jira
 
-## Seguimiento vigente — 20 de septiembre de 2026
+## Seguimiento vigente — 21 de septiembre de 2026
 
 [Abrir KAN — Milenio Express](https://milenioexpress-sergionix.atlassian.net/jira/software/projects/KAN/boards/2).
 
-El plan vigente es [PLAN-ENTREGA.md](PLAN-ENTREGA.md), con alcance, criterios, decisión de backend y orden de integración. Los responsables están asignados en Jira. La operación masiva del 20 de septiembre confirmó el vencimiento **25 de septiembre de 2026** en 59 tareas asignadas no terminadas, incluidas las rutas simuladas. KAN-58 contiene la coordinación de alcance y KAN-59 la de responsables/fechas.
+El plan vigente es [PLAN-ENTREGA.md](PLAN-ENTREGA.md), con alcance, criterios, decisión de backend y orden de integración. Los responsables están asignados en Jira. La operación masiva del 20 de septiembre confirmó el vencimiento **25 de septiembre de 2026** en 59 tareas asignadas no terminadas, incluidas entonces las rutas simuladas. El 21 de septiembre se retiraron 36 tarjetas a Fuera de alcance conforme a la rúbrica: KAN-17/28/31/34/37/40–50/56/60–78. El plan vigente limita la entrega a creación/consulta, JWT/roles, cobertura ≥80%, CI/CD con deployment, SonarQube, ZAP e informe/ZIP. KAN-58 contiene la coordinación de alcance y KAN-59 la de responsables/fechas.
 
 Los registros PACKAGE y las cantidades siguientes son **históricos**. No usarlos para asignar trabajo ni deducir estados actuales; no existe correspondencia automática de números entre ambos proyectos. Los tableros locales tampoco se sincronizan con Jira. Conservar las asignaciones del proyecto KAN.
 

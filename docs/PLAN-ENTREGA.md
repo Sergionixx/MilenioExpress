@@ -1,85 +1,58 @@
-# Plan vigente de entrega — Milenio Express
+# Entrega académica — alcance vigente
 
-Decisiones de coordinación del 20 de septiembre de 2026, preparadas por autorización del usuario. Fecha final fijada por el usuario: **25 de septiembre de 2026**, zona America/Mexico_City. Jira registra una fecha, no una hora de entrega.
+Revisión del 21 de septiembre de 2026 basada en la [rúbrica del usuario](RUBRICA-ENTREGA.txt). Sustituye el alcance ampliado del 20 de septiembre. Fecha final: **25 de septiembre de 2026**, America/Mexico_City; hora no indicada. [Jira KAN](https://milenioexpress-sergionix.atlassian.net/jira/software/projects/KAN/boards/2) conserva responsables, estados y fechas.
 
-## Fuente de verdad y alcance de estas decisiones
+## Un módulo terminado
 
-[KAN — Milenio Express](https://milenioexpress-sergionix.atlassian.net/jira/software/projects/KAN/boards/2) es la fuente de responsables, estados y fechas. El cambio masivo confirmó 59 tareas asignadas y no terminadas con vencimiento el 25 de septiembre. Ese número es una operación histórica, no un contador en vivo. PACKAGE es el tablero anterior.
+Implementar **creación y consulta de paquetes por guía**, mediante la web React y su backend. ADMIN crea paquetes; USER y ADMIN autenticados consultan los paquetes permitidos. El servidor valida JWT y permisos: sin token se rechaza la operación protegida y USER no puede crear. Cuentas ficticias preparadas son suficientes; registro público y recuperación de contraseña no son necesarios.
 
-Este documento sustituye las decisiones abiertas de los planes locales. `KANBAN.md`, `kanban-data.json` y `kanban.html` se conservan como referencia histórica; sus estados y ediciones locales no representan Jira. `RUTAS-SIMULADAS.md` conserva el detalle de cobertura y se integra al orden de trabajo siguiente.
+Se mantiene React/Vite y la decisión previa de aprovechar Supabase Auth/Postgres, reducida a autenticación y persistencia de usuarios/paquetes. El responsable deberá demostrar JWT real, validación en servidor y rol confiable; un selector de perfil no cumple. Claves de firma y credenciales privilegiadas van en configuración segura/secretos, nunca en código o variables públicas del cliente. No se requiere Storage de fotografías ni un segundo backend. La implementación sigue a cargo de los trabajadores.
 
-Se fijan criterios internos de entrega, no se afirma aprobación del profesor ni conformidad con una rúbrica que no ha sido revisada aquí. Si aparece un requisito académico incompatible, al07098284 registra la diferencia en KAN-58 antes de cambiar el alcance. No se declaran funciones implementadas por escribir este plan.
+## Matriz de requisitos y evidencia
 
-## Matriz de aceptación
-
-| Requisito | Decisión | Jira | Evidencia para cerrar |
-| --- | --- | --- | --- |
-| Web móvil React | Obligatorio; conservar la plataforma actual | KAN-11, KAN-53 | Recorrido en 320, 375 y 430 px, sin desbordamiento horizontal; teclado, etiquetas y errores legibles |
-| Cuentas y permisos | Obligatorio; cliente, repartidor y administrador reales | KAN-16 a KAN-21, KAN-61 | Dos clientes no acceden a envíos ajenos; repartidor modifica solo asignados; registro público sin autoasignación de privilegios |
-| Paquetes y guía manual | Obligatorio; datos compartidos | KAN-14, KAN-23, KAN-24, KAN-27 | Registrar, copiar y consultar la misma guía desde otro dispositivo autorizado; errores visibles |
-| Estados e historial | Obligatorio; eventos persistentes y sin duplicados | KAN-34, KAN-37, KAN-38 | Transición válida conservada tras recarga; rechazar saltos y doble entrega; repetir petición sin duplicar eventos |
-| Evidencia | Obligatorio; foto y nombre del receptor | KAN-44, KAN-46, KAN-47, KAN-50 | JPG/PNG/WebP hasta 1 MB; lectura restringida; fallo de carga no confirma entrega |
-| Destinatario | Obligatorio; enlace seguro | KAN-39, KAN-64 | Enlace limitado al envío; caducidad/revocación verificadas; guía sola no concede acceso privado |
-| Ubicación y mapa | Obligatorio; checkpoints ficticios identificados como simulación | KAN-41, KAN-60, KAN-75 | Último checkpoint y línea de tiempo coherentes; mensaje útil sin ubicación o mapa disponible |
-| Rutas simuladas | Obligatorio; conservar 50 países, 269 centros y 2,450 pares internacionales dirigidos | KAN-65 a KAN-78 | Catálogo validado; todos los pares alcanzan destino sin ciclos; ejemplos, inversos y rutas nacionales; pausa, avance, velocidad, reinicio y recarga |
-| Avisos | Obligatorio dentro de la app; push, SMS y correo fuera de esta entrega | KAN-42, KAN-43 | Cambio relevante visible solo para destinatario autorizado; leído/no leído y preferencias |
-| Administración e incidencias | Obligatorio | KAN-61, KAN-62, KAN-63, KAN-76 | Asignar repartidor, resolver incidencia y conservar actor, fecha y evento de auditoría |
-| Trabajo sin conexión | Obligatorio acotado a una sesión ya cargada | KAN-28, KAN-49 | Operación pendiente visible; al volver conexión se revalida permiso/estado y se sincroniza una vez; conflictos y almacenamiento lleno se muestran; no se finge éxito remoto |
-| Apertura inicial offline/PWA | No requerida en esta entrega | KAN-58 | Documentar que cargar por primera vez requiere conexión; no prometer caché instalable |
-| Rendimiento | Mantener objetivo de referencia: p95 ≤ 2 s con 100 usuarios concurrentes | KAN-52, KAN-54, KAN-56 | Ensayo de 10 minutos tras 1 minuto de calentamiento, lecturas de guía/historial; registrar entorno, muestra, p95 y errores; medir foto/mapa aparte. Un fallo queda abierto, no se elimina el objetivo |
-| Disponibilidad | Verificación de la sesión de exposición; sin prometer SLA de producción | KAN-55, KAN-57 | Smoke test HTTPS al preparar entrega y antes de exponer; ensayo de 30 minutos; demo local de respaldo. Cualquier porcentaje exigido por rúbrica requiere evidencia adicional |
-| Calidad y liberación | Obligatorio | KAN-12, KAN-51 a KAN-57 | Tests, TypeScript y build verdes; CI remoto verificado; E2E con dos cuentas y dos dispositivos; capturas y limitaciones con versión exacta |
-| Android/Kotlin, Firebase/MySQL adicionales, QR, barras, escaneo, pagos, transportistas reales | Excluidos de la implementación de esta entrega | KAN-58 | Documento y exposición describen la plataforma real y no prometen estas funciones |
-| Firma del receptor | Opcional, no condiciona la entrega | KAN-45 | No sustituye fotografía y receptor; no desplazar trabajo obligatorio por esta tarjeta |
-
-## Decisión de backend y almacenamiento
-
-**Decisión: Supabase para Auth, Postgres y Storage privado; React/Vite para el cliente.** Se aprovecha la dependencia y el scaffold existentes. No añadir un segundo backend Firebase/MySQL. Las reglas privilegiadas se ejecutarán del lado servidor; los trabajadores deciden y prueban su implementación dentro de las tarjetas asignadas.
-
-La demo local sigue siendo un recorrido reproducible con datos ficticios y perfiles simulados. La versión compartida debe identificarse claramente y nunca cambiar silenciosamente a datos locales cuando falle el servidor. La integración heredada no está conectada a la demo actual y no prueba que haya un backend listo.
-
-| Ambiente | Uso y configuración prevista | Responsable de implementación |
+| Requisito | Tarjetas / responsable actual | Criterio de aceptación |
 | --- | --- | --- |
-| Demo local | Instalación del README; sin credenciales remotas; datos ficticios reiniciables | Responsables actuales de la demo |
-| Desarrollo compartido | Proyecto Supabase de desarrollo o stack local; cambios reproducibles, cuentas ficticias y pruebas de autorización | Sergionix, KAN-13/KAN-14/KAN-15 |
-| Piloto/entrega | Configuración aislada de desarrollo; frontend HTTPS publicado mediante el flujo de despliegue disponible, redirects de Auth exactos y prueba desde celular | Sergionix, KAN-55; validación Humberto T |
+| Base y configuración reproducible | KAN-10/11/13/14/15 — Sergionix | README, dependencias, configuración de ejemplo sin secretos; persistencia limitada a usuarios y paquetes; validaciones y errores. No exigir eventos/fotos/rutas. |
+| JWT y ADMIN/USER | KAN-18/19/20/21 — Sergionix | Login real; creación solo ADMIN; consulta autenticada; pruebas sin token, token inválido y rol incorrecto. Permisos en servidor, no solo ocultar botones. |
+| Interfaz de acceso y consulta | KAN-16/35/38/39 — Maximo Aguilar | Login y consulta por guía con resultados y errores claros; API protegida. Sin recuperación, destinatario anónimo, historial logístico ni estados. |
+| Creación y guía única | KAN-23/24 — Juan Deluquez; KAN-27 — Sergionix | Crear y consultar el mismo paquete persistido; guía única y copiable; rechazar entradas inválidas. Edición no obligatoria. |
+| Unitarias y cobertura ≥80% | KAN-29 — Juan Deluquez; apoyo KAN-21/35 | Medición sobre el módulo implementado, incluyendo lógica y autorización; reportes originales de ejecución y cobertura. No reducir artificialmente el denominador. Sin pruebas de sincronización. |
+| CI/CD automático | KAN-12 — Humberto T; KAN-55 — Sergionix | Push o PR a rama principal: pruebas → build → despliegue automático a entorno de prueba. YAML, ejecución exitosa y URL/instrucciones verificables. Build sin deployment no cumple. Docker opcional. |
+| SonarQube | KAN-54 — Sergionix | Community Build o equivalente con dashboard, métricas disponibles, al menos un hallazgo interpretado, corrección o justificación de falso positivo y evidencia. Extensión del IDE sola no cumple. Sustituye métricas operativas. |
+| OWASP ZAP | KAN-51 — Humberto T | Reporte inicial, tabla de hallazgos (riesgo/endpoint/evidencia/acción), corrección relevante cuando sea razonable, segundo análisis cuando sea posible y conclusión. Documentar límites de autenticación; automatizar JWT en ZAP es opcional. Escaneo activo solo en entorno propio autorizado. |
+| Demostración básica | KAN-52/53 — Humberto T | Recorrido crear/consultar, roles, móvil y clonación reproducible. Sin E2E logístico completo, carga de 100 usuarios ni SLA. |
+| Informe y paquete final | KAN-57 — Humberto T | PDF/Word: plan vs realidad, desviaciones, lecciones concretas, resultados, mejora medible y una innovación pertinente. ZIP: fuente/configuración, YAML, reportes originales, capturas de pipeline/despliegue, README y entorno de ejemplo sin secretos. |
+| Alcance y coordinación | KAN-58 — al07098284; KAN-59 — Sergionix | Relacionar cada requisito con evidencia y dueño, conservar fecha final y registrar pendientes reales. Revisar evidencia antes de cerrar. |
 
-Contrato previsto de configuración: `VITE_SUPABASE_URL` y `VITE_SUPABASE_PUBLISHABLE_KEY` para el navegador; credenciales administrativas solo en secretos del servidor/CI. Estos nombres son una decisión para implementar: el cliente heredado todavía importa `utils/supabase/info`. No se crean credenciales ni se afirma que esas variables funcionen hoy. No versionar archivos `.env` ni claves privadas. Las cuentas y fotos del piloto serán ficticias; revisar límites del proyecto elegido antes de cargar datos. No se autoriza contratar servicios de pago.
+La innovación se propone como trabajo futuro; no obliga a construir el simulador antes del 25.
 
-Acceso esperado: autenticación más autorización por usuario/asignación, políticas de filas para datos expuestos y políticas de Storage para fotos privadas. No confiar en un rol editable por el navegador. El esquema, migraciones y políticas quedan dentro del trabajo de los responsables; este documento no introduce SQL.
+## Trabajo retirado de esta entrega
 
-Referencias de la decisión: [Auth](https://supabase.com/docs/guides/auth), [Storage y control de acceso](https://supabase.com/docs/guides/storage/security/access-control).
+Jira confirmó el cambio de **36 tarjetas a Fuera de alcance**. Se conserva trazabilidad; no se borra código existente ni se marca trabajo como implementado.
 
-## Responsables y orden unificado
+- KAN-17: registro público; usar cuentas de demostración preparadas.
+- KAN-28/49: funcionamiento offline y sincronización.
+- KAN-31/44/45/46/47/48/50: cámara, fotos, firma y pruebas de evidencia.
+- KAN-34/37/40: operación de repartidor, transiciones e historial logístico avanzado.
+- KAN-41/42/43: mapas, notificaciones y sus pruebas.
+- KAN-56: piloto formal; se conserva verificación básica del módulo.
+- KAN-60/61/62/63/64: checkpoints, panel de asignación, incidencias, auditoría operativa y enlace de destinatario. **Roles y operación ADMIN siguen obligatorios en KAN-19/21.**
+- KAN-65 a KAN-78: épico y 13 tareas de simulación internacional, 50 países, 269 centros y 2,450 pares. Propuesta futura.
 
-Se conservan los responsables observados en Jira; esta tabla resume áreas y no reasigna tarjetas.
+También quedan fuera los objetivos de 100 usuarios concurrentes, p95 de 2 segundos y SLA de producción. QR/escaneo, transportistas reales, pagos y Android/Kotlin permanecen excluidos de esta web. KANBAN.md, kanban-data.json y kanban.html son historia; RUTAS-SIMULADAS.md es una propuesta aplazada.
 
-| Persona en Jira | Coordinación y ejemplos de trabajo asignado |
-| --- | --- |
-| Sergionix | Plataforma, backend, integración y liberación; KAN-10/11/13/14/15/18/19/20/21/27/31/54/55/59/63 |
-| Juan Deluquez | Paquetes, eventos, sincronización y motor/catálogo de rutas; KAN-23/24/28/29/37/60/62/66/67/70/71/73/76 |
-| Maximo Aguilar | Acceso e interfaz, seguimiento/mapa, administración y catálogos; KAN-16/17/34/35/38/39/41/42/43/44/61/64/68/69/75 |
-| Humberto T | CI, evidencia, QA y exposición; KAN-12/46/47/49/50/51/52/53/56/57/72/74/77; firma KAN-45 opcional |
-| al07098284 | Alcance y documentación de rutas; KAN-58/KAN-78 |
+## Secuencia de cierre
 
-Los hitos siguientes son objetivos internos de coordinación establecidos en este plan. La fecha final de Jira sigue siendo el 25; no se atribuye al equipo una aceptación previa de los hitos.
+1. **21 septiembre:** contrato mínimo, JWT/roles y configuración; matriz de evidencia.
+2. **22 septiembre:** creación y consulta integradas; probar ADMIN/USER y rechazos.
+3. **23 septiembre:** cobertura ≥80% y pipeline con despliegue automático verificable.
+4. **24 septiembre:** SonarQube y ZAP; interpretar, corregir, volver a analizar y guardar evidencia; verificación móvil y desde clon limpio.
+5. **25 septiembre:** informe, mejora/innovación, ZIP y ejecución final del pipeline; revisión cruzada de evidencias.
 
-1. **21 sep — contratos y base:** KAN-58/59 como coordinación; KAN-13/14/15 para configuración y persistencia; KAN-66 para contrato de rutas. Definir entradas, salidas, errores y responsable de cada interfaz antes de integración. Catálogos regionales KAN-67 a KAN-70 avanzan después del contrato KAN-66. Diseño móvil, documentación y pruebas pueden avanzar con ejemplos acordados.
-2. **22 sep — recorrido compartido:** acceso/permisos → paquete/guía → transición/evento → evidencia. En rutas: catálogo validado → KAN-71 generador → KAN-72 ejemplos → KAN-73 asociación. No bloquear el motor por la publicación del backend si se puede verificar con datos ficticios.
-3. **23 sep — integración completa:** incorporar mapa/checkpoints, controles KAN-74/75, incidencias KAN-76, destinatario, avisos, administración y sincronización. KAN-55 prepara HTTPS. Comprobar que dos dispositivos ven el mismo envío autorizado.
-4. **24 sep — cierre de funciones y QA:** pruebas de permisos, E2E, móvil, recuperación de conexión y 2,450 pares KAN-77; rendimiento y piloto; corrección de bloqueos. Registrar cualquier criterio fallido y su responsable. No presentar como terminado trabajo pendiente ni añadir funciones opcionales.
-5. **25 sep — entrega:** verificar CI y smoke test, congelar versión, capturas, documentación KAN-57/78, guion y ensayo. Hora exacta no especificada por el usuario; no se inventa.
+Son hitos de coordinación, no trabajo terminado. Se conservan responsables y vencimiento del 25 en Jira; no se promete una hora no indicada.
 
-Dependencias de rutas: KAN-66 → KAN-67/68/69/70 → KAN-71 → KAN-72/73 → KAN-74/75/76 → KAN-77 → KAN-78. Documentación y diseño pueden empezar antes con contratos acordados; cierre exige la implementación. Las dependencias aquí expresan el orden de integración y no afirman que existan enlaces de bloqueo en Jira.
+## Estado verificado y límites
 
-Una tarea pasa a revisión con evidencia y versión/PR; se cierra solo al cumplir su criterio. Cada persona mantiene como máximo dos tareas en curso y registra bloqueos con dependencia y siguiente acción. El tablero debe distinguir implementación, revisión y trabajo ya verificado.
+El checkpoint `7af9577` conserva la demo; `a978e36` guardó el plan anterior. La última verificación de código registró 6 pruebas correctas, TypeScript y build correctos. **No hay aquí evidencia de cobertura ≥80%, JWT real, Sonar, ZAP o despliegue automático completo.** El CI actual de pruebas/build requiere delivery. La demo usa localStorage y perfiles simulados, por lo que aún no satisface la rúbrica.
 
-## Checkpoint y límites de esta preparación
-
-Checkpoint local creado: **`7af9577`**, en `codex/prototipo-academico`, conserva la demo y configuración preexistentes. Verificación del 20 de septiembre: **6/6 pruebas, TypeScript y build correctos**. La documentación se guarda en un commit separado. No equivale a desplegar ni a que CI remoto haya pasado; no se hizo push. El checkpoint conserva el trabajo previo sin implementar las tareas de cada persona.
-
-Hallazgos del checkpoint para los responsables: la descripción de `.figma/make/site.json` contiene `acad?mico` (metadatos, KAN-55); la validación local de foto comprueba formato de data URL, no decodificación del archivo, y la prueba usa contenido ficticio (KAN-50). No impiden guardar el estado existente, pero el checkpoint no certifica que la aplicación compartida esté lista.
-
-La matriz/decisión de backend se publicó en la descripción de KAN-58; responsables, hitos, dependencias y evidencia del checkpoint en KAN-59. Se preservaron las descripciones originales como antecedentes. Las dos tarjetas se llevan a revisión, no a implementación terminada.
-
-La preparación queda documentada; siguen siendo trabajo de implementación: aprovisionar/verificar ambientes, conectar backend, completar las funciones, medir rendimiento y reunir evidencia académica. La rúbrica original no fue aportada en esta revisión: la matriz es el criterio interno operativo y no una certificación del profesor.
+Esta revisión cambia planificación y Jira, no implementa tareas de los trabajadores. Los ejemplos de comandos de la rúbrica son referencias, no acciones ejecutadas aquí.

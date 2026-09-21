@@ -43,7 +43,7 @@ pnpm build
 
 ## Alcance y pendientes del documento
 
-El plan vigente está en [Plan de entrega](docs/PLAN-ENTREGA.md): fecha final **25 de septiembre de 2026**, criterios de aceptación, decisión de backend, responsables y orden de integración, incluidas las rutas simuladas. [Jira KAN](https://milenioexpress-sergionix.atlassian.net/jira/software/projects/KAN/boards/2) es la fuente de estados y asignaciones. El [Kanban local](docs/KANBAN.md) y su [tablero interactivo](docs/kanban.html) son referencias históricas, sin sincronización con Jira.
+El plan vigente está en [Plan de entrega](docs/PLAN-ENTREGA.md): fecha final **25 de septiembre de 2026**, criterios de aceptación, decisión de backend, responsables y orden de integración, limitado a creación y consulta con JWT, ADMIN/USER, cobertura ≥80%, CI/CD, SonarQube, ZAP e informe final. [Jira KAN](https://milenioexpress-sergionix.atlassian.net/jira/software/projects/KAN/boards/2) es la fuente de estados y asignaciones. El [Kanban local](docs/KANBAN.md) y su [tablero interactivo](docs/kanban.html) son referencias históricas, sin sincronización con Jira.
 
 Se decidió usar Supabase para la versión compartida. Es una decisión de planificación: esta demo continúa usando almacenamiento local; la implementación corresponde a las tareas asignadas.
 
@@ -55,10 +55,10 @@ El PDF describe un alcance mayor (Android/Kotlin, Firebase y MySQL), mientras qu
 | Registro y guía | Registro y número único; consulta por guía escrita |
 | QR, códigos de barras y escaneo | Fuera del alcance por decisión del usuario |
 | Estados, seguimiento e historial | Funcionales con datos locales |
-| Evidencia | Foto persistida en el navegador; falta almacenamiento compartido. Firma opcional, fuera del plan necesario |
-| Mapas y notificaciones | Pendientes |
+| Evidencia | Foto existente en el navegador; fotos compartidas y firma fuera de esta entrega |
+| Mapas y notificaciones | Fuera de esta entrega según la rúbrica |
 | Sincronización sin duplicados | Sin backend ni sincronización entre dispositivos |
-| Administración y auditoría | Historial de estados local; administración pendiente |
+| Administración y auditoría | Operación ADMIN obligatoria; panel de asignación y auditoría fuera de alcance |
 | Plataforma | Web adaptable a celular, conforme al formato confirmado |
 
 Los perfiles no son una frontera de seguridad: se pueden cambiar desde la interfaz y el navegador controla los datos. No hay cuentas, aislamiento entre clientes ni enlaces seguros. No se envían fotos ni paquetes a servicios externos. Todos los perfiles de una misma instalación local ven los mismos ejemplos. No utilizar datos personales reales.

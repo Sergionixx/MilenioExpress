@@ -1,6 +1,6 @@
 # Rutas ficticias — planificación en Jira
 
-> Integrado al [plan vigente de entrega](PLAN-ENTREGA.md). Fecha final: **25 de septiembre de 2026**. Los responsables y estados actuales se consultan en Jira; el estado «Pendiente» que sigue corresponde a la creación del plan. Orden: contrato → catálogos → generador → asociación y controles/mapa/incidencias → pruebas → documentación. No requiere implementar transportistas reales.
+> **FUERA DE ESTA ENTREGA — 21 septiembre 2026.** La rúbrica exige un módulo funcional con evidencia técnica. KAN-65 a KAN-78 se retiraron del alcance activo; el contenido siguiente conserva la propuesta histórica para una mejora futura. Consultar [PLAN-ENTREGA.md](PLAN-ENTREGA.md).
 
 Épico: [KAN-65](https://milenioexpress-sergionix.atlassian.net/browse/KAN-65).
 Las 13 tareas KAN-66 a KAN-78 están creadas como hijas, en Pendiente, con criterios de aceptación, dependencias en descripción y etiquetas de dificultad y `rutas-simuladas`. Esto es planificación; el motor y catálogo todavía no están implementados.
