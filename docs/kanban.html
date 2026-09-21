@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kanban · Milenio Express</title>
+  <style>
+    *{box-sizing:border-box}body{margin:0;background:#f3f6fb;color:#182e48;font:15px/1.5 system-ui,sans-serif}header{padding:32px clamp(20px,4vw,56px) 22px;background:#fff;border-bottom:1px solid #dce4ee}small,.muted{color:#526782}.eyebrow{color:#0759c8;font-weight:800;font-size:12px;letter-spacing:1.4px}h1{font-size:clamp(25px,4vw,36px);letter-spacing:-1px;margin:6px 0}header p{max-width:920px;margin:8px 0}.scope{display:inline-block;padding:5px 10px;background:#e9f2ff;color:#184d8f;border-radius:7px;font-size:13px}.tools{display:flex;flex-wrap:wrap;align-items:end;gap:16px;padding:20px clamp(20px,4vw,56px)}label{display:grid;gap:5px;font-size:12px;font-weight:650}input,select,button{font:inherit;color:inherit;padding:9px 11px;border:1px solid #c6d3e2;border-radius:8px;background:#fff}input{min-width:0}button{cursor:pointer;font-weight:650}button:hover{background:#e9f2ff}input:focus-visible,select:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid #78acf0;outline-offset:2px}#counts{margin-left:auto;font-size:13px;color:#526782}.board{display:grid;grid-template-columns:repeat(5,minmax(270px,1fr));gap:16px;overflow-x:auto;padding:0 clamp(20px,4vw,56px) 30px;align-items:start;height:65vh;min-height:360px}.column{background:#eaf0f7;border:1px solid #dbe4ee;border-radius:14px;padding:12px;min-height:240px;height:100%;overflow-y:auto}.column h2{font-size:15px;margin:0 0 14px;display:flex;justify-content:space-between;align-items:center}.column h2 span{font-size:12px;padding:2px 8px;border-radius:20px;background:#fff}.card{background:#fff;border:1px solid #dbe4ee;border-radius:10px;padding:14px;margin-bottom:12px;box-shadow:0 2px 3px #182e4805}.card h3{font-size:15px;line-height:1.4;margin:8px 0 12px}.tags{display:flex;gap:7px;align-items:center;font-size:11px;color:#526782}.priority{border-radius:5px;padding:2px 6px;font-weight:800;background:#eef1f6}.p0{background:#ffebe4;color:#973718}.p1{background:#e8efff;color:#2056a2}.base{background:#e4f5eb;color:#267149}.card select{width:100%;font-size:12px}.card details{margin-top:12px;font-size:12px}.card summary{cursor:pointer;font-weight:650;color:#315d90}.card p{margin:10px 0;overflow-wrap:anywhere}.card input{width:100%;font-size:12px}.empty{font-size:12px;color:#62758d;padding:20px 4px}.note{margin:0 clamp(20px,4vw,56px) 18px;font-size:12px;color:#526782}#message{color:#0759c8;min-height:1.5em}.legend{font-size:12px;color:#526782}.column:nth-child(2){border-top:3px solid #0759c8}.column:nth-child(5){border-top:3px solid #258663}@media(max-width:600px){header{padding-top:22px}.tools{gap:10px}.tools>label:first-child{width:100%}.tools input{width:100%}#counts{margin:0;width:100%}.board{grid-template-columns:repeat(5,85vw)}header p{font-size:13px}}@media print{.board,.column{height:auto;overflow:visible}.tools,.note,.card>label{display:none}.board{display:block;overflow:visible}.column{break-inside:auto;margin-bottom:20px}.card{break-inside:avoid}details> *{display:block}body{background:#fff}}
+  </style>
+</head>
+<body>
+<header>
+  <div class="eyebrow">MILENIO EXPRESS / PROYECTO FINAL</div>
+  <h1>Kanban local — referencia histórica</h1>
+  <span class="scope">Web para celular · Guía escrita · Sin QR ni escaneo</span>
+  <p>Captura histórica: 26 tareas y 6 avances locales. El plan vigente está en <a href="PLAN-ENTREGA.md">Plan de entrega</a> y los responsables/estados en <a href="https://milenioexpress-sergionix.atlassian.net/jira/software/projects/KAN/boards/2">Jira KAN</a>. Fecha final: <strong>25 de septiembre de 2026</strong>. Las ediciones de este tablero son locales y no actualizan Jira.</p>
+  <div class="legend">P0: base necesaria o cierre de entrega · P1: funcionalidades y validación · Máximo sugerido: 2 tareas en curso</div>
+</header>
+<div class="tools">
+  <label>Buscar tarea<input id="search" type="search" placeholder="Título, ID o área"></label>
+  <label>Prioridad<select id="priority"><option value="">Todas</option><option>P0</option><option>P1</option><option value="Base">Base terminada</option></select></label>
+  <button id="export" type="button">Exportar tablero JSON</button>
+  <span id="counts" aria-live="polite"></span>
+</div>
+<p class="note">Cambia de columna con el selector de cada tarjeta. Los movimientos y responsables se guardan solo en este navegador; exporta una copia para compartirlos. El tablero no actualiza GitHub ni los archivos del proyecto automáticamente.</p>
+<p class="note" id="message" role="status"></p>
+<main id="board" class="board" aria-label="Tablero Kanban de Milenio Express"></main>
+<script id="initial-data" type="application/json">{
+  "project": "Milenio Express",
+  "planningStatus": "historical-reference",
+  "currentPlan": "PLAN-ENTREGA.md",
+  "sourceOfTruth": "https://milenioexpress-sergionix.atlassian.net/jira/software/projects/KAN/boards/2",
+  "deliveryDate": "2026-09-25",
+  "notice": "Los estados y responsables de esta captura histórica no se sincronizan con Jira. Consultar el plan vigente.",
+  "scope": "Prototipo web para celular. Seguimiento por número de guía; sin QR, códigos de barras ni escaneo. Evidencia mediante fotografía.",
+  "columns": ["Pendiente", "Listo para iniciar", "En curso", "En revisión", "Terminado"],
+  "tasks": [
+    {"id":"ME-01","title":"Actualizar alcance y criterios de la entrega","priority":"P0","area":"Planeación","status":"Listo para iniciar","depends":[],"acceptance":"Actualizar el documento del proyecto y las historias: web para celular, consulta por guía escrita, sin QR ni escaneo, foto como evidencia. Acordar si los objetivos de carga, disponibilidad y funcionamiento sin conexión del PDF se evalúan en la materia; registrar la decisión y el alcance final."},
+    {"id":"ME-02","title":"Asignar responsables y ordenar la entrega","priority":"P0","area":"Planeación","status":"Listo para iniciar","depends":[],"acceptance":"Cada tarea pendiente tiene una persona responsable y un orden de trabajo. Acordar fecha de entrega y fechas objetivo; limitar a dos tareas en curso por equipo. No inventar fechas ni asignaciones."},
+    {"id":"ME-03","title":"Elegir dónde guardar datos y ejecutar el backend","priority":"P0","area":"Datos","status":"Listo para iniciar","depends":[],"acceptance":"Documentar una sola solución para usuarios, paquetes, eventos y fotos, su configuración local y de prueba, límites y variables necesarias. Aprovechar el repositorio existente y conservar un modo demo reproducible."},
+    {"id":"ME-04","title":"Modelar usuarios, paquetes, eventos y evidencias","priority":"P0","area":"Datos","status":"Pendiente","depends":["ME-03"],"acceptance":"Crear el modelo persistente con propietario, repartidor asignado, guía única, estado, eventos con fecha/actor, evidencia y ubicación opcional. Aplicar cambios reproducibles y preparar datos ficticios de prueba; no guardar todo como una lista global compartida."},
+    {"id":"ME-05","title":"Registro, inicio y cierre de sesión","priority":"P0","area":"Acceso","status":"Pendiente","depends":["ME-04"],"acceptance":"El cliente puede registrarse, iniciar sesión y salir; la sesión se recupera al recargar y las credenciales incorrectas muestran un error. El registro público no permite convertirse en repartidor o administrador."},
+    {"id":"ME-06","title":"Permisos reales y envíos por usuario","priority":"P0","area":"Acceso","status":"Pendiente","depends":["ME-05"],"acceptance":"El backend comprueba cliente, repartidor y administrador. Un cliente solo ve sus envíos; un repartidor solo modifica los asignados; probar peticiones directas y acceso a guías ajenas, además de ocultar botones."},
+    {"id":"ME-07","title":"Conectar registro y consulta con datos compartidos","priority":"P0","area":"Paquetes","status":"Pendiente","depends":["ME-04","ME-06"],"acceptance":"Registrar un paquete y consultarlo desde otro dispositivo con la cuenta autorizada. Validar campos y guía única en el servidor; manejar carga, errores y reintento. Asociar remitente, destinatario y repartidor."},
+    {"id":"ME-08","title":"Guardar cambios de estado y evitar duplicados","priority":"P0","area":"Paquetes","status":"Pendiente","depends":["ME-07"],"acceptance":"Guardar cada transición y su evento de forma atómica con hora y actor verificables. Repetir una solicitud o hacer doble clic no crea eventos extra; rechazar saltos, retrocesos y nuevas entregas de un paquete entregado."},
+    {"id":"ME-09","title":"Guardar fotos de entrega con acceso restringido","priority":"P0","area":"Entregas","status":"Pendiente","depends":["ME-08"],"acceptance":"Validar imagen y tamaño, guardar la foto fuera de localStorage y permitir su lectura solo a usuarios autorizados. Registrar receptor y evidencia antes de confirmar entrega; un fallo de subida no cambia el estado. Probar rechazo de archivos inválidos y acceso ajeno."},
+    {"id":"ME-10","title":"Mejorar captura de fotografía en celular","priority":"P1","area":"Entregas","status":"Listo para iniciar","depends":[],"acceptance":"Permitir cámara o galería cuando el navegador lo soporte, mostrar vista previa, reemplazar imagen y comprimir fotografías grandes. Probar cancelación, permiso rechazado y error de archivo sin perder el formulario."},
+    {"id":"ME-11","title":"Facilitar búsqueda y copia del número de guía","priority":"P1","area":"Seguimiento","status":"Listo para iniciar","depends":[],"acceptance":"Agregar copia accesible de la guía con alternativa si el portapapeles falla. Validar búsqueda vacía, espacios, minúsculas y guía inexistente; mejorar búsqueda del historial sin usar cámara ni códigos gráficos."},
+    {"id":"ME-12","title":"Consulta del destinatario mediante enlace seguro","priority":"P1","area":"Seguimiento","status":"Pendiente","depends":["ME-06","ME-07"],"acceptance":"Permitir un enlace revocable y con vencimiento para consultar seguimiento sin cuenta. Mostrar solo estado y recorrido necesarios; no revelar dirección completa, contacto ni fotografía privada. Probar enlaces inválidos, vencidos y revocados."},
+    {"id":"ME-13","title":"Registrar checkpoints y última ubicación","priority":"P1","area":"Ubicación","status":"Pendiente","depends":["ME-08"],"acceptance":"El repartidor autorizado registra ubicación o punto de control con fecha. La geolocalización pide permiso solo al usarla y tiene alternativa manual; distinguir ubicación real de datos simulados y mostrar cuándo se obtuvo."},
+    {"id":"ME-14","title":"Mostrar mapa y estado sin ubicación","priority":"P1","area":"Ubicación","status":"Pendiente","depends":["ME-13"],"acceptance":"Mostrar el último punto disponible en un mapa móvil, con fecha y texto alternativo. Si no hay coordenadas, conexión o proveedor, mostrar una explicación y conservar el seguimiento. No simular movimiento en tiempo real como si fuera real."},
+    {"id":"ME-15","title":"Avisos de cambios y preferencias del usuario","priority":"P1","area":"Avisos","status":"Pendiente","depends":["ME-08","ME-06"],"acceptance":"Crear avisos de cambios relevantes y entrega para el cliente autorizado, con leídos/no leídos y preferencias. Acordar el canal para destinatarios autorizados según alcance; diferenciar claramente avisos dentro de la app de push o correo si estos no se implementan."},
+    {"id":"ME-16","title":"Administrar roles y asignar repartidores","priority":"P1","area":"Administración","status":"Pendiente","depends":["ME-06","ME-07"],"acceptance":"Un administrador puede consultar usuarios, asignar roles permitidos y distribuir paquetes. Los otros perfiles no acceden; cambios de rol y asignación quedan auditados. Preparar una cuenta administradora de prueba sin permitir autoasignación pública."},
+    {"id":"ME-17","title":"Registrar y resolver incidencias de entrega","priority":"P1","area":"Administración","status":"Pendiente","depends":["ME-08","ME-16"],"acceptance":"El repartidor puede reportar destinatario ausente, dirección incorrecta o paquete dañado con nota y fecha. El administrador consulta y resuelve la incidencia; una entrega fallida no marca el paquete como entregado ni elimina su historial."},
+    {"id":"ME-18","title":"Consultar auditoría de cambios y accesos","priority":"P1","area":"Administración","status":"Pendiente","depends":["ME-16","ME-17"],"acceptance":"El administrador filtra eventos por paquete, usuario y fecha, incluidos cambios de estado, roles, asignaciones e incidencias. Registrar accesos relevantes sin contraseñas ni tokens; la auditoría no es editable desde la app."},
+    {"id":"ME-19","title":"Resolver almacenamiento y trabajo sin conexión","priority":"P1","area":"Conectividad","status":"Pendiente","depends":["ME-01","ME-08","ME-09"],"acceptance":"Si RF-10 se conserva, guardar operaciones pendientes y reintentar al recuperar conexión, con identificadores estables, estados visibles y resolución de conflictos sin duplicar eventos. Si se excluye para la materia, documentar la exclusión aprobada y avisar claramente de operaciones no guardadas. Siempre manejar almacenamiento lleno o bloqueado."},
+    {"id":"ME-20","title":"Revisar experiencia móvil y accesibilidad","priority":"P1","area":"Calidad","status":"Pendiente","depends":["ME-09","ME-11","ME-14","ME-15","ME-18"],"acceptance":"Probar formularios, navegación, carga, errores y estados vacíos entre 320 y 430 px, teclado visible y orientación horizontal. Revisar etiquetas, foco, contraste, tamaño de controles y texto largo; probar al menos Android Chrome y otro navegador disponible."},
+    {"id":"ME-21","title":"Automatizar pruebas del flujo completo","priority":"P0","area":"Calidad","status":"Pendiente","depends":["ME-09","ME-12","ME-15","ME-18","ME-19"],"acceptance":"Cubrir registro/login, permisos, alta, seguimiento, estados, evidencia, avisos y administración, incluyendo fallos. Agregar pruebas de integración y navegador a las unitarias existentes; usar datos aislados y asegurar que CI rechace pruebas fallidas."},
+    {"id":"ME-22","title":"Publicar una versión de prueba con HTTPS","priority":"P0","area":"Entrega","status":"Pendiente","depends":["ME-03","ME-07","ME-09"],"acceptance":"Preparar URL de prueba accesible desde celular fuera de la red local, variables de entorno y rutas directas que soporten recarga. Verificar que no se incluyan secretos, que el backend acepte el origen correcto y que la demo pueda restablecerse con datos ficticios."},
+    {"id":"ME-23","title":"Validar rendimiento y requisitos no funcionales","priority":"P1","area":"Calidad","status":"Pendiente","depends":["ME-01","ME-20","ME-21","ME-22"],"acceptance":"Medir tiempos de consulta y tamaño de imágenes en la versión publicada. Si se mantienen las metas del PDF, probar p95 ≤ 2 s con 100 usuarios, TLS y disponibilidad durante una ventana definida; registrar herramienta, entorno y resultados, sin afirmar cumplimiento no medido."},
+    {"id":"ME-24","title":"Prueba con usuarios y corrección de hallazgos","priority":"P1","area":"Calidad","status":"Pendiente","depends":["ME-20","ME-21","ME-22"],"acceptance":"Observar tareas de consulta y entrega con participantes, registrar tiempo y dificultades, y abrir/cerrar tarjetas por cada defecto. Si se conserva la meta del PDF, verificar 8 de 10 consultas en menos de 60 segundos sin ayuda. Obtener aceptación del equipo responsable."},
+    {"id":"ME-25","title":"Actualizar documentación y evidencia académica","priority":"P1","area":"Entrega","status":"Pendiente","depends":["ME-01","ME-21","ME-23","ME-24"],"acceptance":"Entregar README, arquitectura real, modelo de datos, historias y matriz requisito→pantalla→prueba. Adjuntar resultados, capturas y limitaciones, y explicar qué es demo. El documento final no debe prometer Kotlin, MySQL, QR o escaneo si no forman parte de la entrega."},
+    {"id":"ME-26","title":"Preparar exposición y cerrar versión final","priority":"P0","area":"Entrega","status":"Pendiente","depends":["ME-22","ME-25"],"acceptance":"Ensayar cliente, repartidor y administrador con cuentas/datos ficticios; incluir alta→seguimiento→entrega con foto, incidencias y avisos. Subir la versión revisada al repositorio, comprobar CI remoto y preparar respaldo local y guion por integrante."},
+    {"id":"BASE-01","title":"Interfaz web adaptable y navegación","priority":"Base","area":"Ya disponible","status":"Terminado","depends":[],"acceptance":"Interfaz existente revisada a 390 px. La validación móvil ampliada permanece en ME-20."},
+    {"id":"BASE-02","title":"Perfiles simulados de cliente y repartidor","priority":"Base","area":"Ya disponible","status":"Terminado","depends":[],"acceptance":"Selección local y restricción de rutas operativas. Las cuentas y permisos reales permanecen en ME-05 y ME-06."},
+    {"id":"BASE-03","title":"Registro local y guía única","priority":"Base","area":"Ya disponible","status":"Terminado","depends":[],"acceptance":"Formulario validado y guía aleatoria con comprobación de duplicados. Datos compartidos pendientes en ME-07."},
+    {"id":"BASE-04","title":"Rastreo, historial y estados locales","priority":"Base","area":"Ya disponible","status":"Terminado","depends":[],"acceptance":"Detalle por guía, filtros, estados secuenciales y eventos locales. Persistencia multiusuario pendiente en ME-08."},
+    {"id":"BASE-05","title":"Entrega local con foto y receptor","priority":"Base","area":"Ya disponible","status":"Terminado","depends":[],"acceptance":"Foto y receptor persistidos en navegador; recorrido verificado tras recarga. Almacenamiento remoto pendiente en ME-09."},
+    {"id":"BASE-06","title":"Pruebas unitarias y configuración de CI","priority":"Base","area":"Ya disponible","status":"Terminado","depends":[],"acceptance":"Seis pruebas, TypeScript y compilación verificados localmente en la entrega anterior. Workflow creado; ejecución remota y pruebas ampliadas pendientes en ME-21 y ME-26."}
+  ]
+}</script>
+<script>
+  const data = JSON.parse(document.getElementById('initial-data').textContent);
+  const key = 'milenio-kanban-v1';
+  const board = document.getElementById('board');
+  const search = document.getElementById('search');
+  const priority = document.getElementById('priority');
+  const message = document.getElementById('message');
+  let edits = {};
+  try { const saved = JSON.parse(localStorage.getItem(key) || '{}'); if (saved && typeof saved === 'object' && !Array.isArray(saved)) edits = saved; }
+  catch { message.textContent = 'No se pudo recuperar el tablero guardado. Se muestra el plan inicial.'; }
+  for (const task of data.tasks) {
+    const saved = edits[task.id];
+    if (saved && data.columns.includes(saved.status)) task.status = saved.status;
+    task.owner = saved && typeof saved.owner === 'string' ? saved.owner.slice(0, 100) : '';
+  }
+  function element(tag, text, className) { const node = document.createElement(tag); if(text !== undefined) node.textContent=text; if(className) node.className=className; return node; }
+  function save() {
+    const state = Object.fromEntries(data.tasks.map(t => [t.id, {status:t.status, owner:t.owner}]));
+    try { localStorage.setItem(key, JSON.stringify(state)); message.textContent = 'Cambios guardados en este navegador.'; }
+    catch { message.textContent = 'No se pudieron guardar los cambios. Exporta el tablero antes de cerrar esta página.'; }
+  }
+  function render(focusId) {
+    board.replaceChildren();
+    const query = search.value.trim().toLocaleLowerCase('es');
+    const filtered = data.tasks.filter(t => (!priority.value || t.priority === priority.value) && `${t.id} ${t.title} ${t.area} ${t.owner}`.toLocaleLowerCase('es').includes(query));
+    for(const column of data.columns) {
+      const section = element('section', undefined, 'column');
+      const tasks = filtered.filter(t => t.status === column);
+      const heading = element('h2', column); heading.append(element('span', String(tasks.length))); section.append(heading);
+      if(!tasks.length) section.append(element('p', 'Sin tareas en esta columna.', 'empty'));
+      for(const task of tasks) {
+        const card = element('article', undefined, 'card');
+        const tags = element('div', undefined, 'tags');
+        tags.append(element('span', task.priority, `priority ${task.priority.toLowerCase()}`), element('span', `${task.id} · ${task.area}`));
+        card.append(tags, element('h3', task.title));
+        const label = element('label', 'Columna');
+        const select = element('select'); select.id = `status-${task.id}`; select.setAttribute('aria-label', `Columna de ${task.id}`);
+        for (const state of data.columns) { const option = element('option', state); option.value = state; select.append(option); }
+        select.value = task.status;
+        select.addEventListener('change', () => { task.status = select.value; save(); render(select.id); });
+        label.append(select); card.append(label);
+        const details = element('details'); details.append(element('summary', 'Criterio, dependencias y responsable'));
+        details.append(element('p', task.acceptance));
+        details.append(element('p', `Depende de: ${task.depends.join(', ') || 'Sin dependencias'}.`));
+        const ownerLabel = element('label', 'Responsable'); const owner = element('input'); owner.type = 'text'; owner.maxLength = 100; owner.placeholder = 'Sin asignar'; owner.value = task.owner; owner.setAttribute('aria-label', `Responsable de ${task.id}`);
+        owner.addEventListener('change', () => { task.owner = owner.value.trim(); save(); }); ownerLabel.append(owner); details.append(ownerLabel); card.append(details); section.append(card);
+      }
+      board.append(section);
+    }
+    const remaining = data.tasks.filter(t => !t.id.startsWith('BASE-') && t.status !== 'Terminado').length;
+    const active = data.tasks.filter(t => t.status === 'En curso').length;
+    document.getElementById('counts').textContent = `${remaining} restantes · ${active} en curso · ${filtered.length} tarjetas visibles`;
+    if(focusId) document.getElementById(focusId)?.focus();
+  }
+  search.addEventListener('input', () => render()); priority.addEventListener('change', () => render());
+  document.getElementById('export').addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'}); const url = URL.createObjectURL(blob);
+    const anchor = element('a'); anchor.href = url; anchor.download = 'milenio-express-kanban.json'; anchor.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
+  });
+  render();
+</script>
+</body>
+</html>
