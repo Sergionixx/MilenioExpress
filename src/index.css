@@ -29,3 +29,22 @@ svg { width: 21px; height: 21px; flex: none; }
 .role-button small { font-size: 11px; color: #718099; font-weight: 500; }
 .role-button > svg { width: 17px; color: #8fa0b4; }
 .role-note { margin-top: auto !important; padding-top: 24px; text-align: center; font-size: 11px !important; color: #8795a8 !important; }
+
+.demo-banner { padding: 9px 16px; background: #eaf3ff; color: #315d91; text-align: center; font-size: 10px; font-weight: 700; letter-spacing: .35px; }
+.avatar { display: grid; place-items: center; text-decoration: none; }
+.round-button { display: grid; place-items: center; text-decoration: none; flex-shrink: 0; }
+.guide-label { margin-top: 24px; padding: 16px; background: white; border: 1px solid #dce4ed; border-radius: 14px; overflow-wrap: anywhere; }
+.guide-label small { font-size: 10px; color: #657995; }
+.guide-label strong { display: block; font-size: 14px; margin-top: 6px; }
+.guide-label p, .muted { color: #63728a; font-size: 13px; line-height: 1.6; }
+.package-copy { min-width: 0; }
+.package-copy small { overflow-wrap: anywhere; }
+.full-width { width: 100%; }
+.evidence-image { display: block; width: 100%; max-height: 300px; object-fit: contain; border-radius: 14px; background: #eaf0f8; }
+.form-stack input[type=file] { height: auto; padding: 14px; max-width: 100%; box-sizing: border-box; background: white; }
+.form-stack input { min-width: 0; width: 100%; box-sizing: border-box; }
+.empty-state { background: white; padding: 24px; border-radius: 14px; color: #63728a; text-align: center; font-size: 14px; }
+.reset-actions { display: flex; gap: 10px; }
+.form-error { margin: 16px 0; }
+button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid #5c9be8; outline-offset: 3px; }
+@media (min-width: 700px) { .app-shell { padding-bottom: 80px; } .bottom-nav a { width: 78px; height: auto; display: grid; grid-template-columns: 1fr; gap: 4px; } .bottom-nav a.active:before { width: 34px; height: 3px; left: auto; top: 0; } }

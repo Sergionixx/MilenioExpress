@@ -1,10 +1,12 @@
 {
-  "description": "Streamline logistics with a mobile app offering secure login, shipment tracking via timeline, QR scanning, delivery confirmation, and shipment history management.",
+  "description": "Prototipo acad?mico de registro y seguimiento de paquetes.",
   "robots": {
     "index": false
   },
   "accessibility": {
     "addBypassLinks": false,
     "ignoreReducedMotion": false
-  }
+  },
+  "title": "Milenio Express | Proyecto final",
+  "language": "es"
 }
