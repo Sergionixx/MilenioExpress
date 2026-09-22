@@ -7,7 +7,9 @@
     "dev": "vite --host 0.0.0.0",
     "build": "vite build",
     "preview": "vite preview",
-    "format": "oxfmt"
+    "format": "oxfmt",
+    "test": "node --experimental-strip-types --test tests/*.test.ts",
+    "test:coverage": "node --experimental-strip-types --test --experimental-test-coverage --test-coverage-include=src/lib/http.ts --test-coverage-include=supabase/functions/server/domain.ts --test-coverage-include=supabase/functions/server/service.ts --test-coverage-lines=80 --test-coverage-branches=80 --test-coverage-functions=80 tests/*.test.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.112.4",

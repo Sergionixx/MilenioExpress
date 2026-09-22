@@ -1,35 +1,1043 @@
-import { FormEvent, ReactNode, useEffect, useState } from "react";
-import { apiFetch, supabase } from "./lib/supabase";
-import { createBrowserRouter, Link, NavLink, Outlet, RouterProvider, useNavigate, useParams } from "react-router";
+import {
+  createContext,
+  FormEvent,
+  ReactNode,
+  useContext,
+  useEffect,
+  useState,
+} from "react"
+import {
+  createBrowserRouter,
+  Link,
+  Navigate,
+  NavLink,
+  Outlet,
+  RouterProvider,
+  useNavigate,
+  useParams,
+} from "react-router"
+import { ApiError, apiFetch, supabase } from "./lib/supabase"
 
-type IconName = "box" | "scan" | "search" | "clock" | "user" | "chevron" | "arrow" | "camera" | "check" | "filter" | "pin" | "eye";
+type Role = "ADMIN" | "USER"
+type Account = { id: string; email: string; name: string; role: Role }
+type Owner = Pick<Account, "id" | "email" | "name">
+type Shipment = {
+  id: string
+  guide: string
+  ownerId: string
+  recipient: string
+  address: string
+  city: string
+  place: string
+  description: string
+  state: string
+  tone: string
+  events: { title: string; desc: string; time: string }[]
+  createdAt: string
+}
+type AuthState = {
+  account: Account | null
+  checking: boolean
+  error: string
+  refresh: () => Promise<Account | null>
+  logout: () => Promise<void>
+}
+type IconName = "box" | "search" | "clock" | "user" | "chevron" | "arrow" | "check" | "pin" | "copy" | "plus"
+const AuthContext = createContext<AuthState | null>(null)
+const guidePattern = /^ME-\d{4}-\d{8,}$/
+const errorMessage = (error: unknown) =>
+  error instanceof Error ? error.message : "No se pudo completar la solicitud."
+
+function useAccount() {
+  const context = useContext(AuthContext)
+  if (!context) throw new Error("Falta el contexto de acceso.")
+  return context
+}
+
+function AuthProvider({ children }: { children: ReactNode }) {
+  const [account, setAccount] = useState<Account | null>(null)
+  const [checking, setChecking] = useState(true)
+  const [error, setError] = useState("")
+  async function refresh() {
+    setChecking(true)
+    setError("")
+    try {
+      const {
+        data: { session },
+        error: sessionError,
+      } = await supabase.auth.getSession()
+      if (sessionError) throw sessionError
+      if (!session) {
+        setAccount(null)
+        return null
+      }
+      const current = (await apiFetch("/me")) as Account
+      setAccount(current)
+      return current
+    } catch (cause) {
+      setAccount(null)
+      setError(errorMessage(cause))
+      return null
+    } finally {
+      setChecking(false)
+    }
+  }
+  async function logout() {
+    const { error: signOutError } = await supabase.auth.signOut()
+    if (signOutError) throw signOutError
+    setAccount(null)
+    setError("")
+  }
+  useEffect(() => {
+    void refresh()
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_OUT") {
+        setAccount(null)
+        setError("")
+        setChecking(false)
+      }
+    })
+    return () => subscription.unsubscribe()
+  }, [])
+  return (
+    <AuthContext.Provider value={{ account, checking, error, refresh, logout }}>
+      {children}
+    </AuthContext.Provider>
+  )
+}
+
 function Icon({ name, className = "" }: { name: IconName; className?: string }) {
   const paths: Record<IconName, ReactNode> = {
-    box: <><path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5v-9Z"/><path d="m3 7.5 9 4.5 9-4.5M12 12v9"/></>,
-    scan: <><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"/><path d="M8 12h8M9 9v6M12 9v6M15 9v6"/></>,
-    search: <><circle cx="10.8" cy="10.8" r="5.8"/><path d="m16 16 4 4"/></>,
-    clock: <><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3.5 2"/></>,
-    user: <><circle cx="12" cy="8" r="3"/><path d="M5 20c.7-3.2 3-5 7-5s6.3 1.8 7 5"/></>,
-    chevron: <path d="m9 18 6-6-6-6"/>, arrow: <><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></>,
-    camera: <><path d="M4 8h3l1.4-2h7.2L17 8h3v11H4V8Z"/><circle cx="12" cy="13" r="3.2"/></>,
-    check: <path d="m5 12 4 4L19 6"/>, filter: <><path d="M4 6h16M7 12h10M10 18h4"/></>,
-    pin: <><path d="M12 21s6-5.6 6-11a6 6 0 1 0-12 0c0 5.4 6 11 6 11Z"/><circle cx="12" cy="10" r="2"/></>, eye: <><path d="M3 12s3-5 9-5 9 5 9 5-3 5-9 5-9-5-9-5Z"/><circle cx="12" cy="12" r="2"/></>
-  };
-  return <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.85" strokeLinecap="round" strokeLinejoin="round">{paths[name]}</svg>;
+    box: (
+      <>
+        <path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5v-9Z" />
+        <path d="m3 7.5 9 4.5 9-4.5M12 12v9" />
+      </>
+    ),
+    search: (
+      <>
+        <circle cx="10.8" cy="10.8" r="5.8" />
+        <path d="m16 16 4 4" />
+      </>
+    ),
+    clock: (
+      <>
+        <circle cx="12" cy="12" r="8.5" />
+        <path d="M12 7v5l3.5 2" />
+      </>
+    ),
+    user: (
+      <>
+        <circle cx="12" cy="8" r="3" />
+        <path d="M5 20c.7-3.2 3-5 7-5s6.3 1.8 7 5" />
+      </>
+    ),
+    chevron: <path d="m9 18 6-6-6-6" />,
+    arrow: (
+      <>
+        <path d="M5 12h14" />
+        <path d="m13 6 6 6-6 6" />
+      </>
+    ),
+    check: <path d="m5 12 4 4L19 6" />,
+    pin: (
+      <>
+        <path d="M12 21s6-5.6 6-11a6 6 0 1 0-12 0c0 5.4 6 11 6 11Z" />
+        <circle cx="12" cy="10" r="2" />
+      </>
+    ),
+    copy: (
+      <>
+        <rect x="8" y="8" width="11" height="12" rx="2" />
+        <path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h2" />
+      </>
+    ),
+    plus: <path d="M12 5v14M5 12h14" />,
+  }
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.85"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      {paths[name]}
+    </svg>
+  )
+}
+
+function Loading({ label }: { label: string }) {
+  return (
+    <main className="screen state-screen" role="status">
+      <span className="loading-ring" />
+      <p>{label}</p>
+    </main>
+  )
+}
+function EmptyState({
+  title,
+  detail,
+  action,
+}: {
+  title: string
+  detail: string
+  action?: ReactNode
+}) {
+  return (
+    <div className="empty-state">
+      <div className="empty-icon">
+        <Icon name="box" />
+      </div>
+      <strong>{title}</strong>
+      <p>{detail}</p>
+      {action}
+    </div>
+  )
 }
 
 function Auth() {
-  const nav = useNavigate();
-  return <main className="auth-shell"><section className="auth-top"><div className="brand-mark"><Icon name="box"/></div><span className="brand-name">milenio<span>express</span></span><div className="auth-orbit orbit-one"/><div className="auth-orbit orbit-two"/></section><section className="auth-card role-card"><div className="eyebrow">MÓVIL DE LOGÍSTICA</div><h1>¿Cómo quieres continuar?</h1><p>Elige el acceso que corresponde a tu operación.</p><div className="role-actions"><button className="role-button client-role" onClick={()=>nav("/inicio")}><span className="role-icon"><Icon name="user"/></span><span><strong>Iniciar como cliente</strong><small>Consulta el estado de tus envíos</small></span><Icon name="chevron"/></button><button className="role-button driver-role" onClick={()=>nav("/inicio")}><span className="role-icon"><Icon name="box"/></span><span><strong>Acceso de repartidor</strong><small>Gestiona entregas y comprobantes</small></span><Icon name="chevron"/></button></div><p className="role-note">Podrás cambiar de sección desde el menú inferior.</p></section></main>;
+  const { account, checking, refresh } = useAccount()
+  const navigate = useNavigate()
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [pending, setPending] = useState(false)
+  const [error, setError] = useState("")
+  if (checking) return <Loading label="Comprobando acceso…" />
+  if (account) return <Navigate to="/inicio" replace />
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setError("")
+    setPending(true)
+    try {
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      })
+      if (signInError) throw signInError
+      const current = await refresh()
+      if (!current)
+        throw new Error(
+          "No se pudo cargar el perfil de acceso. Intenta de nuevo.",
+        )
+      navigate("/inicio", { replace: true })
+    } catch (cause) {
+      setError(errorMessage(cause))
+    } finally {
+      setPending(false)
+    }
+  }
+  return (
+    <main className="auth-shell">
+      <section className="auth-top">
+        <div className="brand-mark">
+          <Icon name="box" />
+        </div>
+        <span className="brand-name">
+          milenio<span>express</span>
+        </span>
+        <div className="auth-orbit orbit-one" />
+        <div className="auth-orbit orbit-two" />
+      </section>
+      <section className="auth-card">
+        <div className="eyebrow">ACCESO SEGURO</div>
+        <h1>Bienvenido de nuevo</h1>
+        <p>Ingresa con la cuenta asignada a tu operación.</p>
+        <form className="form-stack" onSubmit={submit}>
+          <label>
+            Correo electrónico
+            <input
+              type="email"
+              autoComplete="username"
+              required
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              placeholder="tu.correo@ejemplo.com"
+            />
+          </label>
+          <label>
+            Contraseña
+            <input
+              type="password"
+              autoComplete="current-password"
+              required
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              placeholder="Tu contraseña"
+            />
+          </label>
+          {error && (
+            <p className="form-error" role="alert">
+              {error}
+            </p>
+          )}
+          <button className="primary-button" disabled={pending} type="submit">
+            {pending ? "Ingresando…" : "Iniciar sesión"}
+            <Icon name="arrow" />
+          </button>
+        </form>
+        <p className="auth-help">
+          El administrador gestiona las cuentas. Si necesitas acceso, solicítalo
+          a tu equipo.
+        </p>
+      </section>
+    </main>
+  )
 }
 
-function Shell() { return <div className="app-shell"><header className="app-header"><Link to="/inicio" className="mini-brand"><div><Icon name="box"/></div><b>milenio<span>express</span></b></Link><button className="avatar">AM</button></header><Outlet/><nav className="bottom-nav"><NavLink to="/inicio"><Icon name="search"/><span>Rastrear</span></NavLink><NavLink to="/historial"><Icon name="clock"/><span>Historial</span></NavLink><NavLink to="/perfil"><Icon name="user"/><span>Perfil</span></NavLink></nav></div> }
-const recent = [{id:"ME-8472-1903", place:"Monterrey, NL", state:"En reparto", tone:"blue"},{id:"ME-1294-8816", place:"Guadalajara, JAL", state:"En tránsito", tone:"violet"},{id:"ME-5573-2081", place:"Ciudad de México", state:"Entregado", tone:"green"}];
-function PackageCard({item}:{item: typeof recent[number]}) { return <Link to="/envio/ME-8472-1903" className="package-card"><div className={`package-icon ${item.tone}`}><Icon name="box"/></div><div className="package-copy"><small>{item.id}</small><strong>{item.place}</strong><span className={`status ${item.tone}`}>{item.state}</span></div><Icon name="chevron" className="chevron"/></Link> }
-function Home(){ const nav=useNavigate(); const [code,setCode]=useState(""); const [items,setItems]=useState<any[]>([]); const [error,setError]=useState(""); useEffect(()=>{apiFetch("/shipments").then(setItems).catch(e=>setError(e.message))},[]); return <main className="screen home-screen"><div className="greeting"><div><div className="eyebrow">OPERACIONES · HOY</div><h1>Hola, Andrea.</h1></div><span className="online-dot">En línea</span></div><form className="tracking-search" onSubmit={(e)=>{e.preventDefault();nav("/envio/"+(code||items[0]?.id||"ME-8472-1903"))}}><Icon name="search"/><input value={code} onChange={e=>setCode(e.target.value)} placeholder="Ingresa tu número de guía"/><button type="submit"><Icon name="arrow"/></button></form><section className="section"><div className="section-title"><div><div className="eyebrow">ACTIVIDAD</div><h2>Paquetes recientes</h2></div><Link to="/historial">Ver todo</Link></div>{error?<p className="form-error">{error}</p>:<div className="package-list">{items.map(x=><PackageCard key={x.id} item={x}/>)}</div>}</section></main> }
-function Shipment(){ const nav=useNavigate(); const { id = "" }=useParams(); const [shipment,setShipment]=useState<any>(); const [error,setError]=useState(""); useEffect(()=>{apiFetch(`/shipments/${id}`).then(setShipment).catch(e=>setError(e.message))},[id]); if(error)return <main className="screen"><button onClick={()=>nav(-1)} className="round-button">←</button><p className="form-error">{error}</p></main>; if(!shipment)return <main className="screen"><p>Consultando envío…</p></main>; const activeIndex=shipment.events.findIndex((x:any)=>x.title===shipment.state); return <main className="screen"><div className="back-row"><button onClick={()=>nav(-1)} className="round-button">←</button><div><div className="eyebrow">DETALLE DE ENVÍO</div><h2>{shipment.id}</h2></div></div><section className="destination-card"><div className="pin-wrap"><Icon name="pin"/></div><div><small>DESTINO</small><strong>{shipment.address}</strong><span>{shipment.place}</span></div></section><section className="section timeline-section"><div className="section-title"><div><div className="eyebrow">SEGUIMIENTO</div><h2>Estado del envío</h2></div><span className={`status ${shipment.tone}`}>{shipment.state}</span></div><div className="timeline">{shipment.events.map((step:any,i:number)=><div className={`timeline-item ${i<=activeIndex?"active":""}`} key={step.title}><div className="track"><span>{i<activeIndex?<Icon name="check"/>:i+1}</span>{i<shipment.events.length-1&&<i/>}</div><div><strong>{step.title}</strong><p>{step.desc}</p><small>{step.time}</small></div></div>)}</div></section>{shipment.state!=="Entregado"&&<Link className="primary-button deliver-button" to={`/entrega/${shipment.id}`}>Confirmar entrega <Icon name="arrow"/></Link>}</main> }
-function History(){ const [filter,setFilter]=useState("Todos"); const [items,setItems]=useState<any[]>([]); const [error,setError]=useState(""); const options=["Todos","En tránsito","En reparto","Entregado"]; useEffect(()=>{apiFetch("/shipments").then(setItems).catch(e=>setError(e.message))},[]); const list=filter==="Todos"?items:items.filter(x=>x.state===filter); return <main className="screen"><div className="eyebrow">CONSULTA OPERATIVA</div><h1>Historial</h1><div className="filters"><div className="filter-chips">{options.map(x=><button key={x} onClick={()=>setFilter(x)} className={filter===x?"active":""}>{x}</button>)}</div></div><div className="history-count"><span>{list.length} envíos encontrados</span><Icon name="filter"/></div>{error?<p className="form-error">{error}</p>:<div className="package-list">{list.map(x=><PackageCard key={x.id} item={x}/>)}</div>}</main> }
-function Delivery(){ const [signed,setSigned]=useState(false);const [photo,setPhoto]=useState(false);const [name,setName]=useState("Mariana Cárdenas");const [saving,setSaving]=useState(false);const [error,setError]=useState("");const nav=useNavigate(); const { id="" }=useParams(); const complete=async()=>{setSaving(true);setError("");try{await apiFetch(`/shipments/${id}/deliver`,{method:"POST",body:JSON.stringify({signedBy:name,photoAttached:photo})});nav("/historial")}catch(e:any){setError(e.message)}finally{setSaving(false)}};return <main className="screen delivery"><div className="back-row"><button onClick={()=>nav(-1)} className="round-button">←</button><div><div className="eyebrow">CIERRE DE ENVÍO</div><h2>Confirmar entrega</h2></div></div><div className="delivery-recipient"><div className="person-icon"><Icon name="user"/></div><div><small>RECIBE</small><strong>{name}</strong><span>{id}</span></div></div><section className="proof-block"><div className="block-label"><span>Firma digital</span><small>{signed?"Registrada":"Requerida"}</small></div><button onClick={()=>setSigned(!signed)} className={`signature-pad ${signed?"signed":""}`}>{signed?<><em>{name}</em><Icon name="check"/></>:<><span>Confirmar firma de {name}</span><b>✎</b></>}</button></section><section className="proof-block"><div className="block-label"><span>Fotografía de prueba</span><small>{photo?"Adjunta":"Requerida"}</small></div><button onClick={()=>setPhoto(!photo)} className={`photo-proof ${photo?"done":""}`}>{photo?<><Icon name="check"/><strong>Fotografía adjunta</strong><span>Lista para guardar</span></>:<><Icon name="camera"/><strong>Registrar fotografía</strong><span>Fachada, recepción o paquete</span></>}</button></section>{error&&<p className="form-error">{error}</p>}<button disabled={!signed||!photo||saving} onClick={complete} className="primary-button confirm-button">{saving?"Guardando…":"Completar entrega"} <Icon name="check"/></button></main> }
-function Profile(){const nav=useNavigate();const logout=async()=>{await supabase.auth.signOut();nav("/")};return <main className="screen"><div className="eyebrow">CUENTA</div><h1>Perfil</h1><div className="profile-card"><div className="profile-avatar">AM</div><strong>Andrea Mendoza</strong><span>Operaciones · Monterrey</span></div><button onClick={logout} className="secondary-button" style={{marginTop:20}}>Cerrar sesión</button></main>}
-const router=createBrowserRouter([{path:"/",Component:Auth},{Component:Shell,children:[{path:"/inicio",Component:Home},{path:"/envio/:id",Component:Shipment},{path:"/historial",Component:History},{path:"/entrega/:id",Component:Delivery},{path:"/perfil",Component:Profile}]}]);
-export default function App(){return <RouterProvider router={router}/>}
+function Protected() {
+  const { account, checking, error, refresh, logout } = useAccount()
+  if (checking) return <Loading label="Preparando tu espacio…" />
+  if (error)
+    return (
+      <main className="screen state-screen">
+        <h1>No se pudo verificar tu acceso</h1>
+        <p className="form-error" role="alert">
+          {error}
+        </p>
+        <button className="secondary-button" onClick={() => void refresh()}>
+          Reintentar
+        </button>
+        <button className="text-button" onClick={() => void logout()}>
+          Cerrar sesión
+        </button>
+      </main>
+    )
+  if (!account) return <Navigate to="/" replace />
+  return <Shell />
+}
+
+function Shell() {
+  const { account } = useAccount()
+  const initials = (account?.name || account?.email || "ME")
+    .split(/[\s@]+/)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join("")
+  return (
+    <div className="app-shell">
+      <header className="app-header">
+        <Link to="/inicio" className="mini-brand">
+          <div>
+            <Icon name="box" />
+          </div>
+          <b>
+            milenio<span>express</span>
+          </b>
+        </Link>
+        <Link to="/perfil" className="avatar" aria-label="Abrir perfil">
+          {initials}
+        </Link>
+      </header>
+      <Outlet />
+      <nav className="bottom-nav" aria-label="Navegación principal">
+        <NavLink to="/inicio">
+          <Icon name="box" />
+          <span>Inicio</span>
+        </NavLink>
+        <NavLink to="/consulta">
+          <Icon name="search" />
+          <span>Consultar</span>
+        </NavLink>
+        <NavLink to="/historial">
+          <Icon name="clock" />
+          <span>Paquetes</span>
+        </NavLink>
+        {account?.role === "ADMIN" && (
+          <NavLink to="/registrar">
+            <Icon name="plus" />
+            <span>Registrar</span>
+          </NavLink>
+        )}
+        <NavLink to="/perfil">
+          <Icon name="user" />
+          <span>Perfil</span>
+        </NavLink>
+      </nav>
+    </div>
+  )
+}
+
+function PackageCard({ item }: { item: Shipment }) {
+  return (
+    <Link
+      to={`/envio/${encodeURIComponent(item.guide)}`}
+      className="package-card"
+    >
+      <div className={`package-icon ${item.tone}`}>
+        <Icon name="box" />
+      </div>
+      <div className="package-copy">
+        <small>{item.guide}</small>
+        <strong>{item.city}</strong>
+        <span className={`status ${item.tone}`}>{item.state}</span>
+      </div>
+      <Icon name="chevron" className="chevron" />
+    </Link>
+  )
+}
+function useShipments() {
+  const [items, setItems] = useState<Shipment[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
+  async function reload() {
+    setLoading(true)
+    setError("")
+    try {
+      setItems((await apiFetch("/shipments")) as Shipment[])
+    } catch (cause) {
+      setError(errorMessage(cause))
+    } finally {
+      setLoading(false)
+    }
+  }
+  useEffect(() => {
+    void reload()
+  }, [])
+  return { items, loading, error, reload }
+}
+
+function Home() {
+  const { account } = useAccount()
+  const navigate = useNavigate()
+  const [guide, setGuide] = useState("")
+  const { items, loading, error, reload } = useShipments()
+  function search(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    navigate(`/consulta?guia=${encodeURIComponent(guide.trim().toUpperCase())}`)
+  }
+  return (
+    <main className="screen home-screen">
+      <div className="greeting">
+        <div>
+          <div className="eyebrow">OPERACIONES · HOY</div>
+          <h1>Hola, {account?.name.split(" ")[0] || "equipo"}.</h1>
+        </div>
+        <span className="online-dot">En línea</span>
+      </div>
+      <form className="tracking-search" onSubmit={search}>
+        <Icon name="search" />
+        <input
+          aria-label="Número de guía"
+          required
+          value={guide}
+          onChange={(event) => setGuide(event.target.value)}
+          placeholder="Ingresa tu número de guía"
+        />
+        <button type="submit" aria-label="Buscar guía">
+          <Icon name="arrow" />
+        </button>
+      </form>
+      <section className="section">
+        <div className="section-title">
+          <div>
+            <div className="eyebrow">ACTIVIDAD</div>
+            <h2>Paquetes recientes</h2>
+          </div>
+          <Link to="/historial">Ver todo</Link>
+        </div>
+        {loading ? (
+          <p className="muted-text" role="status">
+            Cargando paquetes…
+          </p>
+        ) : error ? (
+          <div className="inline-error">
+            <p className="form-error" role="alert">
+              {error}
+            </p>
+            <button onClick={() => void reload()}>Reintentar</button>
+          </div>
+        ) : items.length ? (
+          <div className="package-list">
+            {items.slice(0, 5).map((item) => (
+              <PackageCard key={item.guide} item={item} />
+            ))}
+          </div>
+        ) : (
+          <EmptyState
+            title="Sin paquetes todavía"
+            detail="Cuando se registre un paquete aparecerá aquí."
+            action={
+              account?.role === "ADMIN" ? (
+                <Link to="/registrar" className="secondary-button">
+                  Registrar paquete
+                </Link>
+              ) : undefined
+            }
+          />
+        )}
+      </section>
+    </main>
+  )
+}
+
+function Lookup() {
+  const navigate = useNavigate()
+  const initial = new URLSearchParams(window.location.search).get("guia") ?? ""
+  const [guide, setGuide] = useState(initial)
+  const [requestedGuide, setRequestedGuide] = useState(initial)
+  const [shipment, setShipment] = useState<Shipment | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
+  const [notFound, setNotFound] = useState(false)
+  async function lookup(value: string) {
+    const normalized = value.trim().toUpperCase()
+    setRequestedGuide(normalized)
+    setShipment(null)
+    setError("")
+    setNotFound(false)
+    if (!guidePattern.test(normalized)) {
+      setError("La guía debe tener el formato ME-AAAA-########.")
+      return
+    }
+    setLoading(true)
+    try {
+      setShipment(
+        (await apiFetch(
+          `/shipments/${encodeURIComponent(normalized)}`,
+        )) as Shipment,
+      )
+    } catch (cause) {
+      if (cause instanceof ApiError && cause.status === 404) setNotFound(true)
+      else setError(errorMessage(cause))
+    } finally {
+      setLoading(false)
+    }
+  }
+  useEffect(() => {
+    if (initial) void lookup(initial)
+  }, [])
+  function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    const normalized = guide.trim().toUpperCase()
+    navigate(`/consulta?guia=${encodeURIComponent(normalized)}`, {
+      replace: true,
+    })
+    void lookup(normalized)
+  }
+  return (
+    <main className="screen">
+      <div className="eyebrow">RASTREO SEGURO</div>
+      <h1>Consultar paquete</h1>
+      <p className="muted-text">
+        Busca con la guía confirmada al registrar el paquete.
+      </p>
+      <form className="lookup-form" onSubmit={submit}>
+        <label htmlFor="lookup-guide">Número de guía</label>
+        <div>
+          <input
+            id="lookup-guide"
+            required
+            value={guide}
+            onChange={(event) => setGuide(event.target.value)}
+            placeholder="ME-2026-00000001"
+            autoCapitalize="characters"
+          />
+          <button className="primary-button" type="submit" disabled={loading}>
+            <Icon name="search" />
+            <span>Buscar</span>
+          </button>
+        </div>
+      </form>
+      <section className="section lookup-result" aria-live="polite">
+        <div className="section-title">
+          <div>
+            <div className="eyebrow">RESULTADO</div>
+            <h2>Estado de la consulta</h2>
+          </div>
+        </div>
+        {loading ? (
+          <div className="result-panel" role="status">
+            <span className="loading-ring" /> Consultando guía…
+          </div>
+        ) : notFound ? (
+          <EmptyState
+            title="Guía no encontrada"
+            detail="No existe un paquete con esa guía. Comprueba el número e intenta de nuevo."
+          />
+        ) : error ? (
+          <div className="result-panel result-error">
+            <strong>No se pudo mostrar el paquete</strong>
+            <p className="form-error" role="alert">
+              {error}
+            </p>
+            {guidePattern.test(requestedGuide) && (
+              <button
+                className="secondary-button"
+                onClick={() => void lookup(requestedGuide)}
+              >
+                Reintentar
+              </button>
+            )}
+          </div>
+        ) : shipment ? (
+          <div className="result-panel">
+            <span className="status violet">{shipment.state}</span>
+            <h3>{shipment.guide}</h3>
+            <p>Destino: {shipment.city}</p>
+            <p>Destinatario: {shipment.recipient}</p>
+            <Link
+              className="primary-button"
+              to={`/envio/${encodeURIComponent(shipment.guide)}`}
+            >
+              Ver detalle <Icon name="arrow" />
+            </Link>
+          </div>
+        ) : (
+          <EmptyState
+            title="Esperando una guía"
+            detail="Escribe una guía para consultar los datos permitidos de tu paquete."
+          />
+        )}
+      </section>
+    </main>
+  )
+}
+
+function ShipmentDetail() {
+  const navigate = useNavigate()
+  const { guide = "" } = useParams()
+  const [shipment, setShipment] = useState<Shipment | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
+  async function reload() {
+    setLoading(true)
+    setError("")
+    try {
+      setShipment(
+        (await apiFetch(`/shipments/${encodeURIComponent(guide)}`)) as Shipment,
+      )
+    } catch (cause) {
+      setShipment(null)
+      setError(errorMessage(cause))
+    } finally {
+      setLoading(false)
+    }
+  }
+  useEffect(() => {
+    void reload()
+  }, [guide])
+  return (
+    <main className="screen">
+      <div className="back-row">
+        <button
+          onClick={() => navigate(-1)}
+          className="round-button"
+          aria-label="Volver"
+        >
+          ←
+        </button>
+        <div>
+          <div className="eyebrow">DETALLE DE PAQUETE</div>
+          <h2>{guide}</h2>
+        </div>
+      </div>
+      {loading ? (
+        <div className="result-panel" role="status">
+          Consultando paquete…
+        </div>
+      ) : error ? (
+        <div className="result-panel result-error">
+          <p className="form-error" role="alert">
+            {error}
+          </p>
+          <button className="secondary-button" onClick={() => void reload()}>
+            Reintentar
+          </button>
+          <Link to="/consulta">Nueva consulta</Link>
+        </div>
+      ) : (
+        shipment && (
+          <>
+            <section className="destination-card">
+              <div className="pin-wrap">
+                <Icon name="pin" />
+              </div>
+              <div>
+                <small>DESTINO</small>
+                <strong>{shipment.address}</strong>
+                <span>{shipment.city}</span>
+              </div>
+            </section>
+            <section className="detail-card">
+              <div>
+                <small>DESTINATARIO</small>
+                <strong>{shipment.recipient}</strong>
+              </div>
+              <div>
+                <small>DESCRIPCIÓN</small>
+                <strong>{shipment.description}</strong>
+              </div>
+            </section>
+            <section className="section timeline-section">
+              <div className="section-title">
+                <div>
+                  <div className="eyebrow">SEGUIMIENTO</div>
+                  <h2>Estado del paquete</h2>
+                </div>
+                <span className={`status ${shipment.tone}`}>
+                  {shipment.state}
+                </span>
+              </div>
+              <div className="timeline">
+                {shipment.events.map((event, index) => (
+                  <div
+                    className="timeline-item active"
+                    key={`${event.title}-${index}`}
+                  >
+                    <div className="track">
+                      <span>
+                        <Icon name="check" />
+                      </span>
+                    </div>
+                    <div>
+                      <strong>{event.title}</strong>
+                      <p>{event.desc}</p>
+                      <small>{event.time}</small>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          </>
+        )
+      )}
+    </main>
+  )
+}
+
+function History() {
+  const { items, loading, error, reload } = useShipments()
+  const [filter, setFilter] = useState("Todos")
+  const statuses = [
+    "Todos",
+    ...Array.from(new Set(items.map((item) => item.state))),
+  ]
+  const visible =
+    filter === "Todos" ? items : items.filter((item) => item.state === filter)
+  return (
+    <main className="screen">
+      <div className="eyebrow">CONSULTA OPERATIVA</div>
+      <h1>Paquetes</h1>
+      <div className="filter-chips" aria-label="Filtrar por estado">
+        {statuses.map((status) => (
+          <button
+            key={status}
+            onClick={() => setFilter(status)}
+            className={filter === status ? "active" : ""}
+          >
+            {status}
+          </button>
+        ))}
+      </div>
+      <div className="history-count">{visible.length} paquetes encontrados</div>
+      {loading ? (
+        <p className="muted-text" role="status">
+          Cargando paquetes…
+        </p>
+      ) : error ? (
+        <div className="inline-error">
+          <p className="form-error" role="alert">
+            {error}
+          </p>
+          <button onClick={() => void reload()}>Reintentar</button>
+        </div>
+      ) : visible.length ? (
+        <div className="package-list">
+          {visible.map((item) => (
+            <PackageCard key={item.guide} item={item} />
+          ))}
+        </div>
+      ) : (
+        <EmptyState
+          title="No hay paquetes"
+          detail="No se encontraron paquetes para este filtro."
+        />
+      )}
+    </main>
+  )
+}
+
+function Register() {
+  const { account } = useAccount()
+  const [owners, setOwners] = useState<Owner[]>([])
+  const [ownersError, setOwnersError] = useState("")
+  const [ownersLoading, setOwnersLoading] = useState(true)
+  const [form, setForm] = useState({
+    ownerId: "",
+    recipient: "",
+    address: "",
+    city: "",
+    description: "",
+  })
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState("")
+  const [created, setCreated] = useState<Shipment | null>(null)
+  const [copyState, setCopyState] = useState("")
+  useEffect(() => {
+    apiFetch("/users")
+      .then((users: Owner[]) => {
+        setOwners(users)
+        setForm((current) => ({ ...current, ownerId: users[0]?.id ?? "" }))
+      })
+      .catch((cause) => setOwnersError(errorMessage(cause)))
+      .finally(() => setOwnersLoading(false))
+  }, [])
+  if (account?.role !== "ADMIN") return <Navigate to="/inicio" replace />
+  function update(field: keyof typeof form, value: string) {
+    setForm((current) => ({ ...current, [field]: value }))
+  }
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setError("")
+    if (Object.values(form).some((value) => !value.trim())) {
+      setError("Completa todos los campos antes de registrar el paquete.")
+      return
+    }
+    setSaving(true)
+    try {
+      const shipment = (await apiFetch("/shipments", {
+        method: "POST",
+        body: JSON.stringify({
+          ownerId: form.ownerId,
+          recipient: form.recipient.trim(),
+          address: form.address.trim(),
+          city: form.city.trim(),
+          description: form.description.trim(),
+        }),
+      })) as Shipment
+      setCreated(shipment)
+      setCopyState("")
+    } catch (cause) {
+      setError(errorMessage(cause))
+    } finally {
+      setSaving(false)
+    }
+  }
+  async function copyGuide() {
+    if (!created) return
+    try {
+      await navigator.clipboard.writeText(created.guide)
+      setCopyState("Guía copiada al portapapeles.")
+    } catch {
+      setCopyState(
+        "No se pudo copiar automáticamente. Selecciona la guía en el campo para copiarla.",
+      )
+      const field = document.getElementById(
+        "confirmed-guide",
+      ) as HTMLInputElement | null
+      field?.focus()
+      field?.select()
+    }
+  }
+  if (created)
+    return (
+      <main className="screen">
+        <div className="eyebrow">REGISTRO COMPLETADO</div>
+        <h1>Paquete registrado</h1>
+        <p className="muted-text">
+          Esta guía fue confirmada y guardada por el servidor.
+        </p>
+        <section className="confirmation-card">
+          <div className="success-icon">
+            <Icon name="check" />
+          </div>
+          <span>GUÍA ÚNICA</span>
+          <input
+            id="confirmed-guide"
+            className="confirmed-guide"
+            value={created.guide}
+            readOnly
+            onFocus={(event) => event.target.select()}
+            aria-label="Guía confirmada"
+          />
+          <button className="secondary-button" onClick={() => void copyGuide()}>
+            <Icon name="copy" /> Copiar guía
+          </button>
+          {copyState && (
+            <p className="copy-feedback" role="status">
+              {copyState}
+            </p>
+          )}
+        </section>
+        <Link
+          className="primary-button"
+          to={`/envio/${encodeURIComponent(created.guide)}`}
+        >
+          Consultar paquete <Icon name="arrow" />
+        </Link>
+        <button
+          className="text-button"
+          onClick={() => {
+            setCreated(null)
+            setForm({
+              ownerId: owners[0]?.id ?? "",
+              recipient: "",
+              address: "",
+              city: "",
+              description: "",
+            })
+          }}
+        >
+          Registrar otro paquete
+        </button>
+      </main>
+    )
+  return (
+    <main className="screen">
+      <div className="eyebrow">ADMINISTRACIÓN</div>
+      <h1>Registrar paquete</h1>
+      <p className="muted-text">La guía se genera al guardar el paquete.</p>
+      <form className="register-form" onSubmit={submit}>
+        <label>
+          Propietario
+          <select
+            value={form.ownerId}
+            onChange={(event) => update("ownerId", event.target.value)}
+            required
+            disabled={ownersLoading || !!ownersError}
+          >
+            <option value="">
+              {ownersLoading ? "Cargando usuarios…" : "Selecciona un usuario"}
+            </option>
+            {owners.map((owner) => (
+              <option key={owner.id} value={owner.id}>
+                {owner.name} · {owner.email}
+              </option>
+            ))}
+          </select>
+        </label>
+        {ownersError && (
+          <p className="form-error" role="alert">
+            {ownersError}
+          </p>
+        )}
+        <label>
+          Destinatario
+          <input
+            required
+            maxLength={160}
+            value={form.recipient}
+            onChange={(event) => update("recipient", event.target.value)}
+            placeholder="Nombre de quien recibe"
+          />
+        </label>
+        <label>
+          Dirección
+          <input
+            required
+            maxLength={240}
+            value={form.address}
+            onChange={(event) => update("address", event.target.value)}
+            placeholder="Calle, número y colonia"
+          />
+        </label>
+        <label>
+          Ciudad
+          <input
+            required
+            maxLength={120}
+            value={form.city}
+            onChange={(event) => update("city", event.target.value)}
+            placeholder="Ciudad de destino"
+          />
+        </label>
+        <label>
+          Descripción
+          <textarea
+            required
+            maxLength={2000}
+            rows={3}
+            value={form.description}
+            onChange={(event) => update("description", event.target.value)}
+            placeholder="Contenido del paquete"
+          />
+        </label>
+        {error && (
+          <p className="form-error" role="alert">
+            {error}
+          </p>
+        )}
+        <button
+          className="primary-button"
+          type="submit"
+          disabled={saving || ownersLoading || !!ownersError || !owners.length}
+        >
+          {saving ? "Guardando…" : "Guardar y generar guía"}
+          <Icon name="arrow" />
+        </button>
+      </form>
+    </main>
+  )
+}
+
+function Profile() {
+  const { account, logout } = useAccount()
+  const navigate = useNavigate()
+  const [error, setError] = useState("")
+  async function signOut() {
+    try {
+      await logout()
+      navigate("/", { replace: true })
+    } catch (cause) {
+      setError(errorMessage(cause))
+    }
+  }
+  return (
+    <main className="screen">
+      <div className="eyebrow">CUENTA</div>
+      <h1>Perfil</h1>
+      <div className="profile-card">
+        <div className="profile-avatar">
+          {account?.name[0]?.toUpperCase() || "M"}
+        </div>
+        <strong>{account?.name}</strong>
+        <span>{account?.email}</span>
+        <span className="role-badge">
+          {account?.role === "ADMIN" ? "Administrador" : "Usuario"}
+        </span>
+      </div>
+      {error && (
+        <p className="form-error" role="alert">
+          {error}
+        </p>
+      )}
+      <button
+        onClick={() => void signOut()}
+        className="secondary-button"
+        style={{ marginTop: 20 }}
+      >
+        Cerrar sesión
+      </button>
+    </main>
+  )
+}
+
+const router = createBrowserRouter([
+  { path: "/", Component: Auth },
+  {
+    Component: Protected,
+    children: [
+      { path: "/inicio", Component: Home },
+      { path: "/consulta", Component: Lookup },
+      { path: "/envio/:guide", Component: ShipmentDetail },
+      { path: "/historial", Component: History },
+      { path: "/registrar", Component: Register },
+      { path: "/perfil", Component: Profile },
+    ],
+  },
+  { path: "*", element: <Navigate to="/inicio" replace /> },
+])
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <RouterProvider router={router} />
+    </AuthProvider>
+  )
+}
