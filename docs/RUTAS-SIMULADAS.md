@@ -1,6 +1,6 @@
 # Rutas ficticias — planificación en Jira
 
-> **FUERA DE ESTA ENTREGA — 21 septiembre 2026.** La rúbrica exige un módulo funcional con evidencia técnica. KAN-65 a KAN-78 se retiraron del alcance activo; el contenido siguiente conserva la propuesta histórica para una mejora futura. Consultar [PLAN-ENTREGA.md](PLAN-ENTREGA.md).
+> **FUERA DE ESTA ENTREGA — 21 septiembre 2026.** La rúbrica exige un módulo funcional con evidencia técnica. KAN-65 a KAN-78 se eliminaron de Jira con confirmación del usuario el 21 de septiembre; sus enlaces e identificadores se conservan únicamente como referencia histórica; el contenido siguiente conserva la propuesta histórica para una mejora futura. Consultar [PLAN-ENTREGA.md](PLAN-ENTREGA.md).
 
 Épico: [KAN-65](https://milenioexpress-sergionix.atlassian.net/browse/KAN-65).
 Las 13 tareas KAN-66 a KAN-78 están creadas como hijas, en Pendiente, con criterios de aceptación, dependencias en descripción y etiquetas de dificultad y `rutas-simuladas`. Esto es planificación; el motor y catálogo todavía no están implementados.

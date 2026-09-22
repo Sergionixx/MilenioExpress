@@ -18,7 +18,7 @@ Cambio solicitado por el usuario el 21 de septiembre: retirar todas las asignaci
 | Juan Deluquez | 8: KAN-14/23/24/27/29/35/38/39 | Módulo de paquetes completo: persistencia, formulario/API de creación, guía, interfaz/API de consulta, errores y tests. |
 | Humberto T | 5: KAN-12/13/51/54/55 | Configuración, CI/CD y deployment; SonarQube y ZAP con revisión de resultados. |
 | Maximo Aguilar | 4: KAN-10/57/58/59 | README/reproducibilidad, matriz de rúbrica, coordinación e informe/ZIP final. Grupo de menor complejidad técnica. |
-| al07098284 | 0 | Retirado de las asignaciones del proyecto. KAN-78 excluida queda sin asignar. |
+| al07098284 | 0 | Retirado de las asignaciones del proyecto. KAN-78 excluida fue eliminada con la limpieza posterior. |
 
 El reparto busca coherencia y esfuerzo razonable, no igualdad matemática de tarjetas. No existen estimaciones de horas verificadas. Sergionix conserva la carga adicional; Juan mantiene creación y consulta juntas para no dividir el módulo. Las descripciones de las 26 tarjetas contienen objetivo, pasos, dependencias y evidencia de cierre.
 
@@ -52,7 +52,7 @@ La innovación se propone como trabajo futuro; no obliga a construir el simulado
 
 ## Trabajo retirado de esta entrega
 
-Jira confirmó el cambio de **36 tarjetas a Fuera de alcance**. Se conserva trazabilidad; no se borra código existente ni se marca trabajo como implementado.
+Jira confirmó primero el cambio de **36 tarjetas a Fuera de alcance**. Después, con confirmación explícita del usuario el 21 de septiembre, se eliminaron permanentemente esas 36 tarjetas y los dos placeholders vacíos KAN-2/KAN-3: **38 tarjetas eliminadas**. Los identificadores siguientes quedan como registro histórico local; ya no son tarjetas disponibles en Jira. No se borró código ni se marcó ese trabajo como implementado.
 
 - KAN-17: registro público; usar cuentas de demostración preparadas.
 - KAN-28/49: funcionamiento offline y sincronización.
