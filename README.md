@@ -4,6 +4,8 @@ Prototipo académico de seguimiento de paquetes construido con React, TypeScript
 
 ## Ejecutar
 
+La base de integración en preparación está en [Contrato de API — KAN-11](docs/CONTRATO-API.md), con tipos compartidos, ejemplos y pendientes explícitos del backend.
+
 Requisitos: Node.js 24 o posterior y pnpm 11.
 
 ```sh
