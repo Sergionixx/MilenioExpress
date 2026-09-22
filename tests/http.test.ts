@@ -12,9 +12,10 @@ test("sends the session token and returns the server-confirmed guide", async () 
     method: "POST",
     headers: { Authorization: "Bearer forged-token" },
     body: JSON.stringify({ recipient: "Ana" }),
-  }, transport);
+  }, transport, "public-test-key");
   assert.deepEqual(result, { guide: "ME-2026-00000001" });
   assert.equal((request?.headers as Headers).get("Authorization"), "Bearer trusted-token");
+  assert.equal((request?.headers as Headers).get("apikey"), "public-test-key");
   assert.equal((request?.headers as Headers).get("Content-Type"), "application/json");
 });
 

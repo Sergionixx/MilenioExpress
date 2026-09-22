@@ -15,10 +15,12 @@ export async function requestJson(
   token: string | undefined,
   init: RequestInit = {},
   transport: typeof fetch = fetch,
+  apiKey?: string,
 ) {
   const headers = new Headers(init.headers);
   headers.set("Content-Type", "application/json");
   if (token) headers.set("Authorization", `Bearer ${token}`);
+  if (apiKey) headers.set("apikey", apiKey);
 
   let response: Response;
   try {

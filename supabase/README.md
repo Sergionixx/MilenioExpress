@@ -20,7 +20,7 @@ Los perfiles existentes en `auth.users` se incorporan al aplicar la migración. 
 
 ## Contrato de la API
 
-Todas las rutas usan el prefijo `/make-server-845b49a4`. Salvo `/health`, requieren `Authorization: Bearer <access_token>`.
+Todas las rutas usan el prefijo `/make-server-845b49a4`. Salvo `/health`, requieren `Authorization: Bearer <access_token>`. El navegador envía además la clave pública del proyecto en `apikey`; la clave de servicio nunca se envía al cliente.
 
 | Método | Ruta | Permiso | Respuesta |
 | --- | --- | --- | --- |
@@ -38,6 +38,7 @@ Ejemplo de consulta autenticada, después de registrar un paquete y recibir su g
 ```http
 GET /make-server-845b49a4/shipments/ME-2026-00000001 HTTP/1.1
 Authorization: Bearer <access_token>
+apikey: <public_anon_key>
 ```
 
 ```json

@@ -29,5 +29,5 @@ export async function apiFetch(path: string, init: RequestInit = {}) {
   const {
     data: { session },
   } = await supabase.auth.getSession()
-  return requestJson(`${apiUrl}${path}`, session?.access_token, init)
+  return requestJson(`${apiUrl}${path}`, session?.access_token, init, fetch, publicAnonKey)
 }
