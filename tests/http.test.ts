@@ -24,7 +24,9 @@ test("distinguishes an absent session and a connection failure", async () => {
     assert.equal((init?.headers as Headers).get("Authorization"), null);
     return Response.json({ status: "ok" });
   };
-  assert.deepEqual(await requestJson("https://example.test/health", undefined, {}, noToken), { status: "ok" });
+  assert.deepEqual(await requestJson("https://example.test/health", undefined, {
+    headers: { Authorization: "Bearer forged-token" },
+  }, noToken), { status: "ok" });
   const offline: typeof fetch = async () => { throw new Error("private network detail"); };
   await assert.rejects(requestJson("https://example.test/shipments", "token", {}, offline), (error: unknown) => {
     assert.ok(error instanceof ApiError);

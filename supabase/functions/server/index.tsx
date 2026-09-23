@@ -1,7 +1,7 @@
 import { createClient } from "jsr:@supabase/supabase-js@2.49.8";
-import { Hono, type Context } from "npm:hono";
-import { cors } from "npm:hono/cors";
-import { logger } from "npm:hono/logger";
+import { Hono, type Context } from "npm:hono@4.13.8";
+import { cors } from "npm:hono@4.13.8/cors";
+import { logger } from "npm:hono@4.13.8/logger";
 import { AppError } from "./domain.ts";
 import type { ProfileRow, ShipmentInput, ShipmentRow } from "./domain.ts";
 import { createShipmentService } from "./service.ts";
