@@ -1,5 +1,7 @@
 {
-  "description": "Streamline logistics with a mobile app offering secure login, shipment tracking via timeline, QR scanning, delivery confirmation, and shipment history management.",
+  "title": "Milenio Express",
+  "language": "es",
+  "description": "Módulo académico para registrar y consultar paquetes con acceso por roles.",
   "robots": {
     "index": false
   },
