@@ -30,12 +30,13 @@ Los módulos de creación y consulta son responsabilidad de Juan; esta matriz y 
 - En un registro adicional de prueba, la operadora generó `ME-2026-00000004`, pulsó «Copiar guía» y el portapapeles devolvió exactamente esa guía.
 - `pnpm test:live-roles` comprobó contra Supabase y la función desplegada: `/me` devolvió `ADMIN` y `USER` según la cuenta; `/users` permitió ADMIN y rechazó USER con `403 FORBIDDEN`; la consulta de guía propia devolvió 200 y la ajena `403 FORBIDDEN`; guía mal formada `400 INVALID_GUIDE`; guía inexistente `404 SHIPMENT_NOT_FOUND`; listado propio 200; POST como USER `403 FORBIDDEN`. No registra paquetes nuevos. Requiere credenciales por variables de entorno.
 - Con una página temporal local que enmarcó la aplicación a 320, 375 y 430 px, se inspeccionaron visualmente la consulta autenticada y el formulario de registro. No se observaron elementos cortados ni desbordamiento horizontal. A 320 px, ADMIN registró `ME-2026-00000003` para USER y abrió su detalle con datos correctos. La página temporal de prueba se retiró del proyecto después de la revisión. Las capturas de estas pantallas se observaron en la sesión; sólo las del login quedaron guardadas como archivos de evidencia.
+- La tabulación en el formulario de registro avanzó por propietario → destinatario → dirección → ciudad → descripción → guardar. En el login avanzó por correo → contraseña → iniciar sesión. Ambos recorridos se probaron con teclado en la aplicación local; no se repitió la tabulación dentro de cada ancho móvil.
 
-Estas comprobaciones prueban el recorrido mínimo de acceso, creación, consulta, persistencia y separación de roles con cuentas ficticias, más el registro funcional a 320 px y la inspección visual de registro y consulta a 320, 375 y 430 px. **No** prueban todavía el foco de teclado en esos anchos ni dejan capturas autenticadas guardadas como archivos.
+Estas comprobaciones prueban el recorrido mínimo de acceso, creación, consulta, persistencia y separación de roles con cuentas ficticias, más el registro funcional a 320 px y la inspección visual de registro y consulta a 320, 375 y 430 px. **No** dejan capturas autenticadas guardadas como archivos ni repiten el teclado en cada ancho.
 
 ## Pendiente para cerrar la verificación móvil
 
-1. Revisar foco de teclado y orden de tabulación en el login y el formulario de registro a 320–430 px. Guardar capturas de las pantallas autenticadas de la versión final en archivos de evidencia.
+1. Repetir el recorrido de teclado en 320–430 px y guardar capturas de las pantallas autenticadas de la versión final en archivos de evidencia.
 2. Entregar la evidencia de autenticación a Juan para KAN-29 y la del recorrido a Máximo para KAN-57. Registrar defectos que aparezcan en la revisión final.
 
 El backend remoto ya mostró operaciones de datos y permisos por rol; `/health` por sí solo no se usa como prueba de cierre. KAN-53 sigue parcialmente verificada hasta completar el recorrido móvil autenticado.
