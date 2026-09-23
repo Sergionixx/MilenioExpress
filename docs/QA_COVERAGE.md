@@ -1,6 +1,6 @@
 # Reporte de pruebas y cobertura
 
-Fecha: 22 de septiembre de 2026. Rama de trabajo: `codex/juan-paquetes-qa`.
+Fecha: 22 de septiembre de 2026. Rama de trabajo: `dev-juan`.
 
 ## Resultado reproducible
 

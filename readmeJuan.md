@@ -1,7 +1,7 @@
 # Avance de Juan Deluquez — MilenioExpress
 
 - **Fecha:** 22 de septiembre de 2026
-- **Rama de entrega:** `codex/juan-paquetes-qa`
+- **Rama de entrega:** `dev-juan`
 - **Commits:** `04307a5` (registro, consulta y pruebas) y `ac000ce` (encabezado público de Supabase). `main` no se modificó.
 
 Este archivo resume el trabajo de paquetes asignado a Juan, las dependencias con Sergionix y lo necesario para que Humberto y Maximo continúen el plan. **“Implementado” significa que el código está en esta rama; no significa que ya esté desplegado o validado contra Supabase real.**
