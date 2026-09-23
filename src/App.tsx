@@ -19,6 +19,7 @@ import {
 } from "react-router"
 import { ApiError, apiFetch, supabase } from "./lib/supabase"
 import { loginErrorMessage } from "./lib/authErrors"
+import { SESSION_REJECTED_EVENT } from "./lib/session"
 
 type Role = "ADMIN" | "USER"
 type Account = { id: string; email: string; name: string; role: Role }
@@ -90,7 +91,7 @@ function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
   async function logout() {
-    const { error: signOutError } = await supabase.auth.signOut()
+    const { error: signOutError } = await supabase.auth.signOut({ scope: "local" })
     if (signOutError) throw signOutError
     sessionVersion.current++
     setAccount(null)
@@ -99,17 +100,22 @@ function AuthProvider({ children }: { children: ReactNode }) {
   }
   useEffect(() => {
     void refresh()
+    const clearAccount = () => {
+      sessionVersion.current++
+      setAccount(null)
+      setError("")
+      setChecking(false)
+    }
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "SIGNED_OUT") {
-        sessionVersion.current++
-        setAccount(null)
-        setError("")
-        setChecking(false)
-      }
+      if (event === "SIGNED_OUT") clearAccount()
     })
-    return () => subscription.unsubscribe()
+    window.addEventListener(SESSION_REJECTED_EVENT, clearAccount)
+    return () => {
+      subscription.unsubscribe()
+      window.removeEventListener(SESSION_REJECTED_EVENT, clearAccount)
+    }
   }, [])
   return (
     <AuthContext.Provider value={{ account, checking, error, refresh, logout }}>

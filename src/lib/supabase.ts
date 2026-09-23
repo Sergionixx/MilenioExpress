@@ -1,6 +1,7 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js"
 
 import { requestJson } from "./http"
+import { SESSION_REJECTED_EVENT, withSessionInvalidation } from "./session"
 
 export { ApiError } from "./http"
 
@@ -31,5 +32,11 @@ export async function apiFetch(path: string, init: RequestInit = {}) {
   const {
     data: { session },
   } = await supabase.auth.getSession()
-  return requestJson(`${apiUrl}${path}`, session?.access_token, init, fetch, anonKey)
+  return withSessionInvalidation(
+    () => requestJson(`${apiUrl}${path}`, session?.access_token, init, fetch, anonKey),
+    () => {
+      window.dispatchEvent(new Event(SESSION_REJECTED_EVENT))
+      void supabase.auth.signOut({ scope: "local" }).catch(() => undefined)
+    },
+  )
 }

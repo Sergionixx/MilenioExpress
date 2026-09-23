@@ -15,3 +15,17 @@ Este contrato concreta las dependencias de [KAN-11](https://milenioexpress-sergi
 La cuenta inicia sesión mediante Supabase Auth. El servidor valida el token con Auth y obtiene `ADMIN` o `USER` desde `profiles.role`, nunca del cuerpo de la solicitud ni de metadatos editables. Una cuenta nueva recibe `USER`; un administrador de la base promueve de forma explícita las cuentas operadoras. `ADMIN` puede registrar paquetes para cualquier perfil y consultar todos. `USER` sólo consulta paquetes cuyo `owner_id` coincide con su identidad verificada. La interfaz oculta el formulario a `USER`, y la API y las políticas RLS repiten el control en el servidor.
 
 La API responde errores con `{ "error": "mensaje", "code": "CODIGO" }`: `400` para datos o guía inválidos, `401` para ausencia o invalidez de sesión, `403` para falta de permiso, `404` para guía inexistente, `409` para conflicto de guía y `503` para dependencias no disponibles. El contrato completo de rutas y despliegue está en [supabase/README.md](../supabase/README.md).
+
+Ejemplo válido de `POST /make-server-845b49a4/shipments` con una sesión `ADMIN` (el UUID representa un perfil existente):
+
+```json
+{
+  "ownerId": "11111111-1111-4111-8111-111111111111",
+  "recipient": "Ana López",
+  "address": "Avenida Reforma 123",
+  "city": "Ciudad de México",
+  "description": "Documentos"
+}
+```
+
+El servidor responde `201` con `guide`, `ownerId`, los campos del paquete y `state: "Registrado"`; nunca recibe una guía propuesta por el navegador. Si falta `recipient`, responde `400` con `{ "error": "...", "code": "VALIDATION_ERROR" }`. Si un `USER` intenta registrar, responde `403` con `{ "error": "...", "code": "FORBIDDEN" }`. Los ejemplos de consulta, respuesta completa y demás códigos están en la guía de API enlazada arriba.

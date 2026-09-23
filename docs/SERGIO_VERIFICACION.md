@@ -18,7 +18,8 @@ Los módulos de creación y consulta son responsabilidad de Juan; esta matriz y 
 
 ## Evidencia comprobada
 
-- `pnpm test`: 15/15 pruebas aprobadas. Incluyen verificación de token sustituible, perfil y rol confiable, acciones ADMIN, propiedad de USER y errores de infraestructura.
+- `pnpm test`: 17/17 pruebas aprobadas. Incluyen verificación de token sustituible, perfil y rol confiable, acciones ADMIN, propiedad de USER, errores de infraestructura y retirada de la sesión tras un `401` del servidor. `403` y errores de red conservan la sesión.
+- `pnpm test:coverage`: 17/17; 100 % de líneas, ramas y funciones en los cuatro módulos declarados en [QA_COVERAGE.md](QA_COVERAGE.md), con umbral mínimo de 80 %.
 - `pnpm exec tsc --noEmit`: sin errores.
 - `pnpm build`: correcto. Vite advierte que el paquete JavaScript supera 500 kB; no bloquea el flujo académico.
 - `pnpm test:live-auth`: `/health` devuelve 200; cuatro rutas GET y el registro POST sin sesión devuelven `401 UNAUTHENTICATED`; `/me` con token inválido devuelve `401 INVALID_TOKEN`. La prueba usa la función desplegada, no sustitutos.
@@ -29,14 +30,15 @@ Los módulos de creación y consulta son responsabilidad de Juan; esta matriz y 
 - La operadora registró `ME-2026-00000002` como paquete propio. La cuenta cliente intentó abrir esa guía directamente y recibió «No tienes permiso para consultar este paquete.»
 - En un registro adicional de prueba, la operadora generó `ME-2026-00000004`, pulsó «Copiar guía» y el portapapeles devolvió exactamente esa guía.
 - `pnpm test:live-roles` comprobó contra Supabase y la función desplegada: `/me` devolvió `ADMIN` y `USER` según la cuenta; `/users` permitió ADMIN y rechazó USER con `403 FORBIDDEN`; la consulta de guía propia devolvió 200 y la ajena `403 FORBIDDEN`; guía mal formada `400 INVALID_GUIDE`; guía inexistente `404 SHIPMENT_NOT_FOUND`; listado propio 200; POST como USER `403 FORBIDDEN`. No registra paquetes nuevos. Requiere credenciales por variables de entorno.
-- Con una página temporal local que enmarcó la aplicación a 320, 375 y 430 px, se inspeccionaron visualmente la consulta autenticada y el formulario de registro. No se observaron elementos cortados ni desbordamiento horizontal. A 320 px, ADMIN registró `ME-2026-00000003` para USER y abrió su detalle con datos correctos. La página temporal de prueba se retiró del proyecto después de la revisión. Las capturas de estas pantallas se observaron en la sesión; sólo las del login quedaron guardadas como archivos de evidencia.
-- La tabulación en el formulario de registro avanzó por propietario → destinatario → dirección → ciudad → descripción → guardar. En el login avanzó por correo → contraseña → iniciar sesión. Ambos recorridos se probaron con teclado en la aplicación local; no se repitió la tabulación dentro de cada ancho móvil.
+- En Edge con emulación móvil a 320, 375 y 430 px se probaron el formulario de registro y el detalle de `ME-2026-00000003` con sesión ADMIN. En los seis casos, el ancho del documento coincidió con el viewport; se inspeccionaron las capturas finales y no hubo elementos cortados. Registro: [320 px](evidencia/sergio-registro-320.png), [375 px](evidencia/sergio-registro-375.png), [430 px](evidencia/sergio-registro-430.png). Consulta: [320 px](evidencia/sergio-consulta-320.png), [375 px](evidencia/sergio-consulta-375.png), [430 px](evidencia/sergio-consulta-430.png).
+- La tabulación se repitió a 320, 375 y 430 px en el formulario: propietario → destinatario → dirección → ciudad → descripción → guardar. En el login se comprobó correo → contraseña → iniciar sesión. Se verificaron etiquetas, mensajes de error y lectura de las pantallas capturadas. Se añadió un contorno visible de 3 px para el foco de teclado y se comprobó visualmente en el correo del login. El selector de propietario abre con su nombre visible aunque el correo puede truncarse a 320 px.
+- Un rechazo de sesión simulado mediante el evento de la interfaz redirigió al acceso y ocultó el detalle protegido. La prueba unitaria comprobó que un `401` de la API provoca esa invalidación; la prueba no esperó el vencimiento real del JWT. El cierre voluntario elimina la sesión local de este navegador.
 
-Estas comprobaciones prueban el recorrido mínimo de acceso, creación, consulta, persistencia y separación de roles con cuentas ficticias, más el registro funcional a 320 px y la inspección visual de registro y consulta a 320, 375 y 430 px. **No** dejan capturas autenticadas guardadas como archivos ni repiten el teclado en cada ancho.
+Estas comprobaciones prueban el recorrido mínimo de acceso, creación, consulta, persistencia y separación de roles con cuentas ficticias, más la inspección visual de registro y consulta y la tabulación del formulario a 320, 375 y 430 px.
 
-## Pendiente para cerrar la verificación móvil
+## Límites y entrega de evidencia
 
-1. Repetir el recorrido de teclado en 320–430 px y guardar capturas de las pantallas autenticadas de la versión final en archivos de evidencia.
-2. Entregar la evidencia de autenticación a Juan para KAN-29 y la del recorrido a Máximo para KAN-57. Registrar defectos que aparezcan en la revisión final.
+1. Para [KAN-18](https://milenioexpress-sergionix.atlassian.net/browse/KAN-18) falta una prueba aislada con un JWT auténtico ya vencido. Se comprobó contra el proyecto remoto el rechazo de sesión ausente y token inválido; en la prueba sustituible, un token que el proveedor rechaza recibe `401 INVALID_TOKEN`. No se presenta eso como prueba de expiración real.
+2. Juan puede incorporar los resultados de autenticación y rol a KAN-29; Máximo puede incorporar las nueve capturas y este recorrido a KAN-57. El contrato de campos y errores aún requiere conformidad de Juan antes de integrar a `main`.
 
-El backend remoto ya mostró operaciones de datos y permisos por rol; `/health` por sí solo no se usa como prueba de cierre. KAN-53 sigue parcialmente verificada hasta completar el recorrido móvil autenticado.
+El backend remoto ya mostró operaciones de datos y permisos por rol; `/health` por sí solo no se usa como prueba de cierre. La revisión móvil se hizo en emulación de Edge, no en un dispositivo físico.

@@ -39,3 +39,9 @@ Ejecución registrada: 15 pruebas aprobadas, 0 fallidas. La medición incluye la
 El 100 % corresponde **únicamente a `http.ts`, `domain.ts` y `service.ts`**. No es cobertura de todo el repositorio. Las pruebas usan un repositorio sustituible y un transporte HTTP sustituible para verificar resultados y fallas sin credenciales externas. El adaptador HTTP/Deno, la migración SQL, los componentes React y una base Supabase real requieren verificación de integración por separado.
 
 La pantalla pública de acceso se revisó en navegador a 320 y 375 px: no hubo desplazamiento horizontal ni errores de consola. El flujo autenticado completo en celular aún requiere aplicar la migración, desplegar la función y disponer de cuentas de prueba en el proyecto Supabase.
+
+## Actualización de integración — 23 de septiembre de 2026
+
+La sección anterior conserva el resultado de la rama de Juan del 22 de septiembre. En `dev-sergionix` ya se aplicó la migración, se desplegó la función y se probó el flujo con cuentas ficticias ADMIN y USER; los resultados de integración y las capturas están en [SERGIO_VERIFICACION.md](SERGIO_VERIFICACION.md).
+
+El comando `pnpm test:coverage` ahora incluye `src/lib/session.ts` junto a los tres módulos medidos antes. Resultado: **17 pruebas aprobadas** y **100 % de líneas, ramas y funciones en esos cuatro módulos**; el umbral sigue siendo 80 %. No representa cobertura de todos los componentes React, del adaptador Deno ni de PostgreSQL.
