@@ -4,6 +4,7 @@ import {
   ReactNode,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from "react"
 import {
@@ -17,6 +18,8 @@ import {
   useParams,
 } from "react-router"
 import { ApiError, apiFetch, supabase } from "./lib/supabase"
+import { loginErrorMessage } from "./lib/authErrors"
+import { SESSION_REJECTED_EVENT } from "./lib/session"
 
 type Role = "ADMIN" | "USER"
 type Account = { id: string; email: string; name: string; role: Role }
@@ -58,7 +61,9 @@ function AuthProvider({ children }: { children: ReactNode }) {
   const [account, setAccount] = useState<Account | null>(null)
   const [checking, setChecking] = useState(true)
   const [error, setError] = useState("")
+  const sessionVersion = useRef(0)
   async function refresh() {
+    const version = ++sessionVersion.current
     setChecking(true)
     setError("")
     try {
@@ -67,39 +72,50 @@ function AuthProvider({ children }: { children: ReactNode }) {
         error: sessionError,
       } = await supabase.auth.getSession()
       if (sessionError) throw sessionError
+      if (version !== sessionVersion.current) return null
       if (!session) {
         setAccount(null)
         return null
       }
       const current = (await apiFetch("/me")) as Account
+      if (version !== sessionVersion.current) return null
       setAccount(current)
       return current
     } catch (cause) {
+      if (version !== sessionVersion.current) return null
       setAccount(null)
       setError(errorMessage(cause))
       return null
     } finally {
-      setChecking(false)
+      if (version === sessionVersion.current) setChecking(false)
     }
   }
   async function logout() {
-    const { error: signOutError } = await supabase.auth.signOut()
+    const { error: signOutError } = await supabase.auth.signOut({ scope: "local" })
     if (signOutError) throw signOutError
+    sessionVersion.current++
     setAccount(null)
     setError("")
+    setChecking(false)
   }
   useEffect(() => {
     void refresh()
+    const clearAccount = () => {
+      sessionVersion.current++
+      setAccount(null)
+      setError("")
+      setChecking(false)
+    }
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "SIGNED_OUT") {
-        setAccount(null)
-        setError("")
-        setChecking(false)
-      }
+      if (event === "SIGNED_OUT") clearAccount()
     })
-    return () => subscription.unsubscribe()
+    window.addEventListener(SESSION_REJECTED_EVENT, clearAccount)
+    return () => {
+      subscription.unsubscribe()
+      window.removeEventListener(SESSION_REJECTED_EVENT, clearAccount)
+    }
   }, [])
   return (
     <AuthContext.Provider value={{ account, checking, error, refresh, logout }}>
@@ -219,7 +235,10 @@ function Auth() {
         email: email.trim(),
         password,
       })
-      if (signInError) throw signInError
+      if (signInError) {
+        setError(loginErrorMessage(signInError))
+        return
+      }
       const current = await refresh()
       if (!current)
         throw new Error(
@@ -253,8 +272,13 @@ function Auth() {
             Correo electrónico
             <input
               type="email"
+              id="login-email"
               autoComplete="username"
+              autoCapitalize="none"
+              spellCheck={false}
               required
+              aria-invalid={!!error}
+              aria-describedby={error ? "login-error" : undefined}
               value={email}
               onChange={(event) => setEmail(event.target.value)}
               placeholder="tu.correo@ejemplo.com"
@@ -264,15 +288,18 @@ function Auth() {
             Contraseña
             <input
               type="password"
+              id="login-password"
               autoComplete="current-password"
               required
+              aria-invalid={!!error}
+              aria-describedby={error ? "login-error" : undefined}
               value={password}
               onChange={(event) => setPassword(event.target.value)}
               placeholder="Tu contraseña"
             />
           </label>
           {error && (
-            <p className="form-error" role="alert">
+            <p className="form-error" id="login-error" role="alert">
               {error}
             </p>
           )}

@@ -1,7 +1,7 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js"
 
-import { projectId, publicAnonKey } from "../../utils/supabase/info"
 import { requestJson } from "./http"
+import { SESSION_REJECTED_EVENT, withSessionInvalidation } from "./session"
 
 export { ApiError } from "./http"
 
@@ -11,13 +11,16 @@ declare global {
   }
 }
 
-const supabaseUrl = `https://${projectId}.supabase.co`
+// Public client configuration for the team's Supabase project. Local overrides
+// can target another project without changing the generated Figma Make file.
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL?.trim() || "https://rltahgouyixqquspofsf.supabase.co"
+const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY?.trim() || "sb_publishable_8dC_SpYmjgaIhK2O6mviGA_jiSU9qGB"
 
 // Keep exactly one client during Vite hot reloads and normal browser navigation.
 
 export const supabase =
   window.__milenioSupabaseClient ??
-  createClient(supabaseUrl, publicAnonKey, {
+  createClient(supabaseUrl, anonKey, {
     auth: { storageKey: "milenio-express-session" },
   })
 
@@ -29,5 +32,11 @@ export async function apiFetch(path: string, init: RequestInit = {}) {
   const {
     data: { session },
   } = await supabase.auth.getSession()
-  return requestJson(`${apiUrl}${path}`, session?.access_token, init, fetch, publicAnonKey)
+  return withSessionInvalidation(
+    () => requestJson(`${apiUrl}${path}`, session?.access_token, init, fetch, anonKey),
+    () => {
+      window.dispatchEvent(new Event(SESSION_REJECTED_EVENT))
+      void supabase.auth.signOut({ scope: "local" }).catch(() => undefined)
+    },
+  )
 }

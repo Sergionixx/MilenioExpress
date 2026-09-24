@@ -19,6 +19,8 @@ export async function requestJson(
 ) {
   const headers = new Headers(init.headers);
   headers.set("Content-Type", "application/json");
+  // Authentication comes only from the current Supabase session.
+  headers.delete("Authorization");
   if (token) headers.set("Authorization", `Bearer ${token}`);
   if (apiKey) headers.set("apikey", apiKey);
 
