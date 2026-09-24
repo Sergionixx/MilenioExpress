@@ -35,7 +35,7 @@ La interfaz utiliza Supabase Auth y la función `make-server-845b49a4`. La migra
 
 `pnpm test:live-auth` comprueba que la función desplegada responde y rechaza peticiones sin sesión o con un token inválido. `pnpm test:live-roles` comprueba los permisos ADMIN/USER con dos cuentas ficticias ya existentes; requiere `MILENIO_ADMIN_EMAIL`, `MILENIO_ADMIN_PASSWORD`, `MILENIO_USER_EMAIL`, `MILENIO_USER_PASSWORD`, `MILENIO_CLIENT_GUIDE` y `MILENIO_OPERATOR_GUIDE` en el entorno. Ninguno de los dos comandos crea usuarios ni paquetes. La evidencia de integración y revisión móvil está en [docs/SERGIO_VERIFICACION.md](docs/SERGIO_VERIFICACION.md).
 
-## Idea para la presentación final (fase posterior)
+## Presentación interactiva prevista después de la entrega
 
 Cuando el módulo académico esté terminado, publicar una demostración en línea con **dos interfaces simultáneas**:
 
@@ -43,3 +43,12 @@ Cuando el módulo académico esté terminado, publicar una demostración en lín
 2. **Proyector:** una pantalla compartida muestra una nueva línea horizontal por cada envío confirmado. Cada línea identifica su origen y destino y avanza por puntos de control visibles hasta llegar al destino. Las líneas anteriores permanecen en pantalla, de modo que varios envíos puedan avanzar al mismo tiempo.
 
 Ambas vistas deben reflejar los mismos envíos en tiempo real sin recargar la pantalla del proyector. Para considerar lista la demostración, se debe poder abrir las dos vistas en dispositivos distintos, crear varios envíos desde el celular y observar que cada uno aparezca como una línea independiente que progresa por sus puntos de control. Esta dinámica es una **ampliación para la presentación**; todavía no está implementada y no cambia el alcance de creación y consulta exigido para la entrega académica actual.
+
+### Preparación para añadirla sin rehacer el módulo actual
+
+- **Separar datos y API:** conservar `shipments` y `/shipments` para la entrega académica. La tabla actual exige guías `ME-...` y estado `Registrado`; la simulación deberá usar una tabla y rutas propias, por ejemplo `presentation_shipments` y `/presentation/shipments`. No se deben añadir países ni estados animados a los paquetes existentes.
+- **Guardar lo mínimo:** cada envío de la presentación necesita un identificador, un identificador de la presentación activa, país de origen, país de destino y fecha/hora de creación generada por el servidor. Usar una lista controlada de países y sólo datos ficticios; no hacen falta nombres ni direcciones de participantes. El identificador de presentación permite iniciar una nueva función sin mostrar las líneas de una anterior.
+- **Añadir pantallas independientes:** reservar `/presentacion/control` para el celular y `/presentacion/pantalla` para el proyector, con componentes separados de `Register` y `ShipmentDetail`. El control deberá poder crear envíos sólo con una sesión autorizada; el proyector leerá únicamente los datos ficticios necesarios para dibujar las líneas. La clave de servicio nunca irá al navegador.
+- **Sincronizar y animar:** al abrirse, el proyector se suscribe a los nuevos envíos mediante [Supabase Realtime](https://supabase.com/docs/guides/realtime/postgres-changes), carga los de la presentación activa y elimina duplicados por identificador. Cada línea calcula su avance a partir de la hora de creación y una duración definida para los puntos de control, sin escribir un cambio de estado por cada cuadro de la animación. Si se corta la conexión o se recarga la pantalla, vuelve a consultar los envíos y reconstruye el avance sin duplicar líneas.
+
+La ampliación puede conectarse al cliente de Supabase de `src/lib/supabase.ts`, a rutas nuevas en `src/App.tsx` y a un módulo nuevo de la función Edge y de la base de datos. Esta separación deja intactos el contrato y las pruebas actuales de autenticación, registro y consulta. **Preparado en diseño no significa implementado:** antes de la presentación habrá que crear esas rutas, la tabla, los permisos, la suscripción y la prueba con un celular y el proyector conectados al mismo despliegue en línea.
