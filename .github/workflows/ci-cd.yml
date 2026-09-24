@@ -40,6 +40,11 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+      - name: Recuperar el análisis global de esta ejecución
+        uses: actions/download-artifact@v4
+        with:
+          name: pruebas-y-calidad
+          path: reportes
       - uses: pnpm/action-setup@v4
         with:
           version: 10.34.3
@@ -51,8 +56,10 @@ jobs:
       - name: Preparar Chromium para el recorrido móvil
         run: pnpm exec playwright install --with-deps chromium
       - uses: supabase/setup-cli@v1
+        id: supabase
         with:
-          version: latest
+          version: '2.117.0'
+          github-token: ${{ github.token }}
       - name: Crear base y Auth aislados con las migraciones de esta rama
         run: supabase start -x studio,imgproxy,logflare,vector,supavisor > "$RUNNER_TEMP/supabase-start.log"
       - name: Probar JWT real, roles, persistencia, RLS y guías únicas
@@ -68,7 +75,7 @@ jobs:
             evidencias/ci-ui/
           retention-days: 30
       - name: Detener Supabase aislado
-        if: always()
+        if: always() && steps.supabase.outcome == 'success'
         run: supabase stop --no-backup
   construccion:
     needs: pruebas
