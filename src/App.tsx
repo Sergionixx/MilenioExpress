@@ -565,7 +565,7 @@ function Lookup() {
             placeholder="ME-2026-00000001"
             autoCapitalize="characters"
           />
-          <button className="primary-button" type="submit" disabled={loading}>
+          <button className="primary-button" type="submit" disabled={loading} aria-label="Buscar">
             <Icon name="search" />
             <span>Buscar</span>
           </button>
