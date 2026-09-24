@@ -112,7 +112,7 @@ export default function PresentationScreen() {
         </div>
         <div className="presentation-screen-stats">
           <strong>{shipments.length}</strong>
-          <span>envíos</span>
+          <span>{shipments.length === 1 ? "envío" : "envíos"}</span>
           <small className={connected && !preview ? "connected" : ""}>
             {preview ? "Vista de ejemplo" : connected ? "● Conectado" : "○ Sincronizando"}
           </small>

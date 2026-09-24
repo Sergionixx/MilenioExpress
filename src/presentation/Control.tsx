@@ -104,7 +104,7 @@ export default function PresentationControl({ isAdmin }: Props) {
           <section className="presentation-panel">
             <div className="presentation-panel-top">
               <h2>Pantalla del proyector</h2>
-              <span className="presentation-count">{shipments.length} envíos</span>
+              <span className="presentation-count">{shipments.length} {shipments.length === 1 ? "envío" : "envíos"}</span>
             </div>
             <label className="presentation-url-label">
               Enlace para el proyector

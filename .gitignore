@@ -1,5 +1,7 @@
 node_modules/
 dist/
+/.vercel/
+/.netlify/
 build/
 .cache/
 .env*
