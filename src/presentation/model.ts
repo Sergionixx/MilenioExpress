@@ -5,6 +5,8 @@ export type PresentationShipment = {
   destinationCountry: string
   participantId?: string | null
   participantName?: string | null
+  packageName?: string | null
+  trackingCode?: string | null
   createdAt: string
 }
 

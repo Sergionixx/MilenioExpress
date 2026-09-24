@@ -1,14 +1,14 @@
-# Supabase: paquetes y presentación
+# Supabase: paquetes académicos y presentación
 
-El cliente pide un nombre y llama a `signInAnonymously`. Supabase asigna un `auth.users.id` distinto a cada navegador y el trigger `handle_auth_user_insert` crea su perfil `USER` con el nombre proporcionado. No se pide correo ni contraseña en la aplicación. Los perfiles antiguos con correo siguen funcionando si conservan una sesión, pero no hay formulario para volver a entrar con credenciales.
+El cliente pide un nombre y llama a `signInAnonymously`. Supabase asigna un `auth.users.id` distinto por navegador y el trigger `handle_auth_user_insert` crea el perfil. La opción `[auth] enable_anonymous_sign_ins = true` de `config.toml` debe estar activa en el proyecto remoto. El navegador sólo recibe la URL y la clave publicable; la clave de servicio nunca sale de la función Edge.
 
-La opción `[auth] enable_anonymous_sign_ins = true` en `config.toml` debe estar activada en el proyecto remoto. Las migraciones se aplican en orden: `20260922000000_shipments_and_roles.sql`, `20260924051741_presentation_simulation.sql` y `20260924061348_audience_name_entry.sql`. Después se despliega `make-server-845b49a4`. Antes de cambiar configuración remota, ejecuta `supabase config diff --project-ref <ref>` para revisar el alcance.
+Las migraciones se aplican en orden: `20260922000000_shipments_and_roles.sql`, `20260924051741_presentation_simulation.sql`, `20260924061348_audience_name_entry.sql` y `20260924063626_presentation_guest_orders.sql`. La última agrega nombre y código de cuatro dígitos a cada paquete simulado, exige unicidad del código por presentación y limita con RLS la lectura directa a las filas propias. Antes de cambiar configuración remota, revisa `supabase config diff --project-ref <ref>`.
 
-El navegador sólo recibe la URL y la clave publicable de Supabase. La función Edge conserva la clave de servicio y comprueba cada token mediante `auth.getUser`. El rol se consulta en `profiles`, nunca en metadatos editables. RLS permite a cada `USER` leer y crear paquetes únicamente a su nombre; el rol `ADMIN` antiguo puede consultar todos y asignar propietarios. La lectura de rutas ficticias de presentación es pública, porque el proyector no inicia sesión. Crear presentaciones y rutas requiere una identidad anónima o antigua válida. Las rutas muestran el nombre o apodo y un código breve derivado del identificador del participante.
+El proyecto remoto debe tener el secreto `PRESENTATION_ORGANIZER_KEY`, un valor largo y aleatorio que **no** se guarda en Git ni en variables `VITE_`. La función Edge lo compara con el encabezado `X-Presentation-Key` de los enlaces privados del organizador y del proyector. La clave está en el fragmento `#key=…` de esos enlaces, que no se envía en la solicitud de página; el cliente la transmite sólo a la función Edge en ese encabezado. El enlace del espectador no incluye la clave. Si se pierde, el responsable del proyecto debe fijar un nuevo secreto y generar los nuevos enlaces privados.
 
 ## API
 
-Todas las rutas tienen el prefijo `/make-server-845b49a4`.
+Todas las rutas usan el prefijo `/make-server-845b49a4`.
 
 | Método | Ruta | Acceso |
 | --- | --- | --- |
@@ -18,10 +18,10 @@ Todas las rutas tienen el prefijo `/make-server-845b49a4`.
 | GET | `/shipments` | Propios; `ADMIN` ve todos |
 | POST | `/shipments` | Propios; `ADMIN` puede asignar otro propietario |
 | GET | `/shipments/:guide` | Propietario o `ADMIN` |
-| POST | `/presentation/runs` | Cualquier participante identificado |
-| GET | `/presentation/runs/:runId/shipments` | Público |
-| POST | `/presentation/runs/:runId/shipments` | Cualquier participante identificado |
+| POST | `/presentation/runs` | Sólo clave de organizador |
+| GET | `/presentation/runs/:runId/shipments` | Con clave: todos; con identidad: sólo propios |
+| POST | `/presentation/runs/:runId/shipments` | Participante identificado |
 
-Para registrar un paquete se envía `{ "ownerId": "<uuid>", "recipient": "...", "address": "...", "city": "...", "description": "..." }`; la guía y el estado los asigna la base de datos. Para una ruta ficticia se envía `{ "originCountry": "MX", "destinationCountry": "JP" }`. La respuesta de presentación incluye `participantId` y `participantName`. Los errores usan `{ "error": "...", "code": "..." }`.
+Para crear un paquete de la presentación se envía `{ "packageName": "Regalo", "originCountry": "MX", "destinationCountry": "JP", "trackingCode": "4826" }`. El código acepta exactamente cuatro dígitos, incluidos ceros iniciales. Si otra persona ya lo usó en esa presentación, la función responde `409 TRACKING_CODE_TAKEN`. El nombre del participante se toma del perfil verificado y el identificador de la sesión; no del cuerpo enviado por el navegador.
 
-La publicación `supabase_realtime` transmite rutas nuevas al proyector, que también consulta el servidor periódicamente. La tabla de presentación está separada de `shipments` y no guarda dirección ni destinatario real. El estado académico actual de un paquete es `Registrado`.
+El proyector consulta la función cada dos segundos. La tabla no concede lectura pública y RLS permite a cada espectador ver sólo sus filas. La función usa la clave de servicio para construir la vista completa **únicamente** después de validar el secreto del organizador. Los paquetes académicos de `shipments` mantienen su propio contrato y guía `ME-…`.

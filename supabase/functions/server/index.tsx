@@ -12,7 +12,7 @@ import type { PresentationInput, PresentationRepository, PresentationRunRow, Pre
 const base = "/make-server-845b49a4";
 const shipmentColumns = "id,guide,owner_id,recipient,address,city,description,status,created_at";
 const profileColumns = "id,email,display_name,role";
-const presentationColumns = "id,run_id,origin_country,destination_country,participant_id,participant_name,created_at";
+const presentationColumns = "id,run_id,origin_country,destination_country,participant_id,participant_name,package_name,tracking_code,created_at";
 const presentationRunColumns = "id,created_at";
 
 let database: ReturnType<typeof createClient> | undefined;
@@ -112,13 +112,14 @@ function createPresentationRepository(): PresentationRepository {
       if (error) throw error;
       return data as PresentationRunRow | null;
     },
-    async listShipments(runId) {
+    async listShipments(runId, participantId) {
       const rows: PresentationShipmentRow[] = [];
       const pageSize = 500;
       for (let offset = 0; ; offset += pageSize) {
-        const { data, error } = await db.from("presentation_shipments")
+        const query = db.from("presentation_shipments")
           .select(presentationColumns)
-          .eq("run_id", runId)
+          .eq("run_id", runId);
+        const { data, error } = await (participantId ? query.eq("participant_id", participantId) : query)
           .order("created_at", { ascending: true })
           .order("id", { ascending: true })
           .range(offset, offset + pageSize - 1);
@@ -135,7 +136,12 @@ function createPresentationRepository(): PresentationRepository {
         destination_country: input.destinationCountry,
         participant_id: participant.id,
         participant_name: participant.name,
+        package_name: input.packageName,
+        tracking_code: input.trackingCode,
       }).select(presentationColumns).single();
+      if (error?.code === "23505") {
+        throw new AppError(409, "TRACKING_CODE_TAKEN", "Ese código de cuatro dígitos ya está en uso. Elige otro.");
+      }
       if (error?.code === "23503") {
         throw new AppError(404, "PRESENTATION_NOT_FOUND", "No se encontró esa presentación.");
       }
@@ -152,7 +158,7 @@ function shipmentService() {
 
 let presentation: ReturnType<typeof createPresentationService> | undefined;
 function presentationService() {
-  return presentation ??= createPresentationService(createPresentationRepository());
+  return presentation ??= createPresentationService(createPresentationRepository(), Deno.env.get("PRESENTATION_ORGANIZER_KEY") ?? "");
 }
 
 function bearerToken(c: Context): string | undefined {
@@ -177,7 +183,7 @@ app.use(
   "/*",
   cors({
     origin: "*",
-    allowHeaders: ["Content-Type", "Authorization", "apikey"],
+    allowHeaders: ["Content-Type", "Authorization", "apikey", "X-Presentation-Key"],
     allowMethods: ["GET", "POST", "OPTIONS"],
     maxAge: 600,
   }),
@@ -186,12 +192,13 @@ app.use(
 app.get(`${base}/health`, (c) => c.json({ status: "ok" }));
 
 app.post(`${base}/presentation/runs`, async (c) => {
-  const actor = await shipmentService().authenticate(bearerToken(c));
-  return c.json(await presentationService().createRun(actor), 201);
+  return c.json(await presentationService().createRun(c.req.header("X-Presentation-Key")), 201);
 });
 
 app.get(`${base}/presentation/runs/:runId/shipments`, async (c) => {
-  return c.json(await presentationService().listShipments(c.req.param("runId")));
+  const organizerKey = c.req.header("X-Presentation-Key");
+  const actor = organizerKey ? null : await shipmentService().authenticate(bearerToken(c));
+  return c.json(await presentationService().listShipments(c.req.param("runId"), actor, organizerKey));
 });
 
 app.post(`${base}/presentation/runs/:runId/shipments`, async (c) => {

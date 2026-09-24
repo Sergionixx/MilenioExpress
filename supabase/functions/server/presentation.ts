@@ -13,18 +13,22 @@ export interface PresentationShipmentRow {
   destination_country: string;
   participant_id: string | null;
   participant_name: string | null;
+  package_name: string | null;
+  tracking_code: string | null;
   created_at: string;
 }
 
 export interface PresentationInput {
   originCountry: string;
   destinationCountry: string;
+  packageName: string;
+  trackingCode: string;
 }
 
 export interface PresentationRepository {
   createRun(): Promise<PresentationRunRow>;
   getRun(runId: string): Promise<PresentationRunRow | null>;
-  listShipments(runId: string): Promise<PresentationShipmentRow[]>;
+  listShipments(runId: string, participantId?: string): Promise<PresentationShipmentRow[]>;
   createShipment(runId: string, input: PresentationInput, participant: { id: string; name: string }): Promise<PresentationShipmentRow>;
 }
 
@@ -43,7 +47,7 @@ export function validatePresentationInput(value: unknown): PresentationInput {
     throw new AppError(400, "VALIDATION_ERROR", "El cuerpo debe ser un objeto JSON.");
   }
   const body = value as Record<string, unknown>;
-  const unexpected = Object.keys(body).filter((key) => !["originCountry", "destinationCountry"].includes(key));
+  const unexpected = Object.keys(body).filter((key) => !["originCountry", "destinationCountry", "packageName", "trackingCode"].includes(key));
   if (unexpected.length) {
     throw new AppError(400, "VALIDATION_ERROR", `Campos no permitidos: ${unexpected.join(", ")}.`);
   }
@@ -55,7 +59,15 @@ export function validatePresentationInput(value: unknown): PresentationInput {
   if (originCountry === destinationCountry) {
     throw new AppError(400, "VALIDATION_ERROR", "El destino debe ser distinto del origen.");
   }
-  return { originCountry, destinationCountry };
+  const packageName = typeof body.packageName === "string" ? body.packageName.replace(/\s+/g, " ").trim() : "";
+  const trackingCode = typeof body.trackingCode === "string" ? body.trackingCode.trim() : "";
+  if (!packageName || packageName.length > 40) {
+    throw new AppError(400, "VALIDATION_ERROR", "Ponle un nombre al paquete de hasta 40 caracteres.");
+  }
+  if (!/^[0-9]{4}$/.test(trackingCode)) {
+    throw new AppError(400, "VALIDATION_ERROR", "El código de rastreo debe tener exactamente cuatro dígitos.");
+  }
+  return { originCountry, destinationCountry, packageName, trackingCode };
 }
 
 export function toPresentationShipment(row: PresentationShipmentRow) {
@@ -66,6 +78,8 @@ export function toPresentationShipment(row: PresentationShipmentRow) {
     destinationCountry: row.destination_country,
     participantId: row.participant_id,
     participantName: row.participant_name,
+    packageName: row.package_name,
+    trackingCode: row.tracking_code,
     createdAt: row.created_at,
   };
 }
@@ -79,20 +93,28 @@ async function fromRepository<T>(operation: () => Promise<T>): Promise<T> {
   }
 }
 
-export function createPresentationService(repo: PresentationRepository) {
+export function createPresentationService(repo: PresentationRepository, organizerKey: string) {
+  function requireOrganizer(key: string | undefined) {
+    if (!organizerKey || !key || key !== organizerKey) {
+      throw new AppError(403, "ORGANIZER_REQUIRED", "Este enlace es sólo para el organizador.");
+    }
+  }
   return {
-    async createRun(_actor: Actor) {
+    async createRun(key: string | undefined) {
+      requireOrganizer(key);
       const row = await fromRepository(() => repo.createRun());
       return { id: row.id, createdAt: row.created_at };
     },
 
-    async listShipments(runId: string) {
+    async listShipments(runId: string, actor: Actor | null, key?: string) {
       const validId = validateRunId(runId);
+      if (key) requireOrganizer(key);
+      if (!key && !actor) throw new AppError(401, "UNAUTHENTICATED", "Entra con tu nombre para continuar.");
       const run = await fromRepository(() => repo.getRun(validId));
       if (!run) {
         throw new AppError(404, "PRESENTATION_NOT_FOUND", "No se encontró esa presentación.");
       }
-      const rows = await fromRepository(() => repo.listShipments(validId));
+      const rows = await fromRepository(() => repo.listShipments(validId, key ? undefined : actor!.id));
       return rows.map(toPresentationShipment);
     },
 

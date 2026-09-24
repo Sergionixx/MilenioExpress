@@ -266,7 +266,7 @@ function Auth() {
     }
   }
   return (
-    <main className="auth-shell">
+    <main className="auth-shell presentation-auth">
       <section className="auth-top">
         <div className="brand-mark">
           <Icon name="box" />
@@ -489,16 +489,6 @@ function Home() {
             action={<Link to="/registrar" className="secondary-button">Registrar paquete</Link>}
           />
         )}
-      </section>
-      <section className="section">
-        <div className="section-title">
-          <div>
-            <div className="eyebrow">PARA LA PRESENTACIÓN</div>
-            <h2>Envíos entre países</h2>
-          </div>
-        </div>
-        <p className="muted-text">Inicia una presentación o únete desde tu celular con el enlace compartido.</p>
-        <Link to="/presentacion/control" className="secondary-button">Iniciar presentación</Link>
       </section>
     </main>
   )
@@ -1063,13 +1053,20 @@ function PresentationControlRoute() {
 }
 
 function PresentationParticipantRoute() {
-  const { account } = useAccount()
-  return account ? <PresentationParticipant participant={account} /> : null
+  const { account, checking, error, refresh } = useAccount()
+  const location = useLocation()
+  if (checking) return <Loading label="Preparando tu espacio…" />
+  if (error) return <main className="presentation-guest"><p className="form-error" role="alert">{error}</p><button onClick={() => void refresh()}>Reintentar</button></main>
+  if (!account) return <Navigate to={`/?next=${encodeURIComponent(location.pathname)}`} replace />
+  return <PresentationParticipant participant={account} />
 }
 
 const router = createBrowserRouter([
   { path: "/", Component: Auth },
   { path: "/presentacion/pantalla/:runId", Component: PresentationScreen },
+  { path: "/presentacion/control", Component: PresentationControlRoute },
+  { path: "/presentacion/control/:runId", Component: PresentationControlRoute },
+  { path: "/presentacion/participar/:runId", Component: PresentationParticipantRoute },
   {
     Component: Protected,
     children: [
@@ -1079,9 +1076,6 @@ const router = createBrowserRouter([
       { path: "/historial", Component: History },
       { path: "/registrar", Component: Register },
       { path: "/perfil", Component: Profile },
-      { path: "/presentacion/control", Component: PresentationControlRoute },
-      { path: "/presentacion/control/:runId", Component: PresentationControlRoute },
-      { path: "/presentacion/participar/:runId", Component: PresentationParticipantRoute },
     ],
   },
   { path: "*", element: <Navigate to="/inicio" replace /> },

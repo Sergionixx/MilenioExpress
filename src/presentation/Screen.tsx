@@ -1,29 +1,13 @@
 import { useEffect, useRef, useState } from "react"
-import { useParams } from "react-router"
-import { apiFetch, supabase } from "../lib/supabase"
-import {
-  checkpointAt,
-  checkpoints,
-  countryName,
-  mergePresentationShipments,
-  participantCode,
-  progressAt,
-  type PresentationShipment,
-} from "./model"
+import { useLocation, useParams } from "react-router"
+import { apiFetch } from "../lib/supabase"
+import { checkpointAt, checkpoints, countryName, progressAt, type PresentationShipment } from "./model"
 import "./presentation.css"
-
-type NewRow = {
-  id: string
-  run_id: string
-  origin_country: string
-  destination_country: string
-  participant_id: string | null
-  participant_name: string | null
-  created_at: string
-}
 
 export default function PresentationScreen() {
   const { runId } = useParams()
+  const location = useLocation()
+  const organizerKey = new URLSearchParams(location.hash.slice(1)).get("key") ?? ""
   const preview = import.meta.env.DEV && runId === "vista-previa"
   const [shipments, setShipments] = useState<PresentationShipment[]>([])
   const [now, setNow] = useState(Date.now())
@@ -53,71 +37,52 @@ export default function PresentationScreen() {
         runId,
         originCountry: String(originCountry),
         destinationCountry: String(destinationCountry),
+        packageName: `Paquete ${index + 1}`,
+        trackingCode: String(4826 + index),
+        participantName: `Participante ${index + 1}`,
         createdAt: new Date(started - Number(seconds) * 1000).toISOString(),
       })))
       setLoading(false)
       setConnected(true)
       return
     }
+    if (!organizerKey) {
+      setLoading(false)
+      setError("Abre el enlace privado del proyector desde la página del organizador.")
+      return
+    }
     let active = true
     setShipments([])
     setLoading(true)
     setError("")
-    setConnected(false)
-    const load = async () => {
+    async function load() {
       try {
-        const items = await apiFetch(`/presentation/runs/${encodeURIComponent(runId)}/shipments`) as PresentationShipment[]
-        if (!active) return
-        setShipments((current) => mergePresentationShipments(current, items))
-        setError("")
+        const rows = await apiFetch(`/presentation/runs/${encodeURIComponent(runId!)}/shipments`, {
+          headers: { "X-Presentation-Key": organizerKey },
+        }) as PresentationShipment[]
+        if (active) { setShipments(rows); setConnected(true); setError("") }
       } catch (cause) {
-        if (active) setError(cause instanceof Error ? cause.message : "No se pudo cargar la presentación.")
+        if (active) { setConnected(false); setError(cause instanceof Error ? cause.message : "No se pudo cargar la presentación.") }
       } finally {
         if (active) setLoading(false)
       }
     }
-    const channel = supabase
-      .channel(`presentation-${runId}`)
-      .on("postgres_changes", {
-        event: "INSERT", schema: "public", table: "presentation_shipments", filter: `run_id=eq.${runId}`,
-      }, (payload) => {
-        if (!active) return
-        const row = payload.new as NewRow
-        setShipments((current) => mergePresentationShipments(current, [{
-          id: row.id,
-          runId: row.run_id,
-          originCountry: row.origin_country,
-          destinationCountry: row.destination_country,
-          participantId: row.participant_id,
-          participantName: row.participant_name,
-          createdAt: row.created_at,
-        }]))
-      })
-      .subscribe((status) => {
-        if (!active) return
-        setConnected(status === "SUBSCRIBED")
-        if (status === "SUBSCRIBED") void load()
-      })
     void load()
-    const refresh = window.setInterval(() => void load(), 15_000)
-    return () => {
-      active = false
-      window.clearInterval(refresh)
-      void supabase.removeChannel(channel)
-    }
-  }, [runId, preview])
+    const refresh = window.setInterval(() => void load(), 2000)
+    return () => { active = false; window.clearInterval(refresh) }
+  }, [runId, preview, organizerKey])
 
   return (
     <div className="presentation-screen">
       <header className="presentation-screen-header">
         <div>
           <span className="presentation-screen-kicker">MILENIO EXPRESS · {preview ? "VISTA PREVIA" : "EN VIVO"}</span>
-          <h1>Rutas alrededor del mundo</h1>
-          <p>Cada línea es un envío simulado por un participante.</p>
+          <h1>Paquetes alrededor del mundo</h1>
+          <p>Cada línea es un paquete creado desde el celular de un participante.</p>
         </div>
         <div className="presentation-screen-stats">
           <strong>{shipments.length}</strong>
-          <span>{shipments.length === 1 ? "envío" : "envíos"}</span>
+          <span>{shipments.length === 1 ? "paquete" : "paquetes"}</span>
           <small className={connected && !preview ? "connected" : ""}>
             {preview ? "Vista de ejemplo" : connected ? "● Conectado" : "○ Sincronizando"}
           </small>
@@ -131,10 +96,10 @@ export default function PresentationScreen() {
           <div className="presentation-empty">
             <span aria-hidden="true">✦</span>
             <h2>La primera ruta está por comenzar</h2>
-            <p>Los participantes pueden elegir origen y destino desde sus celulares.</p>
+            <p>Los espectadores pueden crear sus paquetes desde sus celulares.</p>
           </div>
         )}
-        <div className="presentation-journeys" aria-label="Envíos de la presentación" ref={journeysRef}>
+        <div className="presentation-journeys" aria-label="Paquetes de la presentación" ref={journeysRef}>
           {shipments.map((shipment, index) => {
             const progress = progressAt(shipment.createdAt, now)
             const percent = `${Math.round(progress * 100)}%`
@@ -143,10 +108,9 @@ export default function PresentationScreen() {
                 <div className="presentation-journey-heading">
                   <span className="presentation-journey-number">#{String(index + 1).padStart(2, "0")}</span>
                   <div className="presentation-journey-title">
-                    {shipment.participantId && shipment.participantName && (
-                      <small>{shipment.participantName} · {participantCode(shipment.participantId)}</small>
-                    )}
-                    <strong>{countryName(shipment.originCountry)} <span aria-hidden="true">→</span> {countryName(shipment.destinationCountry)}</strong>
+                    <small>{shipment.participantName || "Participante"} · CÓDIGO {shipment.trackingCode || "----"}</small>
+                    <strong>{shipment.packageName || "Paquete"}</strong>
+                    <span>{countryName(shipment.originCountry)} → {countryName(shipment.destinationCountry)}</span>
                   </div>
                   <span className="presentation-journey-state">{checkpointAt(progress)}</span>
                 </div>

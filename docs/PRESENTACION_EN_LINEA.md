@@ -2,18 +2,20 @@
 
 Rama: `feature/presentacion-interactiva`. `main` no se modificó.
 
-## Estado comprobado
+## Preparación
 
-- Supabase `rltahgouyixqquspofsf` tiene activado el acceso anónimo y las tres migraciones del proyecto. La función Edge `make-server-845b49a4` está desplegada.
-- `pnpm test:live-guests` confirmó que dos participantes reciben identificadores y nombres distintos, pueden enviar rutas a una misma presentación y que el proyector público muestra ambos. También confirmó que uno no puede consultar ni crear paquetes académicos a nombre del otro.
-- En la interfaz local se comprobó la entrada con nombre, la creación de una presentación, el enlace para los celulares y el envío desde la página de participante.
-- La versión actual está en un [despliegue temporal de Vercel](https://temporary-swift-indigo-eled1sk.vercel.app). Se comprobó que un invitado puede abrir directamente un enlace de participación, escribir su nombre y llegar a esa presentación. El despliegue caduca aproximadamente una hora después de crearse el 24 de septiembre de 2026. Para conservarlo, [reclámalo en Vercel](https://vercel.com/claim-deployment?code=93b0a8d4-01d6-40f6-a4c1-98708392dc0b) o publica la rama desde una cuenta propia. `vercel.json` y `public/_redirects` preparan las rutas directas para Vercel y Netlify.
+Supabase `rltahgouyixqquspofsf` tiene activado el acceso anónimo, las cuatro migraciones aplicadas y la función Edge desplegada. El secreto del organizador está en Supabase y en un archivo local fuera del repositorio, bajo el perfil del responsable del proyecto. Nunca compartas ese secreto ni el enlace del proyector con los espectadores.
 
-## Uso durante la exposición
+El cliente web necesita un dominio HTTPS común para la computadora y los celulares. Las rutas directas están configuradas para Vercel (`vercel.json`) y Netlify (`public/_redirects`). Un despliegue temporal de Vercel caduca aproximadamente una hora después de publicarse; para una exposición real, publícalo o reclama el despliegue desde una cuenta de hosting propia. Al cambiar de dominio, conserva la misma parte `#key=…` en el enlace privado del organizador y abre ese enlace en el dominio nuevo.
 
-1. Publicar el cliente desde esta rama en Vercel o Netlify y abrir el dominio HTTPS en la computadora del proyector y los celulares.
-2. Una persona escribe su nombre, entra a `/presentacion/control`, inicia una presentación y copia el enlace del proyector y el de los participantes. La página de control puede quedar abierta en su celular.
-3. Abrir el enlace del proyector en la computadora. Compartir el otro enlace con los espectadores.
-4. Cada espectador escribe su nombre o apodo la primera vez en su navegador, elige dos países diferentes y pulsa **Enviar al proyector**. Cada ruta aparece con el nombre y un código breve propio de ese navegador.
+## Orden durante la exposición
 
-El enlace del proyector muestra únicamente rutas ficticias y los nombres o apodos que los participantes decidan escribir. No se muestran paquetes ni direcciones académicas. Si se borran los datos del navegador o se pulsa **Cambiar participante**, se pierde la identidad anónima de ese navegador y el acceso a sus paquetes anteriores. Para más de 30 participantes detrás de una misma IP en una hora, revisa el límite de altas anónimas de Supabase antes de la exposición.
+1. En la computadora, abre el enlace **privado del organizador** `/presentacion/control#key=…` e inicia una presentación.
+2. Abre en el proyector el enlace **privado del proyector** que aparece en la primera tarjeta. Puedes poner el navegador en pantalla completa para ocultar su barra de direcciones.
+3. Comparte **únicamente** el enlace de la segunda tarjeta con los espectadores. Ese enlace no contiene la clave privada.
+4. Cada espectador escribe su nombre en su celular, nombra el paquete, elige país de salida y destino y pone un código de rastreo de cuatro dígitos. Ve la línea de tiempo de su propio paquete en la misma pantalla.
+5. El proyector agrega las rutas nuevas automáticamente. Los espectadores no ven el control ni las rutas ajenas desde su enlace.
+
+Los nombres y paquetes de esta dinámica son ficticios y visibles en el proyector. Los códigos de rastreo deben ser únicos sólo dentro de una presentación. Si dos personas eligen el mismo, la segunda debe poner otro. Borrar los datos del navegador hace que se pierda la identidad anónima y el acceso a sus paquetes anteriores. Para más de 30 espectadores detrás de la misma IP en una hora, revisa el límite de altas anónimas de Supabase antes de la exposición.
+
+`pnpm test:live-guests` comprobó dos celulares simulados: cada uno ve sólo su paquete, el proyector ve ambos, un código repetido se rechaza y la tabla no permite lectura pública. También se probó en navegador el envío desde el menú oscuro del participante y su aparición en la pantalla del proyector.

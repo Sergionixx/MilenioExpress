@@ -46,6 +46,7 @@
 .presentation-journey-heading { display: flex; align-items: center; gap: 15px; }
 .presentation-journey-title { display: grid; flex: 1; gap: 3px; }
 .presentation-journey-title small { color: #79bdff; font-size: 10px; font-weight: 800; letter-spacing: .7px; }
+.presentation-journey-title > span { color: #b6cbe4; font-size: 12px; }
 .presentation-journey-number { color: #79bdff; font: 800 15px 'Manrope', sans-serif; }
 .presentation-journey-heading strong { flex: 1; font: 700 clamp(16px, 1.6vw, 24px) 'Manrope', sans-serif; }
 .presentation-journey-heading strong span { color: #79bdff; }
@@ -70,3 +71,44 @@
   .presentation-rail { margin-left: 37px; margin-right: 37px; }
   .presentation-checkpoint small { font-size: 8px; }
 }
+
+/* Shared dark style for the private organizer page and the simple guest menu. */
+.presentation-host { min-height: 100dvh; max-width: 760px; margin: auto; background: #09172b; color: #f3f7ff; }
+.presentation-host .eyebrow, .presentation-guest .eyebrow { color: #80beff; }
+.presentation-host .muted-text { color: #b1c5df; }
+.presentation-host .presentation-panel { background: #112644; border-color: #2b496b; box-shadow: none; }
+.presentation-host .presentation-panel p, .presentation-host .presentation-panel label { color: #b1c5df; }
+.presentation-host .presentation-panel input { color: #eaf4ff; background: #173252; border-color: #365575; }
+.presentation-host .primary-button, .presentation-guest .primary-button { background: #3d9bff; color: #061426; box-shadow: none; }
+.presentation-host .secondary-button { color: #d9ebff; background: #173252; border-color: #365575; }
+.presentation-host .text-button { color: #8dc5ff; }
+.presentation-host .form-error, .presentation-guest .form-error { color: #ffb7aa !important; margin-top: 14px; }
+
+.presentation-guest { min-height: 100dvh; max-width: 520px; margin: auto; background: #09172b; color: #f3f7ff; font-family: 'DM Sans', sans-serif; }
+.presentation-guest-header { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 22px; border-bottom: 1px solid #294663; }
+.presentation-guest-brand { font: 800 18px 'Manrope', sans-serif; letter-spacing: -.8px; }
+.presentation-guest-brand span { font-weight: 500; color: #8dc5ff; }
+.presentation-guest-header small { color: #9eb8d8; font-size: 9px; font-weight: 800; letter-spacing: 1px; }
+.presentation-guest-content { padding: 27px 22px 45px; }
+.presentation-guest h1 { margin: 7px 0 9px; font: 800 29px 'Manrope', sans-serif; }
+.presentation-guest-intro { margin: 0; color: #b1c5df; font-size: 14px; line-height: 1.5; }
+.presentation-guest-form { display: grid; gap: 17px; margin-top: 27px; padding: 22px; border: 1px solid #294663; border-radius: 19px; background: #112644; }
+.presentation-guest-form label { display: grid; gap: 7px; color: #e0edfb; font-size: 12px; font-weight: 700; }
+.presentation-guest-form input, .presentation-guest-form select { width: 100%; min-width: 0; height: 48px; padding: 0 13px; border: 1px solid #365575; border-radius: 11px; background: #173252; color: #fff; outline-color: #80beff; }
+.presentation-guest-form input::placeholder { color: #91abc8; }
+.presentation-guest-form .primary-button { width: 100%; margin-top: 4px; }
+.presentation-guest .presentation-feedback { color: #b7f4d0; background: #164b38; }
+.presentation-guest-orders { margin-top: 30px; }
+.presentation-guest-orders h2 { margin: 0 0 15px; font: 800 19px 'Manrope', sans-serif; }
+.presentation-guest-orders > p { color: #a9bedb; font-size: 13px; }
+.presentation-guest-order { margin-bottom: 12px; padding: 17px; border: 1px solid #294663; border-radius: 17px; background: #112644; }
+.presentation-guest-order-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.presentation-guest-order-top strong { font-size: 15px; overflow-wrap: anywhere; }
+.presentation-guest-order-top span { flex: none; padding: 5px 8px; border-radius: 8px; color: #061426; background: #79bdff; font-size: 12px; font-weight: 800; }
+.presentation-guest-order p { margin: 8px 0 17px; color: #b1c5df; font-size: 12px; }
+.presentation-guest-progress { height: 8px; overflow: hidden; border-radius: 99px; background: #355575; }
+.presentation-guest-progress span { display: block; height: 100%; background: linear-gradient(90deg, #3d9bff, #70e4ab); }
+.presentation-guest-checkpoints { display: flex; justify-content: space-between; gap: 3px; margin-top: 8px; }
+.presentation-guest-checkpoints small { color: #7892b1; font-size: 9px; }
+.presentation-guest-checkpoints small.reached { color: #9bdfcb; }
+.presentation-guest-order b { display: block; margin-top: 13px; color: #9bdfcb; font-size: 12px; }
