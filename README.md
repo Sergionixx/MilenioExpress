@@ -34,3 +34,12 @@ main (integración después de revisión de Sergionix)
 La interfaz utiliza Supabase Auth y la función `make-server-845b49a4`. La migración está en `supabase/migrations/` y el servidor en `supabase/functions/server/`. La configuración, el contrato de API y las instrucciones de despliegue están en [supabase/README.md](supabase/README.md). Las variables `VITE_` sólo admiten la URL y la clave pública del proyecto; nunca deben contener la clave de servicio.
 
 `pnpm test:live-auth` comprueba que la función desplegada responde y rechaza peticiones sin sesión o con un token inválido. `pnpm test:live-roles` comprueba los permisos ADMIN/USER con dos cuentas ficticias ya existentes; requiere `MILENIO_ADMIN_EMAIL`, `MILENIO_ADMIN_PASSWORD`, `MILENIO_USER_EMAIL`, `MILENIO_USER_PASSWORD`, `MILENIO_CLIENT_GUIDE` y `MILENIO_OPERATOR_GUIDE` en el entorno. Ninguno de los dos comandos crea usuarios ni paquetes. La evidencia de integración y revisión móvil está en [docs/SERGIO_VERIFICACION.md](docs/SERGIO_VERIFICACION.md).
+
+## Idea para la presentación final (fase posterior)
+
+Cuando el módulo académico esté terminado, publicar una demostración en línea con **dos interfaces simultáneas**:
+
+1. **Celular de los atendientes:** cada participante elige un país de origen y otro de destino para registrar un envío internacional **simulado**. El atendiente confirma el envío desde esta vista.
+2. **Proyector:** una pantalla compartida muestra una nueva línea horizontal por cada envío confirmado. Cada línea identifica su origen y destino y avanza por puntos de control visibles hasta llegar al destino. Las líneas anteriores permanecen en pantalla, de modo que varios envíos puedan avanzar al mismo tiempo.
+
+Ambas vistas deben reflejar los mismos envíos en tiempo real sin recargar la pantalla del proyector. Para considerar lista la demostración, se debe poder abrir las dos vistas en dispositivos distintos, crear varios envíos desde el celular y observar que cada uno aparezca como una línea independiente que progresa por sus puntos de control. Esta dinámica es una **ampliación para la presentación**; todavía no está implementada y no cambia el alcance de creación y consulta exigido para la entrega académica actual.
