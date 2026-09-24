@@ -1,18 +1,19 @@
 # Presentación interactiva en línea
 
-Fecha: 23 de septiembre de 2026. Rama: `feature/presentacion-interactiva`. `main` no se modificó.
+Rama: `feature/presentacion-interactiva`. `main` no se modificó.
 
 ## Estado comprobado
 
-- La migración `20260924051741_presentation_simulation.sql` se aplicó al proyecto Supabase `rltahgouyixqquspofsf`. Una consulta confirmó las tablas nuevas.
-- Se desplegó la función Edge `make-server-845b49a4`. `pnpm test:live-auth` y `pnpm test:live-presentation` comprobaron salud, rechazo de escrituras sin sesión, errores de presentación y lectura pública de los datos ficticios.
-- Se creó una presentación de prueba con el identificador `b805f40c-0138-426c-ab03-dc95519622d3` y dos envíos ficticios. En la web publicada, el segundo apareció en el proyector sin recargar la página. Esta prueba verifica la sincronización; no verificó todavía el formulario `ADMIN` en un celular real.
-- Se publicó el cliente en Vercel como despliegue **temporal**. Su URL y el enlace para reclamarlo se entregaron al responsable del proyecto; el despliegue anónimo vence 60 minutos después de crearse si no se reclama.
+- Supabase `rltahgouyixqquspofsf` tiene activado el acceso anónimo y las tres migraciones del proyecto. La función Edge `make-server-845b49a4` está desplegada.
+- `pnpm test:live-guests` confirmó que dos participantes reciben identificadores y nombres distintos, pueden enviar rutas a una misma presentación y que el proyector público muestra ambos. También confirmó que uno no puede consultar ni crear paquetes académicos a nombre del otro.
+- En la interfaz local se comprobó la entrada con nombre, la creación de una presentación, el enlace para los celulares y el envío desde la página de participante.
+- La versión actual está en un [despliegue temporal de Vercel](https://temporary-swift-indigo-eled1sk.vercel.app). Se comprobó que un invitado puede abrir directamente un enlace de participación, escribir su nombre y llegar a esa presentación. El despliegue caduca aproximadamente una hora después de crearse el 24 de septiembre de 2026. Para conservarlo, [reclámalo en Vercel](https://vercel.com/claim-deployment?code=93b0a8d4-01d6-40f6-a4c1-98708392dc0b) o publica la rama desde una cuenta propia. `vercel.json` y `public/_redirects` preparan las rutas directas para Vercel y Netlify.
 
-## Lo que se necesita para conservarlo y presentarlo
+## Uso durante la exposición
 
-1. Reclamar el despliegue temporal desde el enlace de Vercel compartido en la conversación e iniciar sesión en una cuenta propia. Si vence, publicar de nuevo el contenido de esta rama en Vercel o Netlify. `vercel.json` y `public/_redirects` preparan las rutas de React para ambos servicios. El repositorio puede permanecer privado y `main` no necesita recibir esta rama para hacer una publicación manual.
-2. Usar una cuenta del proyecto Supabase con rol `ADMIN` en el celular. Ya existe un perfil `ADMIN`; no se requiere crear otra cuenta para empezar. Abrir `https://<dominio>/presentacion/control`, pulsar **Iniciar nueva presentación** y copiar el enlace del proyector.
-3. Abrir ese enlace en la computadora conectada al proyector. Desde el celular, elegir países diferentes y pulsar **Enviar al proyector** varias veces. Confirmar que cada envío crea una línea independiente y avanza por los cinco puntos de control.
+1. Publicar el cliente desde esta rama en Vercel o Netlify y abrir el dominio HTTPS en la computadora del proyector y los celulares.
+2. Una persona escribe su nombre, entra a `/presentacion/control`, inicia una presentación y copia el enlace del proyector y el de los participantes. La página de control puede quedar abierta en su celular.
+3. Abrir el enlace del proyector en la computadora. Compartir el otro enlace con los espectadores.
+4. Cada espectador escribe su nombre o apodo la primera vez en su navegador, elige dos países diferentes y pulsa **Enviar al proyector**. Cada ruta aparece con el nombre y un código breve propio de ese navegador.
 
-La pantalla del proyector es pública sólo para datos ficticios; la escritura pasa por la función y exige `ADMIN`. Si cambia el dominio, basta abrir de nuevo el control desde la nueva URL: el enlace del proyector se construye con el dominio actual. No hacen falta datos ni código de Juan o Humberto para esta dinámica.
+El enlace del proyector muestra únicamente rutas ficticias y los nombres o apodos que los participantes decidan escribir. No se muestran paquetes ni direcciones académicas. Si se borran los datos del navegador o se pulsa **Cambiar participante**, se pierde la identidad anónima de ese navegador y el acceso a sus paquetes anteriores. Para más de 30 participantes detrás de una misma IP en una hora, revisa el límite de altas anónimas de Supabase antes de la exposición.

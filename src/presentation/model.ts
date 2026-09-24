@@ -3,7 +3,13 @@ export type PresentationShipment = {
   runId: string
   originCountry: string
   destinationCountry: string
+  participantId?: string | null
+  participantName?: string | null
   createdAt: string
+}
+
+export function participantCode(id: string): string {
+  return id.replace(/-/g, "").slice(0, 6).toUpperCase()
 }
 
 export const countries = [

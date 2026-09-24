@@ -53,5 +53,5 @@ await request(userToken, "/shipments/ME-2026-99999999", 404, "SHIPMENT_NOT_FOUND
 await request(userToken, "/shipments", 200)
 await request(userToken, "/shipments", 403, "FORBIDDEN", {
   method: "POST",
-  body: JSON.stringify({ ownerId: user.id, recipient: "Prueba", address: "Prueba 123", city: "Prueba", description: "No debe crearse" }),
+  body: JSON.stringify({ ownerId: admin.id, recipient: "Prueba", address: "Prueba 123", city: "Prueba", description: "No debe crearse" }),
 })

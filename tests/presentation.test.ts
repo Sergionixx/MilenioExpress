@@ -10,13 +10,15 @@ import {
 
 const runId = "11111111-1111-4111-8111-111111111111";
 const admin: Actor = { id: "22222222-2222-4222-8222-222222222222", email: "admin@example.com", name: "Operador", role: "ADMIN" };
-const user: Actor = { ...admin, role: "USER" };
+const user: Actor = { id: "55555555-5555-4555-8555-555555555555", email: "", name: "Participante", role: "USER" };
 const run = { id: runId, created_at: "2026-09-24T10:00:00.000Z" };
 const row: PresentationShipmentRow = {
   id: "33333333-3333-4333-8333-333333333333",
   run_id: runId,
   origin_country: "MX",
   destination_country: "JP",
+  participant_id: user.id,
+  participant_name: "Participante",
   created_at: "2026-09-24T10:01:00.000Z",
 };
 
@@ -39,13 +41,12 @@ async function assertAppError(promise: Promise<unknown>, status: number, code: s
   });
 }
 
-test("only ADMIN starts presentation runs", async () => {
+test("any named participant can start a presentation run", async () => {
   let creations = 0;
   const service = createPresentationService(repository({ createRun: async () => { creations++; return run; } }));
-  await assertAppError(service.createRun(user), 403, "FORBIDDEN");
-  assert.equal(creations, 0);
+  assert.deepEqual(await service.createRun(user), { id: runId, createdAt: run.created_at });
   assert.deepEqual(await service.createRun(admin), { id: runId, createdAt: run.created_at });
-  assert.equal(creations, 1);
+  assert.equal(creations, 2);
 });
 
 test("the public projector reads only an existing run and receives clean fields", async () => {
@@ -57,26 +58,28 @@ test("the public projector reads only an existing run and receives clean fields"
     runId,
     originCountry: "MX",
     destinationCountry: "JP",
+    participantId: user.id,
+    participantName: "Participante",
     createdAt: row.created_at,
   }]);
 });
 
-test("a country pair is validated before an ADMIN creates a projected line", async () => {
+test("a country pair is validated and tied to the participant's identity", async () => {
   let creations = 0;
   const service = createPresentationService(repository({
-    createShipment: async (_id, input) => {
+    createShipment: async (_id, input, participant) => {
       creations++;
       assert.deepEqual(input, { originCountry: "MX", destinationCountry: "JP" });
+      assert.deepEqual(participant, { id: user.id, name: "Participante" });
       return row;
     },
   }));
-  await assertAppError(service.createShipment(user, runId, { originCountry: "MX", destinationCountry: "JP" }), 403, "FORBIDDEN");
-  await assertAppError(service.createShipment(admin, runId, { originCountry: "MX", destinationCountry: "MX" }), 400, "VALIDATION_ERROR");
-  await assertAppError(service.createShipment(admin, runId, { originCountry: "MEX", destinationCountry: "JP" }), 400, "VALIDATION_ERROR");
-  await assertAppError(service.createShipment(admin, runId, { originCountry: "MX", destinationCountry: "JP", guide: "fake" }), 400, "VALIDATION_ERROR");
-  await assertAppError(service.createShipment(admin, "44444444-4444-4444-8444-444444444444", { originCountry: "MX", destinationCountry: "JP" }), 404, "PRESENTATION_NOT_FOUND");
+  await assertAppError(service.createShipment(user, runId, { originCountry: "MX", destinationCountry: "MX" }), 400, "VALIDATION_ERROR");
+  await assertAppError(service.createShipment(user, runId, { originCountry: "MEX", destinationCountry: "JP" }), 400, "VALIDATION_ERROR");
+  await assertAppError(service.createShipment(user, runId, { originCountry: "MX", destinationCountry: "JP", guide: "fake" }), 400, "VALIDATION_ERROR");
+  await assertAppError(service.createShipment(user, "44444444-4444-4444-8444-444444444444", { originCountry: "MX", destinationCountry: "JP" }), 404, "PRESENTATION_NOT_FOUND");
   assert.equal(creations, 0);
-  assert.equal((await service.createShipment(admin, runId, { originCountry: " mx ", destinationCountry: "jp" })).id, row.id);
+  assert.equal((await service.createShipment(user, runId, { originCountry: " mx ", destinationCountry: "jp" })).id, row.id);
   assert.equal(creations, 1);
 });
 

@@ -124,7 +124,7 @@ test("guide lookup distinguishes invalid, absent and unauthorized shipments", as
   await assertAppError(createShipmentService(repository({ getShipment: async () => { throw new Error("database down"); } })).getShipment(ownerActor, shipment.guide), 503, "SERVICE_UNAVAILABLE");
 });
 
-test("ADMIN registers a shipment for an existing owner; USER cannot register", async () => {
+test("USER registers only for self; ADMIN may register for an existing owner", async () => {
   let profileQueries = 0;
   let creations = 0;
   const service = createShipmentService(repository({
@@ -135,16 +135,18 @@ test("ADMIN registers a shipment for an existing owner; USER cannot register", a
       return shipment;
     },
   }));
-  await assertAppError(service.createShipment(ownerActor, input), 403, "FORBIDDEN");
+  await assertAppError(service.createShipment(ownerActor, { ...input, ownerId: otherId }), 403, "FORBIDDEN");
   assert.equal(profileQueries, 0);
   await assertAppError(service.createShipment(adminActor, { ...input, recipient: "" }), 400, "VALIDATION_ERROR");
   assert.equal(profileQueries, 0);
   await assertAppError(service.createShipment(adminActor, { ...input, ownerId: otherId }), 400, "OWNER_NOT_FOUND");
   assert.equal(creations, 0);
+  const own = await service.createShipment(ownerActor, input);
+  assert.equal(own.ownerId, ownerId);
   const created = await service.createShipment(adminActor, input);
   assert.equal(created.guide, shipment.guide);
   assert.equal(created.ownerId, ownerId);
-  assert.equal(creations, 1);
+  assert.equal(creations, 2);
 });
 
 test("registration preserves guide conflicts and reports storage outages", async () => {

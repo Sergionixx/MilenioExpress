@@ -10,6 +10,7 @@
 }
 .presentation-control .presentation-panel h2 { margin: 0; font: 800 18px 'Manrope', sans-serif; }
 .presentation-control .presentation-panel p { margin: 0; color: #60718c; font-size: 13px; line-height: 1.5; }
+.presentation-control .presentation-form { display: grid; gap: 15px; }
 .presentation-control .presentation-panel-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .presentation-count { padding: 5px 9px; border-radius: 99px; background: #e9f2ff; color: #0759c8; font-size: 11px; font-weight: 800; white-space: nowrap; }
 .presentation-control .presentation-panel label { display: grid; gap: 7px; color: #32435d; font-size: 12px; font-weight: 700; }
@@ -43,6 +44,8 @@
 .presentation-journeys { display: grid; align-content: start; gap: 10px; flex: 1; min-height: 0; overflow-y: auto; padding-right: 7px; }
 .presentation-journey { border: 1px solid #ffffff24; border-radius: 18px; padding: 11px 27px 29px; background: #ffffff0e; }
 .presentation-journey-heading { display: flex; align-items: center; gap: 15px; }
+.presentation-journey-title { display: grid; flex: 1; gap: 3px; }
+.presentation-journey-title small { color: #79bdff; font-size: 10px; font-weight: 800; letter-spacing: .7px; }
 .presentation-journey-number { color: #79bdff; font: 800 15px 'Manrope', sans-serif; }
 .presentation-journey-heading strong { flex: 1; font: 700 clamp(16px, 1.6vw, 24px) 'Manrope', sans-serif; }
 .presentation-journey-heading strong span { color: #79bdff; }

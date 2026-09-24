@@ -1,49 +1,22 @@
-# 🚨 LA RAMA MAIN NO SE TOCA 🚨
+# Milenio Express
 
-## 📌 Reglas del Flujo de Trabajo (Git Workflow)
+`main` se reserva para cambios revisados por Sergionix mediante Pull Request. Cada colaborador trabaja en su rama; esta versión se desarrolla en `feature/presentacion-interactiva`.
 
-El equipo reserva `main` para cambios revisados por Sergionix mediante Pull Request. **No se deben hacer commits ni pushes directos a `main`.** Si GitHub no muestra una regla de protección activa para `main`, esta norma depende del flujo de trabajo del equipo.
+## Ejecutar
 
-### 🌳 Estructura de Ramas (Instrucciones para Desarrolladores e IAs)
+Instala las versiones de Node y pnpm de `.mise.toml`, ejecuta `pnpm install` y después `pnpm dev`. Antes de entregar cambios, ejecuta `pnpm test:coverage`, `pnpm exec tsc --noEmit` y `pnpm build`.
 
-El flujo de trabajo se divide en 3 niveles de ramas:
+La aplicación pide **sólo un nombre** para entrar. Supabase crea una identidad anónima diferente en cada navegador, sin correo ni contraseña. La sesión se conserva en ese navegador; si se borran sus datos o se cambia de participante, se pierde el acceso a sus paquetes anteriores. El nombre o apodo puede mostrarse públicamente en el proyector. Las claves `VITE_` son públicas; nunca pongas una clave de servicio en el cliente.
 
-1. **`main` (Integración)**: Es la rama principal. Sergionix revisa y aprueba cada Pull Request (PR) antes de integrarlo.
-2. **Ramas Principales por Colaborador** (`dev-[nombre-colaborador]`): Cada integrante del equipo debe crear y mantener una rama principal a su nombre (ej. `dev-juan`). Esta rama actúa como su entorno de integración personal.
-3. **Ramas por Actividad/Tarea** (`feature/[nombre-tarea]`, `fix/[nombre-fix]`): Ramas efímeras para trabajar en tareas específicas. 
+## Presentación en vivo
 
-#### Diagrama de Ramas
-```text
-main (integración después de revisión de Sergionix)
-│
-├── dev-colaborador1 (Rama principal de integración del colaborador 1)
-│   ├── feature/crear-login (Se hace push y merge hacia dev-colaborador1)
-│   └── fix/error-botones (Se hace push y merge hacia dev-colaborador1)
-│
-├── dev-colaborador2 (Rama principal de integración del colaborador 2)
-│   ├── feature/conexion-db
-│   └── feature/diseno-home
-```
+1. Un organizador entra con su nombre, abre `/presentacion/control` e inicia una presentación.
+2. Abre el enlace `/presentacion/pantalla/:runId` en la computadora conectada al proyector.
+3. Comparte el enlace `/presentacion/participar/:runId` con los espectadores. Cada uno entra desde su celular, escribe su nombre la primera vez y elige los países de origen y destino.
+4. Cada envío simulado crea una línea horizontal que avanza por Salida, Clasificación, Tránsito, Aduana y Destino. La pantalla muestra nombre y código breve del participante para distinguir celulares que usen el mismo nombre.
 
-## Iniciar el módulo académico
+El proyector lee las rutas ficticias en tiempo real y vuelve a consultar si se interrumpe la conexión. Estas rutas no son paquetes académicos: no tienen guía ni dirección. Para una nueva demostración, inicia otra presentación. `/presentacion/pantalla/vista-previa` muestra una prueba local durante desarrollo.
 
-1. Instalar las versiones de Node y pnpm indicadas en `.mise.toml` y ejecutar `pnpm install`.
-2. Ejecutar `pnpm dev` para abrir el cliente web en la dirección que indique Vite.
-3. Ejecutar `pnpm test`, `pnpm exec tsc --noEmit` y `pnpm build` antes de entregar cambios.
+`pnpm test:live-auth` verifica que la función publicada rechaza solicitudes sin identidad. `pnpm test:live-presentation` comprueba la lectura pública. `pnpm test:live-guests` crea dos identidades anónimas, dos rutas y un paquete ficticio para comprobar separación de datos; úsalo sólo cuando quieras escribir esos datos de prueba en el proyecto Supabase configurado.
 
-La interfaz utiliza Supabase Auth y la función `make-server-845b49a4`. La migración está en `supabase/migrations/` y el servidor en `supabase/functions/server/`. La configuración, el contrato de API y las instrucciones de despliegue están en [supabase/README.md](supabase/README.md). Las variables `VITE_` sólo admiten la URL y la clave pública del proyecto; nunca deben contener la clave de servicio.
-
-`pnpm test:live-auth` comprueba que la función desplegada responde y rechaza peticiones sin sesión o con un token inválido. `pnpm test:live-roles` comprueba los permisos ADMIN/USER con dos cuentas ficticias ya existentes; requiere `MILENIO_ADMIN_EMAIL`, `MILENIO_ADMIN_PASSWORD`, `MILENIO_USER_EMAIL`, `MILENIO_USER_PASSWORD`, `MILENIO_CLIENT_GUIDE` y `MILENIO_OPERATOR_GUIDE` en el entorno. Ninguno de los dos comandos crea usuarios ni paquetes. La evidencia de integración y revisión móvil está en [docs/SERGIO_VERIFICACION.md](docs/SERGIO_VERIFICACION.md).
-
-## Presentación interactiva (rama `feature/presentacion-interactiva`)
-
-El código de esta rama prepara una demostración con **dos interfaces simultáneas**, separada de los paquetes académicos normales:
-
-1. **Celular del atendiente:** una cuenta `ADMIN` entra a `/presentacion/control`, inicia una presentación y comparte su enlace. Después elige origen y destino de una lista de países y confirma cada envío ficticio. La ruta de control incluye el identificador de la presentación, por lo que se puede volver a abrir después de recargar.
-2. **Proyector:** el enlace `/presentacion/pantalla/:runId` muestra una línea horizontal nueva por envío, con país de origen, destino y los puntos Salida, Clasificación, Tránsito, Aduana y Destino. Las líneas avanzan durante 90 segundos según su fecha de creación y permanecen en la pantalla; cuando hay muchas, la lista se desplaza hacia las más recientes.
-
-La pantalla consulta los envíos existentes al abrirse, recibe inserciones mediante [Supabase Realtime](https://supabase.com/docs/guides/realtime/postgres-changes) y vuelve a consultar periódicamente por si se interrumpe la conexión. El mismo identificador de envío elimina duplicados entre ambas vías. Los datos de esta dinámica son únicamente códigos de países y fechas ficticias; no incluyen nombres ni direcciones. Para empezar otra función se crea una presentación nueva, sin mezclar las rutas anteriores. Una vista de ejemplo local está disponible en `/presentacion/pantalla/vista-previa` cuando se ejecuta Vite en desarrollo; no escribe datos ni aparece en producción.
-
-La migración nueva crea `presentation_runs` y `presentation_shipments`, y la función Edge añade rutas propias. La tabla `shipments`, las guías `ME-...`, el registro y la consulta académicos no se modifican. El detalle del contrato y del despliegue está en [supabase/README.md](supabase/README.md).
-
-**Estado:** las pantallas, el servicio, la migración y las pruebas están implementados en esta rama. La migración y la función Edge ya se aplicaron al proyecto Supabase compartido; la pantalla pública se probó en un despliegue temporal de Vercel. Para conservar una URL estable hay que reclamar ese despliegue en una cuenta de hosting o volver a publicar la rama desde esa cuenta. Después falta probar el formulario con una sesión `ADMIN` desde un celular y el proyector abierto en otro dispositivo. Los pasos y la evidencia están en [docs/PRESENTACION_EN_LINEA.md](docs/PRESENTACION_EN_LINEA.md). Los países, puntos de control y duración se pueden ajustar en `src/presentation/model.ts` sin cambiar el módulo académico.
+La configuración y el contrato del servidor están en [supabase/README.md](supabase/README.md). La publicación del cliente está explicada en [docs/PRESENTACION_EN_LINEA.md](docs/PRESENTACION_EN_LINEA.md). [docs/SERGIO_VERIFICACION.md](docs/SERGIO_VERIFICACION.md) contiene evidencia histórica del módulo académico anterior al cambio de acceso.

@@ -12,7 +12,7 @@ import type { PresentationInput, PresentationRepository, PresentationRunRow, Pre
 const base = "/make-server-845b49a4";
 const shipmentColumns = "id,guide,owner_id,recipient,address,city,description,status,created_at";
 const profileColumns = "id,email,display_name,role";
-const presentationColumns = "id,run_id,origin_country,destination_country,created_at";
+const presentationColumns = "id,run_id,origin_country,destination_country,participant_id,participant_name,created_at";
 const presentationRunColumns = "id,created_at";
 
 let database: ReturnType<typeof createClient> | undefined;
@@ -128,11 +128,13 @@ function createPresentationRepository(): PresentationRepository {
         if (page.length < pageSize) return rows;
       }
     },
-    async createShipment(runId, input: PresentationInput) {
+    async createShipment(runId, input: PresentationInput, participant) {
       const { data, error } = await db.from("presentation_shipments").insert({
         run_id: runId,
         origin_country: input.originCountry,
         destination_country: input.destinationCountry,
+        participant_id: participant.id,
+        participant_name: participant.name,
       }).select(presentationColumns).single();
       if (error?.code === "23503") {
         throw new AppError(404, "PRESENTATION_NOT_FOUND", "No se encontró esa presentación.");

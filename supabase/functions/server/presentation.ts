@@ -11,6 +11,8 @@ export interface PresentationShipmentRow {
   run_id: string;
   origin_country: string;
   destination_country: string;
+  participant_id: string | null;
+  participant_name: string | null;
   created_at: string;
 }
 
@@ -23,7 +25,7 @@ export interface PresentationRepository {
   createRun(): Promise<PresentationRunRow>;
   getRun(runId: string): Promise<PresentationRunRow | null>;
   listShipments(runId: string): Promise<PresentationShipmentRow[]>;
-  createShipment(runId: string, input: PresentationInput): Promise<PresentationShipmentRow>;
+  createShipment(runId: string, input: PresentationInput, participant: { id: string; name: string }): Promise<PresentationShipmentRow>;
 }
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -62,6 +64,8 @@ export function toPresentationShipment(row: PresentationShipmentRow) {
     runId: row.run_id,
     originCountry: row.origin_country,
     destinationCountry: row.destination_country,
+    participantId: row.participant_id,
+    participantName: row.participant_name,
     createdAt: row.created_at,
   };
 }
@@ -77,10 +81,7 @@ async function fromRepository<T>(operation: () => Promise<T>): Promise<T> {
 
 export function createPresentationService(repo: PresentationRepository) {
   return {
-    async createRun(actor: Actor) {
-      if (actor.role !== "ADMIN") {
-        throw new AppError(403, "FORBIDDEN", "Sólo un operador puede iniciar la presentación.");
-      }
+    async createRun(_actor: Actor) {
       const row = await fromRepository(() => repo.createRun());
       return { id: row.id, createdAt: row.created_at };
     },
@@ -96,16 +97,14 @@ export function createPresentationService(repo: PresentationRepository) {
     },
 
     async createShipment(actor: Actor, runId: string, value: unknown) {
-      if (actor.role !== "ADMIN") {
-        throw new AppError(403, "FORBIDDEN", "Sólo un operador puede añadir envíos.");
-      }
       const validId = validateRunId(runId);
       const input = validatePresentationInput(value);
       const run = await fromRepository(() => repo.getRun(validId));
       if (!run) {
         throw new AppError(404, "PRESENTATION_NOT_FOUND", "No se encontró esa presentación.");
       }
-      return toPresentationShipment(await fromRepository(() => repo.createShipment(validId, input)));
+      const name = actor.name.replace(/\s+/g, " ").trim().slice(0, 40) || "Participante";
+      return toPresentationShipment(await fromRepository(() => repo.createShipment(validId, input, { id: actor.id, name })));
     },
   };
 }

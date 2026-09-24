@@ -6,6 +6,7 @@ import {
   checkpoints,
   countryName,
   mergePresentationShipments,
+  participantCode,
   progressAt,
   type PresentationShipment,
 } from "./model"
@@ -16,6 +17,8 @@ type NewRow = {
   run_id: string
   origin_country: string
   destination_country: string
+  participant_id: string | null
+  participant_name: string | null
   created_at: string
 }
 
@@ -85,6 +88,8 @@ export default function PresentationScreen() {
           runId: row.run_id,
           originCountry: row.origin_country,
           destinationCountry: row.destination_country,
+          participantId: row.participant_id,
+          participantName: row.participant_name,
           createdAt: row.created_at,
         }]))
       })
@@ -126,7 +131,7 @@ export default function PresentationScreen() {
           <div className="presentation-empty">
             <span aria-hidden="true">✦</span>
             <h2>La primera ruta está por comenzar</h2>
-            <p>Elige origen y destino en el celular del atendiente.</p>
+            <p>Los participantes pueden elegir origen y destino desde sus celulares.</p>
           </div>
         )}
         <div className="presentation-journeys" aria-label="Envíos de la presentación" ref={journeysRef}>
@@ -137,7 +142,12 @@ export default function PresentationScreen() {
               <article className="presentation-journey" key={shipment.id}>
                 <div className="presentation-journey-heading">
                   <span className="presentation-journey-number">#{String(index + 1).padStart(2, "0")}</span>
-                  <strong>{countryName(shipment.originCountry)} <span aria-hidden="true">→</span> {countryName(shipment.destinationCountry)}</strong>
+                  <div className="presentation-journey-title">
+                    {shipment.participantId && shipment.participantName && (
+                      <small>{shipment.participantName} · {participantCode(shipment.participantId)}</small>
+                    )}
+                    <strong>{countryName(shipment.originCountry)} <span aria-hidden="true">→</span> {countryName(shipment.destinationCountry)}</strong>
+                  </div>
                   <span className="presentation-journey-state">{checkpointAt(progress)}</span>
                 </div>
                 <div className="presentation-rail" aria-label={`${percent} del trayecto completado`}>

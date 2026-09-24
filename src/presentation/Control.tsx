@@ -4,9 +4,7 @@ import { apiFetch } from "../lib/supabase"
 import { countries, countryName, type PresentationShipment } from "./model"
 import "./presentation.css"
 
-type Props = { isAdmin: boolean }
-
-export default function PresentationControl({ isAdmin }: Props) {
+export default function PresentationControl() {
   const { runId } = useParams()
   const navigate = useNavigate()
   const [originCountry, setOriginCountry] = useState("MX")
@@ -17,9 +15,10 @@ export default function PresentationControl({ isAdmin }: Props) {
   const [error, setError] = useState("")
   const [feedback, setFeedback] = useState("")
   const screenUrl = runId ? `${window.location.origin}/presentacion/pantalla/${runId}` : ""
+  const participantUrl = runId ? `${window.location.origin}/presentacion/participar/${runId}` : ""
 
   useEffect(() => {
-    if (!runId || !isAdmin) return
+    if (!runId) return
     let active = true
     setLoading(true)
     setError("")
@@ -28,16 +27,7 @@ export default function PresentationControl({ isAdmin }: Props) {
       .catch((cause) => { if (active) setError(cause instanceof Error ? cause.message : "No se pudo cargar la presentación.") })
       .finally(() => { if (active) setLoading(false) })
     return () => { active = false }
-  }, [runId, isAdmin])
-
-  if (!isAdmin) {
-    return (
-      <main className="screen presentation-control">
-        <h1>Presentación</h1>
-        <p className="form-error" role="alert">Sólo una cuenta operadora puede controlar la presentación.</p>
-      </main>
-    )
-  }
+  }, [runId])
 
   async function createRun() {
     setSaving(true)
@@ -76,10 +66,10 @@ export default function PresentationControl({ isAdmin }: Props) {
     }
   }
 
-  async function copyScreenUrl() {
+  async function copyUrl(url: string, label: string) {
     try {
-      await navigator.clipboard.writeText(screenUrl)
-      setFeedback("Enlace del proyector copiado.")
+      await navigator.clipboard.writeText(url)
+      setFeedback(`Enlace para ${label} copiado.`)
     } catch {
       setFeedback("Selecciona y copia el enlace del campo.")
     }
@@ -111,14 +101,27 @@ export default function PresentationControl({ isAdmin }: Props) {
               <input readOnly value={screenUrl} onFocus={(event) => event.currentTarget.select()} />
             </label>
             <div className="presentation-actions">
-              <button className="secondary-button" type="button" onClick={() => void copyScreenUrl()}>Copiar enlace</button>
+              <button className="secondary-button" type="button" onClick={() => void copyUrl(screenUrl, "el proyector")}>Copiar enlace</button>
               <a className="secondary-button" href={screenUrl} target="_blank" rel="noreferrer">Abrir pantalla</a>
+            </div>
+          </section>
+
+          <section className="presentation-panel">
+            <h2>Enlace para los celulares</h2>
+            <p>Compártelo con los participantes. Cada persona escribe su nombre y elige sus países desde su propio celular.</p>
+            <label className="presentation-url-label">
+              Enlace para participar
+              <input readOnly value={participantUrl} onFocus={(event) => event.currentTarget.select()} />
+            </label>
+            <div className="presentation-actions">
+              <button className="secondary-button" type="button" onClick={() => void copyUrl(participantUrl, "los participantes")}>Copiar enlace</button>
+              <a className="secondary-button" href={participantUrl} target="_blank" rel="noreferrer">Probar en este dispositivo</a>
             </div>
           </section>
 
           <form className="presentation-panel presentation-form" onSubmit={(event) => void submit(event)}>
             <h2>Nuevo envío simulado</h2>
-            <p>Pregunta al participante desde qué país sale el paquete y a cuál llegará.</p>
+            <p>También puedes añadir una ruta desde este dispositivo. Aparecerá con tu nombre y código.</p>
             <label>
               País de origen
               <select value={originCountry} onChange={(event) => setOriginCountry(event.target.value)}>
