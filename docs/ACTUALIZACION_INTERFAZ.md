@@ -10,7 +10,7 @@ Actualización de producto solicitada después de la entrega académica, en la r
 | Tipografía del sistema, colores sobrios, botones y formularios consistentes | Mejorar la lectura sin depender de una descarga de fuentes externas | Toda la aplicación |
 | Resumen de paquetes y ciudades | Mostrar información calculada con los paquetes disponibles para la cuenta, sin cifras de demostración | Inicio |
 | Botón **Crear cuenta** y formulario | Registrar nombre, correo, contraseña y confirmación | Acceso → Crear cuenta (`/crear-cuenta`) |
-| Validación y mensajes de registro | Explicar contraseñas diferentes, errores, límites de intentos y confirmación por correo | Formulario de cuenta |
+| Validación y mensajes de registro | Explicar contraseñas diferentes, errores y límites de intentos | Formulario de cuenta |
 
 Se mantienen login, roles ADMIN/USER, consulta y registro de paquetes, generación y copia de guías, detalle, perfil y cierre de sesión. El servidor conserva sus controles de acceso. No se fusionó la presentación de otra rama ni se modificó `main`.
 
@@ -19,18 +19,18 @@ Se mantienen login, roles ADMIN/USER, consulta y registro de paquetes, generaci�
 1. Ejecutar `pnpm install --frozen-lockfile` y `pnpm dev` desde el proyecto, con Node 24 y pnpm 10.34.3.
 2. Abrir `http://localhost:8443` y pulsar **Crear cuenta**.
 3. Introducir nombre, correo y una contraseña de al menos ocho caracteres; repetir la contraseña.
-4. Si Supabase exige confirmar el correo, abrir el enlace recibido y volver al inicio de sesión. Si la confirmación está desactivada en un entorno de pruebas, la cuenta entra directamente.
+4. La cuenta entra directamente después del registro; no requiere abrir un enlace recibido por correo.
 5. La cuenta nueva tiene rol **USER** y puede consultar sus propios paquetes. El listado está vacío hasta que un administrador le registre un paquete.
 
 El nombre viaja como `full_name`; no se envía un rol. La migración existente crea el perfil con rol USER. No se utilizan claves privadas del servidor en el navegador.
 
-## Configuración del servicio de correo
+## Configuración del acceso
 
-El 24/09/2026 se consultó la configuración pública del Supabase compartido: registro habilitado y confirmación por correo activada. Esa lectura no acredita que el proveedor entregue correos a cualquier destinatario.
+El 24/09/2026 se desactivó **Confirm email** en el proyecto Supabase compartido. El proveedor **Email** y el registro de usuarios permanecen habilitados. La configuración local equivalente está en `supabase/config.toml`.
 
-Para registro público en ese servicio, su administrador debe tener configurado el envío de correo (SMTP y límites del proveedor) y autorizar la URL del sitio en **Authentication → URL Configuration**. El cliente solicita volver al origen donde se abrió la app; para desarrollo, permitir `http://localhost:8443/` o `http://127.0.0.1:8443/`, según se utilice. No se modificó la configuración remota ni se enviaron correos a personas durante esta actualización.
+Para registrar una cuenta nueva no se necesita configurar SMTP ni una URL de redirección de confirmación. El inicio de sesión sigue usando correo y contraseña. Las cuentas nuevas reciben el rol USER.
 
-El comportamiento de confirmación y las respuestas que evitan revelar si un correo ya existe siguen el contrato de [Supabase Auth signUp](https://supabase.com/docs/reference/javascript/auth-signup). La pantalla no afirma que se creó una cuenta o se envió un correo cuando el servicio solo devuelve una respuesta sin sesión.
+Si Supabase devuelve un registro sin sesión, la aplicación muestra un error y permite volver a intentarlo o iniciar sesión; no indica que haya enviado un correo.
 
 ## Cómo comprobar esta actualización
 
@@ -38,7 +38,7 @@ El comportamiento de confirmación y las respuestas que evitan revelar si un cor
 - **Construcción:** `pnpm typecheck` y `pnpm build`.
 - **Recorrido real en navegador:** el workflow existente ejecuta los escenarios anteriores y dos nuevos: registro público desde la interfaz y comprobación de perfil USER, reingreso y rechazo de acceso administrativo. La prueba consulta Auth y PostgreSQL para comprobar que realmente se creó el usuario y su perfil. Usa Supabase aislado y elimina las cuentas ficticias al terminar.
 - **Resultados:** abrir [GitHub Actions de dev-maxi](https://github.com/Sergionixx/MilenioExpress/actions?query=branch%3Adev-maxi), elegir la ejecución del commit y consultar el job `integracion` y el artefacto `integracion-supabase-local`. El reporte es `reportes/integracion/ui-resultados.json`; las capturas están en `evidencias/ci-ui/` dentro del artefacto. Son 11 escenarios previstos: 10 recorridos de aplicación y una captura del tablero de calidad, en anchos de 320, 375, 430 y 1440 px.
-- **Revisión visual local adicional:** las pantallas se revisan con datos ficticios y respuestas simuladas para estados como correo pendiente o registro deshabilitado. Esa revisión no se presenta como prueba de entrega de correos ni como integración real con el servidor.
+- **Revisión visual local adicional:** las pantallas se revisan con datos ficticios y respuestas simuladas para estados de error o registro deshabilitado. Esa revisión no sustituye una integración real con el servidor.
 
 Los artefactos de Actions se conservan durante 30 días. El informe académico y sus reportes originales mantienen su corte anterior; se conservan como evidencia histórica y no se reemplazan por resultados de esta actualización.
 

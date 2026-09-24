@@ -368,7 +368,6 @@ function Auth({ registration = false }: Readonly<{ registration?: boolean }>) {
   const [password, setPassword] = useState("")
   const [name, setName] = useState("")
   const [confirmation, setConfirmation] = useState("")
-  const [submitted, setSubmitted] = useState(false)
   const [pending, setPending] = useState(false)
   const [error, setError] = useState("")
   if (checking) return <Loading label="Comprobando acceso…" />
@@ -397,19 +396,18 @@ function Auth({ registration = false }: Readonly<{ registration?: boolean }>) {
           password,
           options: {
             data: { full_name: name.trim() },
-            emailRedirectTo: `${window.location.origin}/`,
           },
         })
         if (signupError) {
           setError(registrationErrorMessage(signupError))
           return
         }
-        setPassword("")
-        setConfirmation("")
         if (!data.session) {
-          setSubmitted(true)
+          setError("No se pudo iniciar la sesión con la nueva cuenta. Intenta iniciar sesión.")
           return
         }
+        setPassword("")
+        setConfirmation("")
       } else {
         const { error: signInError } = await supabase.auth.signInWithPassword({
           email: email.trim(),
@@ -475,38 +473,14 @@ function Auth({ registration = false }: Readonly<{ registration?: boolean }>) {
         </span>
       </section>
       <section className="auth-card">
-        {submitted ? (
-          <div className="signup-confirmation" role="status">
-            <div className="success-icon">
-              <Icon name="check" />
-            </div>
-            <div className="eyebrow">SIGUIENTE PASO</div>
-            <h1>Revisa tu correo</h1>
-            <p>
-              Si el registro puede completarse con{" "}
-              <strong>{email.trim()}</strong>, recibirás un enlace para
-              confirmar tu cuenta. Revisa también la carpeta de correo no
-              deseado.
-            </p>
-            <p>
-              Si ya tienes una cuenta, puedes iniciar sesión con tu contraseña.
-            </p>
-            <Link className="primary-button" to="/">
-              Volver al inicio de sesión <Icon name="arrow" />
-            </Link>
-          </div>
-        ) : (
-          <>
-            <div className="eyebrow">{copy.eyebrow}</div>
-            <h1>{copy.title}</h1>
-            <p>{copy.intro}</p>
-            <AccessForm registration={registration} pending={pending} error={error}
-              fields={{ name, email, password, confirmation }} onSubmit={submit}
-              onChange={(field, value) => ({ name: setName, email: setEmail, password: setPassword, confirmation: setConfirmation }[field])(value)} />
-            <div className="auth-switch"><span>{copy.switchPrompt}</span><Link to={copy.switchPath}>{copy.switchLabel}</Link></div>
-            <p className="auth-help">{copy.help}</p>
-          </>
-        )}
+        <div className="eyebrow">{copy.eyebrow}</div>
+        <h1>{copy.title}</h1>
+        <p>{copy.intro}</p>
+        <AccessForm registration={registration} pending={pending} error={error}
+          fields={{ name, email, password, confirmation }} onSubmit={submit}
+          onChange={(field, value) => ({ name: setName, email: setEmail, password: setPassword, confirmation: setConfirmation }[field])(value)} />
+        <div className="auth-switch"><span>{copy.switchPrompt}</span><Link to={copy.switchPath}>{copy.switchLabel}</Link></div>
+        <p className="auth-help">{copy.help}</p>
       </section>
     </main>
   )
