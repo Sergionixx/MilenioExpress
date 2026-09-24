@@ -52,7 +52,7 @@ jobs:
         with:
           version: latest
       - name: Crear base y Auth aislados con las migraciones de esta rama
-        run: supabase start -x studio,imgproxy,logflare,vector,supavisor
+        run: supabase start -x studio,imgproxy,logflare,vector,supavisor > "$RUNNER_TEMP/supabase-start.log"
       - name: Probar JWT real, roles, persistencia, RLS y guías únicas
         run: node scripts/run-local-integration.mjs
       - uses: actions/upload-artifact@v4
