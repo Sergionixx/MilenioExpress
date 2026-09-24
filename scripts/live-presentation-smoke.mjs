@@ -50,28 +50,4 @@ if (process.env.MILENIO_PRESENTATION_RUN_ID) {
   console.log(`OK lectura pública de presentación real: ${list.body.length} envíos`)
 }
 
-if (process.env.MILENIO_ADMIN_EMAIL && process.env.MILENIO_ADMIN_PASSWORD) {
-  const login = await fetch(`${projectUrl}/auth/v1/token?grant_type=password`, {
-    method: "POST",
-    headers: { apikey: publicKey, "Content-Type": "application/json" },
-    body: JSON.stringify({ email: process.env.MILENIO_ADMIN_EMAIL, password: process.env.MILENIO_ADMIN_PASSWORD }),
-    signal: AbortSignal.timeout(10_000),
-  })
-  assert.equal(login.status, 200, `Inicio de sesión operador: HTTP ${login.status}`)
-  const { access_token: token } = await login.json()
-  assert.ok(token)
-  const created = await request("/presentation/runs", { token, method: "POST" })
-  assert.equal(created.status, 201)
-  const runId = created.body.id
-  assert.match(runId, /^[0-9a-f-]{36}$/i)
-  const shipment = await request(`/presentation/runs/${runId}/shipments`, {
-    token, method: "POST", body: { originCountry: "MX", destinationCountry: "JP" },
-  })
-  assert.equal(shipment.status, 201)
-  const publicList = await request(`/presentation/runs/${runId}/shipments`)
-  assert.equal(publicList.status, 200)
-  assert.ok(publicList.body.some((item) => item.id === shipment.body.id))
-  console.log(`OK creación ADMIN y lectura pública: ${runId}`)
-} else {
-  console.log("Creación ADMIN pendiente: define MILENIO_ADMIN_EMAIL y MILENIO_ADMIN_PASSWORD para probarla.")
-}
+console.log("La creación de rutas desde dos celulares se comprueba con pnpm test:live-guests.")
