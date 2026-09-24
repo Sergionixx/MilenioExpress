@@ -1,0 +1,15 @@
+{
+  "target": "http://127.0.0.1:4173/",
+  "status": 200,
+  "headers": {
+    "cache-control": "no-cache",
+    "connection": "keep-alive",
+    "content-type": "text/html",
+    "date": "Thu, 24 Sep 2026 07:11:18 GMT",
+    "etag": "W/\"303-Rq/tDHblGlSouz+tQMlyZ13zEXQ\"",
+    "keep-alive": "timeout=5",
+    "transfer-encoding": "chunked",
+    "vary": "Origin"
+  },
+  "bodySha256": "074d1e202a180b49b24d1bb543efe98c1a2f00a9f317efec758b639c249e96f1"
+}

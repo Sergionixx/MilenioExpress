@@ -1,0 +1,81 @@
+{
+  "env": {
+    "contexts": [
+      {
+        "name": "milenio-local",
+        "urls": [
+          "http://127.0.0.1:4173"
+        ],
+        "includePaths": [
+          "http://127\\.0\\.0\\.1:4173/.*"
+        ]
+      }
+    ],
+    "parameters": {
+      "failOnError": true,
+      "failOnWarning": false,
+      "continueOnFailure": false,
+      "progressToStdout": true
+    }
+  },
+  "jobs": [
+    {
+      "type": "passiveScan-config",
+      "parameters": {
+        "scanOnlyInScope": true
+      }
+    },
+    {
+      "type": "spider",
+      "parameters": {
+        "context": "milenio-local",
+        "url": "http://127.0.0.1:4173/",
+        "maxDuration": 1,
+        "maxDepth": 3,
+        "maxChildren": 20
+      },
+      "tests": [
+        {
+          "name": "Al menos la página inicial fue visitada",
+          "type": "stats",
+          "statistic": "automation.spider.urls.added",
+          "operator": ">=",
+          "value": 1,
+          "onFail": "error"
+        }
+      ]
+    },
+    {
+      "type": "passiveScan-wait",
+      "parameters": {
+        "maxDuration": 2
+      }
+    },
+    {
+      "type": "report",
+      "parameters": {
+        "template": "traditional-html",
+        "reportDir": "/Users/maximo/Documents/ChatGPT/Milenio-Express/MilenioExpress/reportes/seguridad-zap/baseline",
+        "reportFile": "zap-baseline",
+        "reportTitle": "Milenio Express — ZAP baseline",
+        "reportDescription": "Inspección pasiva del frontend local. Sin autenticación JWT, escaneo activo ni acceso al backend remoto."
+      },
+      "sites": [
+        "http://127.0.0.1:4173"
+      ]
+    },
+    {
+      "type": "report",
+      "parameters": {
+        "template": "traditional-json",
+        "reportDir": "/Users/maximo/Documents/ChatGPT/Milenio-Express/MilenioExpress/reportes/seguridad-zap/baseline",
+        "reportFile": "zap-baseline",
+        "reportTitle": "Milenio Express — ZAP baseline",
+        "reportDescription": "Inspección pasiva del frontend local. Sin autenticación JWT, escaneo activo ni acceso al backend remoto."
+      },
+      "sites": [
+        "http://127.0.0.1:4173"
+      ]
+    }
+  ]
+}

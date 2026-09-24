@@ -19,3 +19,9 @@ logs/
 # beside it.
 /.plugins/
 /.opencode-skills/
+
+# Public examples and generated delivery files
+!.env.example
+coverage/
+output/
+reportes/sonar/.work/

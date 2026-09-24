@@ -58,3 +58,27 @@ test("preserves safe HTTP errors and provides a fallback for malformed error bod
     return true;
   });
 });
+
+test("non-object and malformed error fields retain HTTP status without crashing", async () => {
+  for (const body of [null, "failure", [], { error: { secret: true }, code: 503 }, { error: "", code: "" }]) {
+    const transport: typeof fetch = async () => Response.json(body, { status: 503 });
+    await assert.rejects(requestJson("https://example.test/shipments", "token", {}, transport), (error: unknown) => {
+      assert.ok(error instanceof ApiError);
+      assert.equal(error.status, 503);
+      assert.equal(error.code, "REQUEST_FAILED");
+      assert.equal(error.message, "No se pudo completar la solicitud.");
+      return true;
+    });
+  }
+});
+
+test("a malformed success response is reported as an actionable API error", async () => {
+  const transport: typeof fetch = async () => new Response("<html>proxy error</html>");
+  await assert.rejects(requestJson("https://example.test/shipments", "token", {}, transport), (error: unknown) => {
+    assert.ok(error instanceof ApiError);
+    assert.equal(error.code, "INVALID_RESPONSE");
+    assert.match(error.message, /respuesta no válida/);
+    assert.doesNotMatch(error.message, /proxy error/);
+    return true;
+  });
+});

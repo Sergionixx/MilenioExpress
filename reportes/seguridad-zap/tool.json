@@ -1,0 +1,18 @@
+{
+  "tool": "ZAP",
+  "version": "2.17.0",
+  "source": "https://github.com/zaproxy/zaproxy/releases/download/v2.17.0/ZAP_2.17.0_Linux.tar.gz",
+  "checksumSource": "https://raw.githubusercontent.com/zaproxy/zap-admin/master/ZapVersions-2.17.xml",
+  "sha256Verified": "efe799aaa3627db683b43f00c9c210aea0b75c00cc8f0a0f0434d12bb3ddde5a",
+  "runtime": "Java 23.0.2 on macOS",
+  "addons": {
+    "automation": "0.58.0",
+    "spider": "0.18.0",
+    "network": "0.25.0",
+    "passiveScanner": "0.6.0",
+    "passiveRules": "70",
+    "reports": "0.43.0"
+  },
+  "scope": "Only frontend loopback HTTP. No active scan, remote backend or JWT credentials.",
+  "updateWarning": "The fixed official release package reports no update check for over 3 months. No add-on updates were applied between scans, so both use the same rule versions."
+}

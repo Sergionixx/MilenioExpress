@@ -1,0 +1,126 @@
+name: Calidad y despliegue de pruebas
+on:
+  push:
+    branches: [main, dev-maxi]
+  pull_request:
+    branches: [main, dev-maxi]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: entrega-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  pruebas:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.34.3
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test:coverage
+      - run: pnpm typecheck
+      - run: pnpm quality
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pruebas-y-calidad
+          path: |
+            reportes/pruebas-unitarias/
+            reportes/sonar/
+          retention-days: 30
+  integracion:
+    needs: pruebas
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.34.3
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - name: Crear base y Auth aislados con las migraciones de esta rama
+        run: supabase start -x studio,imgproxy,logflare,vector,supavisor
+      - name: Probar JWT real, roles, persistencia, RLS y guías únicas
+        run: node scripts/run-local-integration.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: integracion-supabase-local
+          path: reportes/integracion/
+          retention-days: 30
+      - name: Detener Supabase aislado
+        if: always()
+        run: supabase stop --no-backup
+  construccion:
+    needs: pruebas
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.34.3
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: aplicacion
+          path: dist/
+          retention-days: 30
+  despliegue-pruebas:
+    needs: [construccion, integracion]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: actions/download-artifact@v4
+        with:
+          name: aplicacion
+          path: dist
+      - name: Desplegar artefacto probado en contenedor aislado
+        run: |
+          docker build --tag milenio-pruebas:${{ github.sha }} .
+          docker run --detach --name milenio-pruebas --publish 127.0.0.1:8080:8080 milenio-pruebas:${{ github.sha }}
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:8080/ > /dev/null; then break; fi
+            sleep 1
+          done
+      - name: Verificar HTTP, rutas, bundle y cabeceras del despliegue
+        run: node scripts/deployment-smoke.mjs
+        env:
+          DEPLOY_URL: http://127.0.0.1:8080
+      - name: Registrar versión y ciclo de vida
+        if: always()
+        run: |
+          mkdir -p evidencias
+          docker inspect milenio-pruebas > evidencias/contenedor.json
+          docker logs milenio-pruebas > evidencias/contenedor.log 2>&1
+          echo 'Entorno de pruebas efímero: accesible dentro del runner durante este job; se elimina al finalizar. Reproducir localmente con Dockerfile y el artefacto aplicacion.' >> "$GITHUB_STEP_SUMMARY"
+          echo "Versión: $GITHUB_SHA" >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: evidencia-despliegue
+          path: evidencias/
+          retention-days: 30
+      - name: Detener entorno de pruebas
+        if: always()
+        run: docker rm -f milenio-pruebas || true

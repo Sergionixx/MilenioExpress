@@ -1,0 +1,21 @@
+{
+  "sourceVersion": "0469db3",
+  "artifacts": [
+    {
+      "path": "assets/index-ChAxYKNG.css",
+      "sha256": "6dc6300821716aadabcc747ab2f210dad11a8e9ddb5e245bad8460f4acb718cc"
+    },
+    {
+      "path": "assets/index-CztTgVJ1.js",
+      "sha256": "cdff7df59a49c1ca98d5d5ff0e42e670cfb9aaafbc1d8f129c1f2111aa46c1cb"
+    },
+    {
+      "path": "index.html",
+      "sha256": "074d1e202a180b49b24d1bb543efe98c1a2f00a9f317efec758b639c249e96f1"
+    },
+    {
+      "path": "robots.txt",
+      "sha256": "331ea9090db0c9f6f597bd9840fd5b171830f6e0b3ba1cb24dfa91f0c95aedc1"
+    }
+  ]
+}

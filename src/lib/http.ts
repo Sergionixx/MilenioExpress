@@ -32,7 +32,13 @@ export async function requestJson(
   }
   if (!response.ok) {
     const body = await response.json().catch(() => ({}));
-    throw new ApiError(body.error || "No se pudo completar la solicitud.", response.status, body.code || "REQUEST_FAILED");
+    const message = typeof body?.error === "string" && body.error ? body.error : "No se pudo completar la solicitud.";
+    const code = typeof body?.code === "string" && body.code ? body.code : "REQUEST_FAILED";
+    throw new ApiError(message, response.status, code);
   }
-  return response.json();
+  try {
+    return await response.json();
+  } catch {
+    throw new ApiError("El servidor devolvió una respuesta no válida. Intenta de nuevo.", response.status, "INVALID_RESPONSE");
+  }
 }

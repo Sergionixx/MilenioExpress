@@ -1036,8 +1036,7 @@ function Profile() {
       )}
       <button
         onClick={() => void signOut()}
-        className="secondary-button"
-        style={{ marginTop: 20 }}
+        className="secondary-button profile-signout"
       >
         Cerrar sesión
       </button>

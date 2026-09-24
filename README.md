@@ -1,36 +1,81 @@
-# 🚨 LA RAMA MAIN NO SE TOCA 🚨
+# Milenio Express — LA RAMA MAIN NO SE TOCA
 
-## 📌 Reglas del Flujo de Trabajo (Git Workflow)
+Entrega académica de registro y consulta de paquetes. El trabajo y la publicación de esta entrega están en **`dev-maxi`**. `main` queda reservada para la revisión del equipo; no se modifica ni se fusiona automáticamente.
 
-El equipo reserva `main` para cambios revisados por Sergionix mediante Pull Request. **No se deben hacer commits ni pushes directos a `main`.** Si GitHub no muestra una regla de protección activa para `main`, esta norma depende del flujo de trabajo del equipo.
+La referencia de coordinación solicitada fue el `README.md` de `feature/presentacion-interactiva`. Esa rama contiene una dinámica de exposición independiente. Esta entrega conserva el módulo académico de `dev-maxi` con correo/contraseña, JWT, ADMIN y USER. No reemplaza el backend compartido ni publica la presentación interactiva.
 
-### 🌳 Estructura de Ramas (Instrucciones para Desarrolladores e IAs)
+## Preparar y ejecutar
 
-El flujo de trabajo se divide en 3 niveles de ramas:
+Requisitos: Node.js 24 y pnpm 10.34.3 (también declarados en `.mise.toml`).
 
-1. **`main` (Integración)**: Es la rama principal. Sergionix revisa y aprueba cada Pull Request (PR) antes de integrarlo.
-2. **Ramas Principales por Colaborador** (`dev-[nombre-colaborador]`): Cada integrante del equipo debe crear y mantener una rama principal a su nombre (ej. `dev-juan`). Esta rama actúa como su entorno de integración personal.
-3. **Ramas por Actividad/Tarea** (`feature/[nombre-tarea]`, `fix/[nombre-fix]`): Ramas efímeras para trabajar en tareas específicas. 
-
-#### Diagrama de Ramas
-```text
-main (integración después de revisión de Sergionix)
-│
-├── dev-colaborador1 (Rama principal de integración del colaborador 1)
-│   ├── feature/crear-login (Se hace push y merge hacia dev-colaborador1)
-│   └── fix/error-botones (Se hace push y merge hacia dev-colaborador1)
-│
-├── dev-colaborador2 (Rama principal de integración del colaborador 2)
-│   ├── feature/conexion-db
-│   └── feature/diseno-home
+```sh
+git clone --branch dev-maxi https://github.com/Sergionixx/MilenioExpress.git
+cd MilenioExpress
+pnpm install --frozen-lockfile
+pnpm dev
 ```
 
-## Iniciar el módulo académico
+Abrir `http://localhost:8443`. El repositorio es privado: quien clone necesita acceso concedido por su propietario. El cliente conserva la URL y clave **pública** del Supabase existente. Para otro proyecto, copiar `.env.example` a `.env.local` y reemplazar `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` por valores públicos reales del entorno de pruebas. No usar los marcadores de ejemplo literalmente.
 
-1. Instalar las versiones de Node y pnpm indicadas en `.mise.toml` y ejecutar `pnpm install`.
-2. Ejecutar `pnpm dev` para abrir el cliente web en la dirección que indique Vite.
-3. Ejecutar `pnpm test`, `pnpm exec tsc --noEmit` y `pnpm build` antes de entregar cambios.
+Las cuentas se administran en Supabase Auth. Los perfiles nuevos nacen como USER; el rol ADMIN se asigna únicamente desde administración de la base. No existe un selector de rol que conceda privilegios. ADMIN registra paquetes para un perfil existente; USER consulta únicamente sus paquetes. La guía se genera en PostgreSQL, con una secuencia y restricción UNIQUE.
 
-La interfaz utiliza Supabase Auth y la función `make-server-845b49a4`. La migración está en `supabase/migrations/` y el servidor en `supabase/functions/server/`. La configuración, el contrato de API y las instrucciones de despliegue están en [supabase/README.md](supabase/README.md). Las variables `VITE_` sólo admiten la URL y la clave pública del proyecto; nunca deben contener la clave de servicio.
+## Variables y backend
 
-`pnpm test:live-auth` comprueba que la función desplegada responde y rechaza peticiones sin sesión o con un token inválido. `pnpm test:live-roles` comprueba los permisos ADMIN/USER con dos cuentas ficticias ya existentes; requiere `MILENIO_ADMIN_EMAIL`, `MILENIO_ADMIN_PASSWORD`, `MILENIO_USER_EMAIL`, `MILENIO_USER_PASSWORD`, `MILENIO_CLIENT_GUIDE` y `MILENIO_OPERATOR_GUIDE` en el entorno. Ninguno de los dos comandos crea usuarios ni paquetes. La evidencia de integración y revisión móvil está en [docs/SERGIO_VERIFICACION.md](docs/SERGIO_VERIFICACION.md).
+| Variable | Ubicación | Uso |
+|---|---|---|
+| `VITE_SUPABASE_URL` | Cliente, pública | URL del proyecto Supabase de pruebas |
+| `VITE_SUPABASE_ANON_KEY` | Cliente, pública | Clave publishable/anon; no concede privilegios ADMIN |
+| `SUPABASE_URL` | Función, servidor | URL para el acceso a datos |
+| `SUPABASE_SERVICE_ROLE_KEY` | Secretos de Supabase | Credencial privada del servidor; nunca VITE, Git o ZIP |
+| `ALLOWED_ORIGINS` | Función, servidor | Orígenes exactos separados por coma; sin configurar conserva compatibilidad `*` |
+| `HOST`, `PORT` | Servidor de pruebas | Dirección de escucha y puerto; por defecto 127.0.0.1:4174 |
+
+La firma y vigencia del JWT se verifican mediante `Supabase Auth.getUser(token)` antes de consultar el perfil. El rol proviene de `profiles`, nunca del cuerpo de la petición. RLS añade controles de propiedad en PostgreSQL. `verify_jwt=false` en la puerta de entrada permite `/health`; **no desactiva la autenticación en las rutas de datos**.
+
+Código de backend en `supabase/functions/server/`; migración en `supabase/migrations/`. Contrato y matriz de acceso: [docs/CONTRATO_PAQUETES_ACCESO.md](docs/CONTRATO_PAQUETES_ACCESO.md). Las nuevas correcciones del servidor deben validarse en un Supabase aislado antes de promoverse al backend compartido, donde también vive la presentación de otra rama.
+
+Para una réplica local completa se necesita Docker y Supabase CLI. `supabase start` aplica las migraciones locales; `supabase functions serve make-server-845b49a4 --no-verify-jwt` sirve la función. `supabase status -o env` muestra las claves locales: no compartir ni guardar esa salida en Git. Configurar el cliente con API_URL/ANON_KEY locales. El pipeline crea ese entorno aislado para sus pruebas de integración.
+
+## Pruebas, compilación y despliegue de pruebas
+
+```sh
+pnpm test
+pnpm test:coverage
+pnpm typecheck
+pnpm build
+pnpm serve
+```
+
+`test:coverage` exige al menos 80% en líneas, ramas y funciones y genera TAP y LCOV en `reportes/pruebas-unitarias/`. El alcance comprende reglas de negocio, permisos, cliente HTTP, sesión, mensajes de acceso, handler HTTP y adaptador de datos; no representa cobertura de toda la interfaz React o del motor PostgreSQL.
+
+El servidor del build abre `http://127.0.0.1:4174`, soporta rutas de la SPA y cabeceras CSP/anticlickjacking/nosniff. `node scripts/deployment-smoke.mjs` comprueba HTML, bundle, rutas y cabeceras. La alternativa reproducible es:
+
+```sh
+docker build -t milenio-pruebas .
+docker run --rm -p 127.0.0.1:8080:8080 milenio-pruebas
+```
+
+El workflow [.github/workflows/ci-cd.yml](.github/workflows/ci-cd.yml) se ejecuta en push/PR a `main` o `dev-maxi`. Pruebas y typecheck son requisitos de construcción; construcción es requisito de despliegue. El despliegue ejecuta el artefacto construido en Docker en el runner de GitHub Actions y verifica sus respuestas. **Es un entorno efímero de pruebas:** termina con el job; no es una URL pública permanente. Los artefactos de pruebas, calidad, aplicación y despliegue duran 30 días; la entrega conserva además reportes locales verificables.
+
+Consultar [Actions](https://github.com/Sergionixx/MilenioExpress/actions) filtrando `dev-maxi`. Cada ejecución identifica su commit. El pipeline no cambia otras ramas ni despliega funciones sobre el proyecto Supabase compartido.
+
+## Calidad y seguridad
+
+```sh
+pnpm quality
+ZAP_HOME=/ruta/a/ZAP_2.17.0 node scripts/zap-scan.mjs final http://127.0.0.1:4174/
+```
+
+El análisis global equivalente permitido por el PDF utiliza reglas recomendadas ESLint/SonarJS, tipos TypeScript, jscpd y cobertura real. Abrir `reportes/sonar/final.html`; métricas y limitaciones en [docs/CALIDAD.md](docs/CALIDAD.md). No se presenta como una instancia de SonarQube ni se inventan sus métricas exclusivas.
+
+Los escaneos OWASP ZAP originales, comparación y procedimiento están en [docs/SEGURIDAD.md](docs/SEGURIDAD.md) y `reportes/seguridad-zap/`. Se ejecutan solo contra loopback propio. Los límites de autenticación y del alcance frontend se documentan; los endpoints protegidos se verifican por separado.
+
+## Documentación y entrega
+
+- [MILENIO_EXPRESS.md](MILENIO_EXPRESS.md): funcionamiento, idea de negocio y explicación técnica.
+- [docs/INFORME_CIERRE.md](docs/INFORME_CIERRE.md): cierre, comparación, lecciones y plan de mejora.
+- [docs/MATRIZ_ENTREGA.md](docs/MATRIZ_ENTREGA.md): requisitos y evidencias, incluida cualquier validación pendiente.
+- `reportes/`: originales de pruebas, calidad, integración y seguridad.
+- `evidencias/`: comprobaciones de despliegue y de GitHub Actions.
+
+No incluir `.env.local`, contraseñas, JWT de sesión, claves de servicio o secretos reales en la entrega. `.env.example` contiene únicamente marcadores públicos y comentarios. Las verificaciones históricas se identifican como históricas; una comprobación local automatizada no se atribuye a otro integrante del equipo.

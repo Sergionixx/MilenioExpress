@@ -1,0 +1,25 @@
+{
+  "sourceVersion": "dev-maxi-working-tree-2026-09-24",
+  "artifacts": [
+    {
+      "path": "assets/index-B7AWFi2I.css",
+      "sha256": "e69b5df5ac56e489da0ec079a2c4515144a47a4df1a0696ef72799c4fcca8124"
+    },
+    {
+      "path": "assets/index-DFbIAQwB.js",
+      "sha256": "84e0cd7f054e4c6d32b93bb61a7d9fdf21aa2f062bf5f0420c3840571ae4e1b2"
+    },
+    {
+      "path": "index.html",
+      "sha256": "25905a1fb53e928bee49ad56ef19258f6ef23b606efd3043a6d6a09c08aadda6"
+    },
+    {
+      "path": "robots.txt",
+      "sha256": "331ea9090db0c9f6f597bd9840fd5b171830f6e0b3ba1cb24dfa91f0c95aedc1"
+    },
+    {
+      "path": "scripts/serve.mjs",
+      "sha256": "ec6606924fe3dc5fcd071593f600c3e2f56e90681d8b5831229925f690b7312d"
+    }
+  ]
+}

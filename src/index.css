@@ -71,3 +71,5 @@ svg { width: 21px; height: 21px; flex: none; }
 .role-badge { margin-top: 8px; color: #0759c8 !important; background: #e9f2ff; padding: 5px 9px; border-radius: 99px; font-size: 10px !important; font-weight: 800; }
 @media (max-width: 380px) { .screen { padding-left: 16px; padding-right: 16px; } .bottom-nav a { width: auto; min-width: 55px; } .lookup-form .primary-button span { display: none; } }
 :where(a, button, input, select, textarea):focus-visible { outline: 3px solid #e58d00; outline-offset: 2px; }
+
+.profile-signout { margin-top: 20px; }
