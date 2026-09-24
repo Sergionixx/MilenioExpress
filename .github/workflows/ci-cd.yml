@@ -48,6 +48,8 @@ jobs:
           node-version: '24'
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - name: Preparar Chromium para el recorrido móvil
+        run: pnpm exec playwright install --with-deps chromium
       - uses: supabase/setup-cli@v1
         with:
           version: latest
@@ -55,11 +57,15 @@ jobs:
         run: supabase start -x studio,imgproxy,logflare,vector,supavisor > "$RUNNER_TEMP/supabase-start.log"
       - name: Probar JWT real, roles, persistencia, RLS y guías únicas
         run: node scripts/run-local-integration.mjs
+        env:
+          MILENIO_UI_SMOKE: '1'
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: integracion-supabase-local
-          path: reportes/integracion/
+          path: |
+            reportes/integracion/
+            evidencias/ci-ui/
           retention-days: 30
       - name: Detener Supabase aislado
         if: always()

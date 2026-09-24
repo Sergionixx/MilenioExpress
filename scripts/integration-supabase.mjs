@@ -253,6 +253,22 @@ try {
     assert.equal(original.owner_id, owner.id);
   });
 
+  if (process.env.MILENIO_UI_SMOKE === "1") {
+    const { runUISmoke } = await import("./ui-smoke.mjs");
+    const ui = await runUISmoke({
+      adminEmail: operator.email,
+      adminPassword: password,
+      userEmail: owner.email,
+      userPassword: password,
+      expectedGuide: ownShipment.guide,
+      foreignGuide: foreignShipment.guide,
+      baseURL: "http://127.0.0.1:4180",
+      supabaseUrl: projectUrl,
+      anonKey,
+    });
+    report.ui = { status: ui.status, summary: ui.summary, report: "reportes/integracion/ui-resultados.json" };
+  }
+
   await scenario("INT-14", "Logout local retira la sesión usada por el cliente", async () => {
     checkResult(await ownerClient.auth.signOut({ scope: "local" }), "Local logout must succeed.");
     const session = checkResult(await ownerClient.auth.getSession(), "Session storage must remain readable.");
