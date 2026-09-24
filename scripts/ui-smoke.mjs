@@ -47,21 +47,41 @@ export async function runUISmoke({ adminEmail, adminPassword, userEmail, userPas
   let page;
   let createdGuide;
   let currentCase = "UI-SETUP";
+  let currentStep = "preparar-entorno";
+
+  function failureDiagnostic(error) {
+    const permittedNames = new Set(["AssertionError", "TimeoutError", "TypeError", "ReferenceError", "SyntaxError", "Error"]);
+    const diagnostic = { step: currentStep, errorName: permittedNames.has(error?.name) ? error.name : "Error" };
+    // Playwright call logs can contain fill(password). Never serialize them.
+    // Only our explicitly authored assertion messages are eligible for output.
+    const ownMessages = new Set([
+      "The real local owner must appear in the selector.",
+      "Keyboard Tab must move from email to the password field.",
+    ]);
+    const firstLine = typeof error?.message === "string" ? error.message.split("\n")[0] : "";
+    if (error?.name === "AssertionError" && ownMessages.has(firstLine)) diagnostic.assertion = firstLine;
+    return diagnostic;
+  }
 
   async function scenario(id, label, operation) {
     currentCase = id;
+    currentStep = "iniciar-escenario";
     const started = Date.now();
     try {
       await operation();
       report.cases.push({ id, label, status: "passed", durationMs: Date.now() - started });
       console.log(`PASS ${id}: ${label}`);
-    } catch {
+    } catch (error) {
+      const failure = failureDiagnostic(error);
+      report.failure = failure;
       report.cases.push({ id, label, status: "failed", durationMs: Date.now() - started,
+        failure,
         detail: "La expectativa de interfaz no se cumplió. Consultar captura de fallo; no se serializan credenciales ni errores del proveedor." });
       throw new Error(`UI smoke failed: ${id}.`);
     }
   }
   async function screenshot(name, width) {
+    currentStep = `captura-${name}-${width}`;
     await page.setViewportSize({ width, height: 900 });
     const dimensions = await page.evaluate(() => ({ viewport: document.documentElement.clientWidth,
       content: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) }));
@@ -74,11 +94,17 @@ export async function runUISmoke({ adminEmail, adminPassword, userEmail, userPas
     for (const width of widths) await screenshot(name, width);
   }
   async function login(email, password) {
+    currentStep = "login-abrir-pagina";
     await page.goto(ui.origin);
+    currentStep = "login-esperar-formulario";
     await page.getByRole("heading", { name: "Bienvenido de nuevo", exact: true }).waitFor();
+    currentStep = "login-capturar-correo";
     await page.getByLabel("Correo electrónico", { exact: true }).fill(email);
+    currentStep = "login-capturar-clave";
     await page.getByLabel("Contraseña", { exact: true }).fill(password);
+    currentStep = "login-enviar-formulario";
     await page.getByRole("button", { name: "Iniciar sesión", exact: true }).click();
+    currentStep = "login-esperar-inicio-autenticado";
     await page.waitForURL(`${ui.origin}/inicio`);
     await page.getByRole("heading", { name: /^Hola,/ }).waitFor();
   }
@@ -134,20 +160,30 @@ export async function runUISmoke({ adminEmail, adminPassword, userEmail, userPas
     });
     await scenario("UI-02", "Login ADMIN real y formulario de registro móvil", async () => {
       await login(adminEmail, adminPassword);
+      currentStep = "registro-abrir-ruta";
       await page.getByRole("link", { name: "Registrar", exact: true }).click();
+      currentStep = "registro-esperar-formulario";
       await page.getByRole("heading", { name: "Registrar paquete", exact: true }).waitFor();
-      const ownerSelect = page.getByLabel("Propietario", { exact: true });
+      const ownerSelect = page.getByRole("combobox");
+      currentStep = "registro-esperar-propietarios";
       await page.waitForFunction(() => {
         const select = document.querySelector(".register-form select");
         return select && !select.disabled && select.options.length > 1;
       });
+      currentStep = "registro-leer-opciones-propietario";
       const choices = await ownerSelect.locator("option").evaluateAll((options) => options.map((option) => ({ value: option.value, label: option.textContent })));
+      currentStep = "registro-encontrar-propietario-ficticio";
       const choice = choices.find((option) => option.label.includes(userEmail));
       assert.ok(choice, "The real local owner must appear in the selector.");
+      currentStep = "registro-seleccionar-propietario";
       await ownerSelect.selectOption(choice.value);
+      currentStep = "registro-capturar-destinatario";
       await page.getByLabel("Destinatario", { exact: true }).fill("Persona ficticia de interfaz");
+      currentStep = "registro-capturar-direccion";
       await page.getByLabel("Dirección", { exact: true }).fill("Calle de prueba UI 123");
+      currentStep = "registro-capturar-ciudad";
       await page.getByLabel("Ciudad", { exact: true }).fill("Ciudad de prueba UI");
+      currentStep = "registro-capturar-descripcion";
       await page.getByLabel("Descripción", { exact: true }).fill("Paquete ficticio creado desde Chromium en el entorno aislado.");
       await mobileViews("registro");
     });
@@ -207,9 +243,10 @@ export async function runUISmoke({ adminEmail, adminPassword, userEmail, userPas
       report.screenshots.push({ file: "evidencias/ci-ui/calidad-dashboard.png", source: "reportes/sonar/final.html" });
     });
     report.status = "passed";
-  } catch {
+  } catch (error) {
     report.status = "failed";
     report.failedStage = currentCase;
+    report.failure ??= failureDiagnostic(error);
     if (page) {
       try { await page.screenshot({ path: join(evidence, "fallo.png"), fullPage: true }); }
       catch { /* A closed browser has no screenshot; never pretend one exists. */ }
