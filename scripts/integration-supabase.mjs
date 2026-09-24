@@ -12,7 +12,7 @@ function requireLocalUrl(value) {
   const url = new URL(value);
   assert.ok(loopbackHosts.has(url.hostname), "Integration requires a loopback Supabase URL.");
   assert.ok(["http:", "https:"].includes(url.protocol), "Unsupported local protocol.");
-  assert.ok(!url.username && !url.password && !url.search && !url.hash, "The local URL must not contain credentials or query data.");
+  assert.ok(!url.username && !url.password && !url.hash, "The local URL must not contain credentials or a fragment.");
   return url;
 }
 
@@ -23,7 +23,9 @@ function required(name, fallback) {
 }
 
 const configuredUrl = requireLocalUrl(required("SUPABASE_URL"));
+assert.equal(configuredUrl.search, "", "SUPABASE_URL must not include a query.");
 assert.equal(configuredUrl.pathname, "/", "SUPABASE_URL must identify the local API root.");
+assert.equal(configuredUrl.search, "", "SUPABASE_URL must not contain query data.");
 const projectUrl = configuredUrl.origin;
 const anonKey = required("SUPABASE_ANON_KEY", "ANON_KEY");
 const serviceKey = required("SUPABASE_SERVICE_ROLE_KEY", "SERVICE_ROLE_KEY");
