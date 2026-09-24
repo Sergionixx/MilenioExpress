@@ -6,7 +6,7 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const widths = [320, 375, 430];
+const widths = [320, 375, 430, 1440];
 const loopback = new Set(["127.0.0.1", "localhost", "[::1]"]);
 function localOrigin(value) {
   const url = new URL(value);
@@ -21,7 +21,7 @@ function localOrigin(value) {
  * The caller removes accounts and all their shipments after this function ends.
  */
 export async function runUISmoke({ adminEmail, adminPassword, userEmail, userPassword,
-  expectedGuide, foreignGuide, baseURL, supabaseUrl, anonKey }) {
+  expectedGuide, foreignGuide, baseURL, supabaseUrl, anonKey, signupEmail, verifySignup }) {
   const ui = localOrigin(baseURL);
   const backend = localOrigin(supabaseUrl);
   assert.ok(ui.origin !== backend.origin, "Frontend and backend require separate local origins.");
@@ -160,6 +160,7 @@ export async function runUISmoke({ adminEmail, adminPassword, userEmail, userPas
     });
     await scenario("UI-02", "Login ADMIN real y formulario de registro móvil", async () => {
       await login(adminEmail, adminPassword);
+      await mobileViews("inicio-admin");
       currentStep = "registro-abrir-ruta";
       await page.getByRole("link", { name: "Registrar", exact: true }).click();
       currentStep = "registro-esperar-formulario";
@@ -242,6 +243,36 @@ export async function runUISmoke({ adminEmail, adminPassword, userEmail, userPas
       await page.screenshot({ path: join(evidence, "calidad-dashboard.png"), fullPage: true, animations: "disabled" });
       report.screenshots.push({ file: "evidencias/ci-ui/calidad-dashboard.png", source: "reportes/sonar/final.html" });
     });
+    await scenario("UI-10", "Registro público desde login: contraseñas diferentes y creación real", async () => {
+      await page.goto(ui.origin);
+      await page.getByRole("link", { name: "Crear cuenta", exact: true }).click();
+      await page.getByRole("heading", { name: "Crea tu cuenta", exact: true }).waitFor();
+      await mobileViews("crear-cuenta");
+      await page.getByLabel("Nombre completo", { exact: true }).fill("Nuevo usuario de prueba");
+      await page.getByLabel("Correo electrónico", { exact: true }).fill(signupEmail);
+      await page.getByLabel("Contraseña", { exact: true }).fill(userPassword);
+      await page.getByLabel("Confirmar contraseña", { exact: true }).fill("Una-distinta-123!");
+      await page.getByRole("button", { name: "Crear cuenta", exact: true }).click();
+      await page.getByRole("alert").filter({ hasText: "Las contraseñas no coinciden." }).waitFor();
+      await page.getByLabel("Confirmar contraseña", { exact: true }).fill(userPassword);
+      await page.getByRole("button", { name: "Crear cuenta", exact: true }).click();
+      await page.waitForURL(`${ui.origin}/inicio`);
+      await page.getByRole("heading", { name: "Hola, Nuevo.", exact: true }).waitFor();
+      await verifySignup();
+      await mobileViews("inicio-cuenta-nueva");
+    });
+    await scenario("UI-11", "La cuenta nueva tiene rol USER, puede volver a entrar y no puede registrar paquetes", async () => {
+      assert.equal(await page.getByRole("link", { name: "Registrar", exact: true }).count(), 0);
+      await page.goto(`${ui.origin}/registrar`);
+      await page.waitForURL(`${ui.origin}/inicio`);
+      await logout();
+      await login(signupEmail, userPassword);
+      await page.goto(`${ui.origin}/perfil`);
+      await page.getByText("Nuevo usuario de prueba", { exact: true }).waitFor();
+      await page.getByText("Usuario", { exact: true }).waitFor();
+      await screenshot("perfil-cuenta-nueva", 1440);
+      await logout();
+    });
     report.status = "passed";
   } catch (error) {
     report.status = "failed";
@@ -258,7 +289,7 @@ export async function runUISmoke({ adminEmail, adminPassword, userEmail, userPas
     await rm(work, { recursive: true, force: true });
     report.finishedAt = new Date().toISOString();
     report.summary = { passed: report.cases.filter((item) => item.status === "passed").length,
-      failed: report.cases.filter((item) => item.status === "failed").length, totalPlanned: 9 };
+      failed: report.cases.filter((item) => item.status === "failed").length, totalPlanned: 11 };
     await writeFile(reportPath, JSON.stringify(report, null, 2) + "\n");
   }
   return report;

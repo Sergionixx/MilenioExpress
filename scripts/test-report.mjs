@@ -4,7 +4,7 @@ import { spawnSync } from 'node:child_process';
 const directory = 'reportes/pruebas-unitarias';
 mkdirSync(directory, { recursive: true });
 const sources = [
-  'src/lib/http.ts', 'src/lib/session.ts', 'src/lib/authErrors.ts',
+  'src/lib/http.ts', 'src/lib/session.ts', 'src/lib/authErrors.ts', 'src/lib/registration.ts',
   'supabase/functions/server/domain.ts', 'supabase/functions/server/service.ts',
   'supabase/functions/server/handler.ts', 'supabase/functions/server/repository.ts',
 ];

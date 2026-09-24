@@ -1,6 +1,6 @@
 import {
   createContext,
-  FormEvent,
+  SubmitEvent,
   ReactNode,
   useContext,
   useEffect,
@@ -20,6 +20,10 @@ import {
 import { ApiError, apiFetch, supabase } from "./lib/supabase"
 import { loginErrorMessage } from "./lib/authErrors"
 import { SESSION_REJECTED_EVENT } from "./lib/session"
+import {
+  registrationErrorMessage,
+  validateRegistration,
+} from "./lib/registration"
 
 type Role = "ADMIN" | "USER"
 type Account = { id: string; email: string; name: string; role: Role }
@@ -91,7 +95,9 @@ function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
   async function logout() {
-    const { error: signOutError } = await supabase.auth.signOut({ scope: "local" })
+    const { error: signOutError } = await supabase.auth.signOut({
+      scope: "local",
+    })
     if (signOutError) throw signOutError
     sessionVersion.current++
     setAccount(null)
@@ -217,27 +223,202 @@ function EmptyState({
   )
 }
 
-function Auth() {
+const accessCopy = {
+  login: {
+    eyebrow: "BIENVENIDO A MILENIO EXPRESS", title: "Bienvenido de nuevo",
+    intro: "Inicia sesión para consultar y gestionar tus paquetes.",
+    switchPrompt: "¿Es tu primera vez aquí?", switchLabel: "Crear cuenta", switchPath: "/crear-cuenta",
+    help: "Tus paquetes, disponibles para ti desde cualquier dispositivo.",
+    action: "Iniciar sesión", pending: "Ingresando…",
+  },
+  signup: {
+    eyebrow: "TU ESPACIO EN MILENIO", title: "Crea tu cuenta",
+    intro: "Regístrate para consultar los paquetes asociados a tu cuenta.",
+    switchPrompt: "¿Ya tienes una cuenta?", switchLabel: "Iniciar sesión", switchPath: "/",
+    help: "Tu cuenta te permitirá consultar tus propios paquetes. El equipo administra los registros y permisos.",
+    action: "Crear cuenta", pending: "Creando cuenta…",
+  },
+}
+type AccessFields = { name: string; email: string; password: string; confirmation: string }
+function AccessForm({ registration, pending, error, fields, onChange, onSubmit }: Readonly<{
+  registration: boolean
+  pending: boolean
+  error: string
+  fields: AccessFields
+  onChange: (field: keyof AccessFields, value: string) => void
+  onSubmit: (event: SubmitEvent<HTMLFormElement>) => void
+}>) {
+  const [showPassword, setShowPassword] = useState(false)
+  const copy = registration ? accessCopy.signup : accessCopy.login
+  const errorDescription = error ? "login-error" : undefined
+  const passwordDescription = registration ? "password-help" : errorDescription
+  return (
+    <form className="form-stack" onSubmit={onSubmit} aria-busy={pending}>
+      {registration && (
+        <label>
+          Nombre completo
+          <input
+            autoComplete="name"
+            required
+            minLength={2}
+            maxLength={120}
+            value={fields.name}
+            disabled={pending}
+            onChange={(event) => onChange("name", event.target.value)}
+            placeholder="Tu nombre y apellido"
+          />
+        </label>
+      )}
+      <label>
+        Correo electrónico
+        <input
+          type="email"
+          id="login-email"
+          autoComplete="username"
+          autoCapitalize="none"
+          spellCheck={false}
+          required
+          maxLength={254}
+          disabled={pending}
+          aria-invalid={!!error}
+          aria-describedby={error ? "login-error" : undefined}
+          value={fields.email}
+          onChange={(event) => onChange("email", event.target.value)}
+          placeholder="nombre@ejemplo.com"
+        />
+      </label>
+      <div className="password-field">
+        <label htmlFor="login-password">Contraseña</label>
+        <div className="password-control">
+          <input
+            type={showPassword ? "text" : "password"}
+            id="login-password"
+            autoComplete={
+              registration ? "new-password" : "current-password"
+            }
+            required
+            minLength={registration ? 8 : undefined}
+            disabled={pending}
+            aria-invalid={!!error}
+            aria-describedby={
+              passwordDescription
+            }
+            value={fields.password}
+            onChange={(event) => onChange("password", event.target.value)}
+            placeholder={
+              registration ? "Elige una contraseña" : "Tu contraseña"
+            }
+          />
+          <button
+            type="button"
+            className="password-toggle"
+            aria-label={
+              showPassword ? "Ocultar contraseña" : "Mostrar contraseña"
+            }
+            aria-pressed={showPassword}
+            onClick={() => setShowPassword(!showPassword)}
+          >
+            {showPassword ? "Ocultar" : "Mostrar"}
+          </button>
+        </div>
+        {registration && (
+          <small id="password-help" className="field-help">
+            Utiliza al menos 8 caracteres.
+          </small>
+        )}
+      </div>
+      {registration && (
+        <label>
+          Confirmar contraseña
+          <input
+            type="password"
+            autoComplete="new-password"
+            required
+            disabled={pending}
+            value={fields.confirmation}
+            aria-invalid={!!error}
+            aria-describedby={error ? "login-error" : undefined}
+            onChange={(event) => onChange("confirmation", event.target.value)}
+            placeholder="Escribe de nuevo tu contraseña"
+          />
+        </label>
+      )}
+      {error && (
+        <p className="form-error" id="login-error" role="alert">
+          {error}
+        </p>
+      )}
+      <button
+        className="primary-button"
+        disabled={pending}
+        type="submit"
+      >
+        {pending ? copy.pending : copy.action}
+        <Icon name="arrow" />
+      </button>
+    </form>
+  )
+}
+
+function Auth({ registration = false }: Readonly<{ registration?: boolean }>) {
+  const copy = registration ? accessCopy.signup : accessCopy.login
   const { account, checking, refresh } = useAccount()
   const navigate = useNavigate()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [name, setName] = useState("")
+  const [confirmation, setConfirmation] = useState("")
+  const [submitted, setSubmitted] = useState(false)
   const [pending, setPending] = useState(false)
   const [error, setError] = useState("")
   if (checking) return <Loading label="Comprobando acceso…" />
   if (account) return <Navigate to="/inicio" replace />
-  async function submit(event: FormEvent<HTMLFormElement>) {
+  async function submit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault()
+    if (pending) return
     setError("")
+    if (registration) {
+      const validation = validateRegistration({
+        name,
+        email,
+        password,
+        confirmation,
+      })
+      if (validation) {
+        setError(validation)
+        return
+      }
+    }
     setPending(true)
     try {
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password,
-      })
-      if (signInError) {
-        setError(loginErrorMessage(signInError))
-        return
+      if (registration) {
+        const { data, error: signupError } = await supabase.auth.signUp({
+          email: email.trim(),
+          password,
+          options: {
+            data: { full_name: name.trim() },
+            emailRedirectTo: `${window.location.origin}/`,
+          },
+        })
+        if (signupError) {
+          setError(registrationErrorMessage(signupError))
+          return
+        }
+        setPassword("")
+        setConfirmation("")
+        if (!data.session) {
+          setSubmitted(true)
+          return
+        }
+      } else {
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email: email.trim(),
+          password,
+        })
+        if (signInError) {
+          setError(loginErrorMessage(signInError))
+          return
+        }
       }
       const current = await refresh()
       if (!current)
@@ -253,65 +434,79 @@ function Auth() {
   }
   return (
     <main className="auth-shell">
-      <section className="auth-top">
-        <div className="brand-mark">
-          <Icon name="box" />
+      <section className="auth-top" aria-label="Milenio Express">
+        <div className="auth-brand">
+          <div className="brand-mark">
+            <Icon name="box" />
+          </div>
+          <span className="brand-name">
+            milenio<span>express</span>
+          </span>
         </div>
-        <span className="brand-name">
-          milenio<span>express</span>
+        <div className="auth-story">
+          <span className="eyebrow">CONECTAMOS CADA ENTREGA</span>
+          <h2>
+            Cada paquete,
+            <br />
+            un paso más cerca.
+          </h2>
+          <p>
+            Un solo espacio para consultar tus guías y mantener la información
+            de tus paquetes en orden.
+          </p>
+          <div className="route-illustration" aria-hidden="true">
+            <div className="route-station">
+              <Icon name="box" />
+              <span>Origen</span>
+            </div>
+            <div className="route-line">
+              <span />
+              <Icon name="arrow" />
+              <span />
+            </div>
+            <div className="route-station">
+              <Icon name="pin" />
+              <span>Destino</span>
+            </div>
+          </div>
+        </div>
+        <span className="auth-caption">
+          TU PAQUETE. TU GUÍA. TU TRANQUILIDAD.
         </span>
-        <div className="auth-orbit orbit-one" />
-        <div className="auth-orbit orbit-two" />
       </section>
       <section className="auth-card">
-        <div className="eyebrow">ACCESO SEGURO</div>
-        <h1>Bienvenido de nuevo</h1>
-        <p>Ingresa con la cuenta asignada a tu operación.</p>
-        <form className="form-stack" onSubmit={submit}>
-          <label>
-            Correo electrónico
-            <input
-              type="email"
-              id="login-email"
-              autoComplete="username"
-              autoCapitalize="none"
-              spellCheck={false}
-              required
-              aria-invalid={!!error}
-              aria-describedby={error ? "login-error" : undefined}
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              placeholder="tu.correo@ejemplo.com"
-            />
-          </label>
-          <label>
-            Contraseña
-            <input
-              type="password"
-              id="login-password"
-              autoComplete="current-password"
-              required
-              aria-invalid={!!error}
-              aria-describedby={error ? "login-error" : undefined}
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              placeholder="Tu contraseña"
-            />
-          </label>
-          {error && (
-            <p className="form-error" id="login-error" role="alert">
-              {error}
+        {submitted ? (
+          <div className="signup-confirmation" role="status">
+            <div className="success-icon">
+              <Icon name="check" />
+            </div>
+            <div className="eyebrow">SIGUIENTE PASO</div>
+            <h1>Revisa tu correo</h1>
+            <p>
+              Si el registro puede completarse con{" "}
+              <strong>{email.trim()}</strong>, recibirás un enlace para
+              confirmar tu cuenta. Revisa también la carpeta de correo no
+              deseado.
             </p>
-          )}
-          <button className="primary-button" disabled={pending} type="submit">
-            {pending ? "Ingresando…" : "Iniciar sesión"}
-            <Icon name="arrow" />
-          </button>
-        </form>
-        <p className="auth-help">
-          El administrador gestiona las cuentas. Si necesitas acceso, solicítalo
-          a tu equipo.
-        </p>
+            <p>
+              Si ya tienes una cuenta, puedes iniciar sesión con tu contraseña.
+            </p>
+            <Link className="primary-button" to="/">
+              Volver al inicio de sesión <Icon name="arrow" />
+            </Link>
+          </div>
+        ) : (
+          <>
+            <div className="eyebrow">{copy.eyebrow}</div>
+            <h1>{copy.title}</h1>
+            <p>{copy.intro}</p>
+            <AccessForm registration={registration} pending={pending} error={error}
+              fields={{ name, email, password, confirmation }} onSubmit={submit}
+              onChange={(field, value) => ({ name: setName, email: setEmail, password: setPassword, confirmation: setConfirmation }[field])(value)} />
+            <div className="auth-switch"><span>{copy.switchPrompt}</span><Link to={copy.switchPath}>{copy.switchLabel}</Link></div>
+            <p className="auth-help">{copy.help}</p>
+          </>
+        )}
       </section>
     </main>
   )
@@ -348,6 +543,9 @@ function Shell() {
     .join("")
   return (
     <div className="app-shell">
+      <a className="skip-link" href="#contenido">
+        Saltar al contenido
+      </a>
       <header className="app-header">
         <Link to="/inicio" className="mini-brand">
           <div>
@@ -357,12 +555,32 @@ function Shell() {
             milenio<span>express</span>
           </b>
         </Link>
-        <Link to="/perfil" className="avatar" aria-label="Abrir perfil">
-          {initials}
-        </Link>
+        <div className="workspace-label">
+          <span>Espacio de trabajo</span>
+          <strong>
+            {account?.role === "ADMIN" ? "Gestión de paquetes" : "Mis envíos"}
+          </strong>
+        </div>
+        <div className="header-account">
+          <span className="header-role">
+            {account?.role === "ADMIN" ? "Administrador" : "Mi cuenta"}
+          </span>
+          <Link to="/perfil" className="avatar" aria-label="Abrir perfil">
+            {initials}
+          </Link>
+        </div>
       </header>
-      <Outlet />
+      <div className="workspace-content" id="contenido" tabIndex={-1}>
+        <Outlet />
+      </div>
       <nav className="bottom-nav" aria-label="Navegación principal">
+        <div className="sidebar-brand">
+          <Icon name="box" />
+          <span>
+            milenio<strong>express</strong>
+          </span>
+        </div>
+        <span className="nav-label">ESPACIO DE TRABAJO</span>
         <NavLink to="/inicio">
           <Icon name="box" />
           <span>Inicio</span>
@@ -385,6 +603,13 @@ function Shell() {
           <Icon name="user" />
           <span>Perfil</span>
         </NavLink>
+        <div className="sidebar-note">
+          <span className="sidebar-note-mark">ME</span>
+          <div>
+            <strong>Todo en un lugar</strong>
+            <p>Consulta tus paquetes con su número de guía.</p>
+          </div>
+        </div>
       </nav>
     </div>
   )
@@ -434,7 +659,7 @@ function Home() {
   const navigate = useNavigate()
   const [guide, setGuide] = useState("")
   const { items, loading, error, reload } = useShipments()
-  function search(event: FormEvent<HTMLFormElement>) {
+  function search(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault()
     navigate(`/consulta?guia=${encodeURIComponent(guide.trim().toUpperCase())}`)
   }
@@ -442,10 +667,57 @@ function Home() {
     <main className="screen home-screen">
       <div className="greeting">
         <div>
-          <div className="eyebrow">OPERACIONES · HOY</div>
+          <div className="eyebrow">RESUMEN GENERAL</div>
           <h1>Hola, {account?.name.split(" ")[0] || "equipo"}.</h1>
         </div>
-        <span className="online-dot">En línea</span>
+        {account?.role === "ADMIN" ? (
+          <Link to="/registrar" className="primary-button new-shipment">
+            <Icon name="plus" />
+            Registrar paquete
+          </Link>
+        ) : (
+          <span className="session-label">
+            <Icon name="check" />
+            Sesión iniciada
+          </span>
+        )}
+      </div>
+      <p className="muted-text home-intro">
+        {account?.role === "ADMIN"
+          ? "Organiza los registros y encuentra cada paquete desde aquí."
+          : "Consulta tus paquetes y encuentra la información de cada envío."}
+      </p>
+      <div className="overview-grid" aria-label="Resumen de paquetes">
+        <div className="overview-item">
+          <span>Paquetes disponibles</span>
+          <strong>{loading || error ? "—" : items.length}</strong>
+          <small>
+            {account?.role === "ADMIN"
+              ? "Registrados en el sistema"
+              : "Asociados a tu cuenta"}
+          </small>
+          <Icon name="box" />
+        </div>
+        <div className="overview-item">
+          <span>Ciudades de destino</span>
+          <strong>
+            {loading || error
+              ? "—"
+              : new Set(
+                  items.map((item) => item.city.trim().toLocaleLowerCase()),
+                ).size}
+          </strong>
+          <small>En tus paquetes disponibles</small>
+          <Icon name="pin" />
+        </div>
+        <Link className="overview-item overview-action" to="/consulta">
+          <span>¿Tienes una guía?</span>
+          <strong>Encuentra tu paquete</strong>
+          <small>
+            Consultar por número de guía <Icon name="arrow" />
+          </small>
+          <Icon name="search" />
+        </Link>
       </div>
       <form className="tracking-search" onSubmit={search}>
         <Icon name="search" />
@@ -539,7 +811,7 @@ function Lookup() {
   useEffect(() => {
     if (initial) void lookup(initial)
   }, [])
-  function submit(event: FormEvent<HTMLFormElement>) {
+  function submit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault()
     const normalized = guide.trim().toUpperCase()
     navigate(`/consulta?guia=${encodeURIComponent(normalized)}`, {
@@ -565,7 +837,12 @@ function Lookup() {
             placeholder="ME-2026-00000001"
             autoCapitalize="characters"
           />
-          <button className="primary-button" type="submit" disabled={loading} aria-label="Buscar">
+          <button
+            className="primary-button"
+            type="submit"
+            disabled={loading}
+            aria-label="Buscar"
+          >
             <Icon name="search" />
             <span>Buscar</span>
           </button>
@@ -755,6 +1032,7 @@ function History() {
         {statuses.map((status) => (
           <button
             key={status}
+            aria-pressed={filter === status}
             onClick={() => setFilter(status)}
             className={filter === status ? "active" : ""}
           >
@@ -819,7 +1097,7 @@ function Register() {
   function update(field: keyof typeof form, value: string) {
     setForm((current) => ({ ...current, [field]: value }))
   }
-  async function submit(event: FormEvent<HTMLFormElement>) {
+  async function submit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault()
     setError("")
     if (Object.values(form).some((value) => !value.trim())) {
@@ -921,6 +1199,13 @@ function Register() {
       <h1>Registrar paquete</h1>
       <p className="muted-text">La guía se genera al guardar el paquete.</p>
       <form className="register-form" onSubmit={submit}>
+        <div className="form-section-heading">
+          <span>01</span>
+          <div>
+            <h2>Información del paquete</h2>
+            <p>Completa los datos para generar una guía única.</p>
+          </div>
+        </div>
         <label>
           Propietario
           <select
@@ -944,7 +1229,7 @@ function Register() {
             {ownersError}
           </p>
         )}
-        <label>
+        <label className="full-width">
           Destinatario
           <input
             required
@@ -1045,7 +1330,8 @@ function Profile() {
 }
 
 const router = createBrowserRouter([
-  { path: "/", Component: Auth },
+  { path: "/", element: <Auth key="login" /> },
+  { path: "/crear-cuenta", element: <Auth key="signup" registration /> },
   {
     Component: Protected,
     children: [

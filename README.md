@@ -4,6 +4,16 @@ Entrega académica de registro y consulta de paquetes. El trabajo y la publicaci
 
 La referencia de coordinación solicitada fue el `README.md` de `feature/presentacion-interactiva`. Esa rama contiene una dinámica de exposición independiente. Esta entrega conserva el módulo académico de `dev-maxi` con correo/contraseña, JWT, ADMIN y USER. No reemplaza el backend compartido ni publica la presentación interactiva.
 
+## Actualización de la aplicación: interfaz y creación de cuentas
+
+En `dev-maxi` se renovó la interfaz para computadora y celular y se añadió **Crear cuenta** en la pantalla de acceso. El registro utiliza Supabase y crea perfiles **USER**; las funciones ADMIN de paquetes conservan sus permisos.
+
+- [Qué cambió, cómo usarlo y cómo verificarlo](docs/ACTUALIZACION_INTERFAZ.md).
+- [Vista del inicio de sesión](docs/imagenes/interfaz/login-escritorio.png) y [registro en celular](docs/imagenes/interfaz/registro-celular.png).
+- [Comprobaciones de la rama en GitHub Actions](https://github.com/Sergionixx/MilenioExpress/actions?query=branch%3Adev-maxi): abrir la ejecución de la versión que se consulta.
+
+Esta actualización es posterior al corte del informe académico. El PDF, ZIP y reportes anteriores conservan los resultados de su versión; no describen automáticamente este rediseño.
+
 ## Preparar y ejecutar
 
 Requisitos: Node.js 24 y pnpm 10.34.3 (también declarados en `.mise.toml`).
@@ -17,7 +27,7 @@ pnpm dev
 
 Abrir `http://localhost:8443`. El repositorio es privado: quien clone necesita acceso concedido por su propietario. El cliente conserva la URL y clave **pública** del Supabase existente. Para otro proyecto, copiar `.env.example` a `.env.local` y reemplazar `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` por valores públicos reales del entorno de pruebas. No usar los marcadores de ejemplo literalmente.
 
-Las cuentas se administran en Supabase Auth. Los perfiles nuevos nacen como USER; el rol ADMIN se asigna únicamente desde administración de la base. No existe un selector de rol que conceda privilegios. ADMIN registra paquetes para un perfil existente; USER consulta únicamente sus paquetes. La guía se genera en PostgreSQL, con una secuencia y restricción UNIQUE.
+Las personas pueden registrarse desde **Crear cuenta** con nombre, correo y contraseña. Si Supabase exige confirmación por correo, deben abrir el enlace recibido antes de iniciar sesión. Las cuentas se guardan en Supabase Auth. Los perfiles nuevos nacen como USER; el rol ADMIN se asigna únicamente desde administración de la base. No existe un selector de rol que conceda privilegios. ADMIN registra paquetes para un perfil existente; USER consulta únicamente sus paquetes. La guía se genera en PostgreSQL, con una secuencia y restricción UNIQUE.
 
 ## Variables y backend
 
@@ -50,7 +60,7 @@ pnpm build
 pnpm serve
 ```
 
-`test:coverage` exige al menos 80% en líneas, ramas y funciones y genera TAP y LCOV en `reportes/pruebas-unitarias/`. El alcance es el **módulo API de creación/consulta con control de acceso y sus helpers declarados**: reglas de negocio, permisos, cliente HTTP, sesión, mensajes de acceso, handler HTTP y adaptador de datos. La cifra no representa cobertura de toda la interfaz React o del motor PostgreSQL.
+`test:coverage` exige al menos 80% en líneas, ramas y funciones y genera TAP y LCOV en `reportes/pruebas-unitarias/`. El alcance es el **módulo API de creación/consulta con control de acceso y sus helpers declarados**: reglas de negocio, permisos, cliente HTTP, sesión, mensajes de acceso y registro, handler HTTP y adaptador de datos. La cifra no representa cobertura de toda la interfaz React o del motor PostgreSQL.
 
 El servidor del build abre `http://127.0.0.1:4174`, soporta rutas de la SPA y cabeceras CSP/anticlickjacking/nosniff. `node scripts/deployment-smoke.mjs` comprueba HTML, bundle, rutas y cabeceras. La alternativa reproducible es:
 

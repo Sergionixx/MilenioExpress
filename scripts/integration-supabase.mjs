@@ -34,6 +34,7 @@ const functionUrl = `${projectUrl}/functions/v1/make-server-845b49a4`;
 const output = "reportes/integracion/resultados.json";
 const runId = randomUUID();
 const createdUsers = [];
+const signupEmail = `ui-signup-${runId}@example.test`;
 const started = new Date();
 const report = {
   schemaVersion: 1,
@@ -265,6 +266,16 @@ try {
       baseURL: "http://127.0.0.1:4180",
       supabaseUrl: projectUrl,
       anonKey,
+      signupEmail,
+      verifySignup: async () => {
+        const { users } = checkResult(await adminDb.auth.admin.listUsers(), "Read isolated signup fixture.");
+        const signup = users.find(user => user.email === signupEmail);
+        assert.ok(signup, "Public registration must persist a real Auth user.");
+        createdUsers.push(signup.id);
+        const profile = checkResult(await adminDb.from("profiles").select("role,display_name").eq("id", signup.id).single(), "Public registration must create a profile.");
+        assert.equal(profile.role, "USER");
+        assert.equal(profile.display_name, "Nuevo usuario de prueba");
+      },
     });
     report.ui = { status: ui.status, summary: ui.summary, report: "reportes/integracion/ui-resultados.json" };
   }
@@ -281,6 +292,12 @@ try {
   process.exitCode = 1;
 } finally {
   try {
+    // Find the unique signup fixture even if the browser failed after creating it.
+    if (process.env.MILENIO_UI_SMOKE === "1") {
+      const { users } = checkResult(await adminDb.auth.admin.listUsers(), "Locate signup fixture for cleanup.");
+      const signup = users.find(user => user.email === signupEmail);
+      if (signup && !createdUsers.includes(signup.id)) createdUsers.push(signup.id);
+    }
     if (createdUsers.length) {
       checkResult(await adminDb.from("shipments").delete().in("owner_id", createdUsers), "Synthetic shipments must be removed.");
       for (const id of createdUsers) checkResult(await adminDb.auth.admin.deleteUser(id), "Synthetic accounts must be removed.");

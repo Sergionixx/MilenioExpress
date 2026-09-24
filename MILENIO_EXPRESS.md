@@ -2,17 +2,19 @@
 
 Guía del proyecto académico en la rama `dev-maxi`. Describe el módulo que existe en el código y distingue las propuestas futuras. El informe y las evidencias de calidad se consultan en [docs/INFORME_CIERRE.md](docs/INFORME_CIERRE.md).
 
+Actualización posterior a la entrega académica: [interfaz renovada y registro público de cuentas](docs/ACTUALIZACION_INTERFAZ.md).
+
 ## 1. Funcionamiento de app
 
-Milenio Express es una aplicación web adaptable a pantallas de celular. Su módulo actual permite registrar un paquete, generar una guía y consultar los datos autorizados del envío. Se abre en un navegador; esta entrega no es una aplicación Android nativa ni genera un APK.
+Milenio Express es una aplicación web adaptable a computadora y celular. Su módulo actual permite registrar un paquete, generar una guía y consultar los datos autorizados del envío. Se abre en un navegador; esta entrega no es una aplicación Android nativa ni genera un APK.
 
-El acceso comienza con correo y contraseña mediante Supabase Auth. El servidor verifica el token de la sesión y consulta el rol guardado en la base de datos. El usuario no puede convertirse en administrador modificando la interfaz, enviando un campo `role` o alterando los metadatos de su cuenta.
+La pantalla de acceso permite **Crear cuenta** con nombre, correo y contraseña. Los perfiles nuevos nacen como USER; si el servicio exige confirmar el correo, se muestra ese paso antes de entrar. El acceso continúa con correo y contraseña mediante Supabase Auth. El servidor verifica el token de la sesión y consulta el rol guardado en la base de datos. El usuario no puede convertirse en administrador modificando la interfaz, enviando un campo `role` o alterando los metadatos de su cuenta.
 
 | Perfil | Operaciones disponibles |
 | --- | --- |
 | ADMIN | Consultar propietarios, registrar paquetes para un propietario existente y consultar todos los paquetes. |
 | USER | Consultar su perfil y los paquetes que le pertenecen, tanto en el listado como por número de guía. |
-| Sin sesión | Abrir el acceso. La API rechaza la creación y las consultas protegidas. El endpoint de salud es público. |
+| Sin sesión | Abrir el acceso y crear una cuenta USER. La API rechaza la creación y las consultas protegidas. El endpoint de salud es público. |
 
 **Registro de un paquete.** La persona con rol ADMIN abre «Registrar paquete», selecciona al propietario e introduce destinatario, dirección, ciudad y descripción. El formulario y el servidor comprueban los campos. La base de datos genera una guía con el formato `ME-AAAA-########`, garantiza su unicidad y guarda el paquete con estado `Registrado`. La pantalla de confirmación muestra la guía devuelta por el servidor y permite copiarla. Si el navegador impide usar el portapapeles, la guía queda seleccionable para copiarla manualmente.
 
@@ -20,7 +22,7 @@ El acceso comienza con correo y contraseña mediante Supabase Auth. El servidor 
 
 **Sesión y errores.** La aplicación recupera la sesión al recargar, ofrece cierre de sesión y oculta las pantallas protegidas cuando el servidor rechaza el acceso con `401`. Distingue falta de permiso, guía inexistente, campos incorrectos y fallos de conexión. Una operación que falla no se presenta como un registro exitoso.
 
-El historial actual reúne los paquetes y su registro inicial. No implementa todavía un recorrido logístico completo con asignación de repartidores, recolección, tránsito, entrega, fotografías o firma. Tampoco se incluyen registro público de cuentas, geolocalización, avisos, operación sin conexión ni pagos. Esas funciones requieren otra iteración y criterios propios.
+El historial actual reúne los paquetes y su registro inicial. No implementa todavía un recorrido logístico completo con asignación de repartidores, recolección, tránsito, entrega, fotografías o firma. Tampoco se incluyen geolocalización, avisos, operación sin conexión ni pagos. Esas funciones requieren otra iteración y criterios propios.
 
 La rama `feature/presentacion-interactiva` contiene trabajo de presentación independiente. Su README autorizado se utilizó como referencia de trabajo, pero esa presentación no se fusionó con `dev-maxi`. La entrega conserva el flujo académico de acceso, creación y consulta.
 
