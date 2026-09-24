@@ -45,3 +45,9 @@ La pantalla pública de acceso se revisó en navegador a 320 y 375 px: no hubo d
 La sección anterior conserva el resultado de la rama de Juan del 22 de septiembre. En `dev-sergionix` ya se aplicó la migración, se desplegó la función y se probó el flujo con cuentas ficticias ADMIN y USER; los resultados de integración y las capturas están en [SERGIO_VERIFICACION.md](SERGIO_VERIFICACION.md).
 
 El comando `pnpm test:coverage` ahora incluye `src/lib/session.ts` junto a los tres módulos medidos antes. Resultado: **17 pruebas aprobadas** y **100 % de líneas, ramas y funciones en esos cuatro módulos**; el umbral sigue siendo 80 %. No representa cobertura de todos los componentes React, del adaptador Deno ni de PostgreSQL.
+
+## Presentación interactiva — rama `feature/presentacion-interactiva`
+
+Se añadieron pruebas del servicio de presentaciones y del cálculo de avance del proyector. `pnpm test:coverage` mide también `supabase/functions/server/presentation.ts` y `src/presentation/model.ts`: **23 pruebas aprobadas, 99,08 % de líneas, 95,56 % de ramas y 97,96 % de funciones** en los seis módulos incluidos. Se verificó además `pnpm exec tsc --noEmit`, `pnpm build` y `deno check --config supabase/functions/server/deno.json supabase/functions/server/index.tsx`. La vista de ejemplo del proyector se revisó en navegador: muestra varias líneas, sus puntos de control y el avance visual sin desplazamiento horizontal.
+
+Estas pruebas no sustituyen la prueba de integración con dos dispositivos. La migración y la función nuevas todavía no se han aplicado al proyecto Supabase compartido, y el cliente web todavía no se ha publicado para esta ampliación.

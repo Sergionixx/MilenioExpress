@@ -22,7 +22,7 @@ Los perfiles existentes en `auth.users` se incorporan al aplicar la migración. 
 
 ## Contrato de la API
 
-Todas las rutas usan el prefijo `/make-server-845b49a4`. Salvo `/health`, requieren `Authorization: Bearer <access_token>`. El navegador envía además la clave pública del proyecto en `apikey`; la clave de servicio nunca se envía al cliente.
+Todas las rutas usan el prefijo `/make-server-845b49a4`. Salvo `/health` y la lectura pública de una presentación, requieren `Authorization: Bearer <access_token>`. El navegador envía además la clave pública del proyecto en `apikey`; la clave de servicio nunca se envía al cliente.
 
 | Método | Ruta | Permiso | Respuesta |
 | --- | --- | --- | --- |
@@ -63,3 +63,17 @@ apikey: <public_anon_key>
 Los errores tienen formato `{ "error": "Mensaje en español", "code": "CODIGO" }`. Ejemplos: guía mal formada `400 INVALID_GUIDE`, guía inexistente `404 SHIPMENT_NOT_FOUND`, guía de otro propietario `403 FORBIDDEN`, ausencia de sesión `401 UNAUTHENTICATED`, token inválido o vencido `401 INVALID_TOKEN`, validación del formulario `400 VALIDATION_ERROR`, guía duplicada `409 GUIDE_CONFLICT` y dependencia temporalmente indisponible `503 SERVICE_UNAVAILABLE`.
 
 No se actualiza el estado ni se registra evidencia de entrega en esta etapa. Esa operación requiere datos y pruebas de una historia posterior.
+
+## Simulación para la presentación
+
+La migración `migrations/20260924051741_presentation_simulation.sql` agrega `presentation_runs` y `presentation_shipments`. Es independiente de `shipments`. Aplicarla **antes** de desplegar la versión de la función Edge de la rama `feature/presentacion-interactiva`. La migración activa RLS; sólo concede lectura pública de `presentation_shipments`, que guarda códigos de países y fechas ficticias. Las escrituras pasan por la función Edge y requieren un perfil `ADMIN` autenticado. La tabla se incorpora a la publicación `supabase_realtime` para mostrar inserciones nuevas en el proyector. Un identificador de presentación distinto separa cada demostración.
+
+| Método | Ruta | Permiso | Respuesta |
+| --- | --- | --- | --- |
+| POST | `/presentation/runs` | ADMIN | `{ id, createdAt }`, HTTP 201 |
+| GET | `/presentation/runs/:runId/shipments` | Público | `[{ id, runId, originCountry, destinationCountry, createdAt }]` |
+| POST | `/presentation/runs/:runId/shipments` | ADMIN | Envío simulado creado, HTTP 201 |
+
+El cuerpo de la última ruta es `{ "originCountry": "MX", "destinationCountry": "JP" }`; los países deben ser distintos y usan códigos de dos letras. El cliente ofrece una lista definida en `src/presentation/model.ts`. Los errores siguen el formato de la API existente: `400 INVALID_PRESENTATION` para un identificador mal formado, `404 PRESENTATION_NOT_FOUND` para una presentación inexistente, `403 FORBIDDEN` para una escritura con rol `USER` y `503 SERVICE_UNAVAILABLE` para fallos de almacenamiento.
+
+La aplicación web abre `/presentacion/control` para el atendiente y `/presentacion/pantalla/:runId` para el proyector. El proyector acepta lectura sin sesión, pero el identificador en el enlace no es un secreto de acceso: los datos son intencionalmente ficticios y públicos. Antes de presentarlo en dos dispositivos se necesita publicar el cliente web con HTTPS y comprobar el flujo completo tras aplicar la migración y desplegar la función. Esta rama aún no aplica cambios al proyecto Supabase compartido.

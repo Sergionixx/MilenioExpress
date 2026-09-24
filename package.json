@@ -11,7 +11,7 @@
     "test": "node --experimental-strip-types --test tests/*.test.ts",
     "test:live-auth": "node scripts/live-auth-smoke.mjs",
     "test:live-roles": "node scripts/live-role-smoke.mjs",
-    "test:coverage": "node --experimental-strip-types --test --experimental-test-coverage --test-coverage-include=src/lib/http.ts --test-coverage-include=src/lib/session.ts --test-coverage-include=supabase/functions/server/domain.ts --test-coverage-include=supabase/functions/server/service.ts --test-coverage-lines=80 --test-coverage-branches=80 --test-coverage-functions=80 tests/*.test.ts"
+    "test:coverage": "node --experimental-strip-types --test --experimental-test-coverage --test-coverage-include=src/lib/http.ts --test-coverage-include=src/lib/session.ts --test-coverage-include=supabase/functions/server/domain.ts --test-coverage-include=supabase/functions/server/service.ts --test-coverage-include=supabase/functions/server/presentation.ts --test-coverage-include=src/presentation/model.ts --test-coverage-lines=80 --test-coverage-branches=80 --test-coverage-functions=80 tests/*.test.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.112.4",

@@ -6,20 +6,31 @@ import { AppError } from "./domain.ts";
 import type { ProfileRow, ShipmentInput, ShipmentRow } from "./domain.ts";
 import { createShipmentService } from "./service.ts";
 import type { ShipmentRepository } from "./service.ts";
+import { createPresentationService } from "./presentation.ts";
+import type { PresentationInput, PresentationRepository, PresentationRunRow, PresentationShipmentRow } from "./presentation.ts";
 
 const base = "/make-server-845b49a4";
 const shipmentColumns = "id,guide,owner_id,recipient,address,city,description,status,created_at";
 const profileColumns = "id,email,display_name,role";
+const presentationColumns = "id,run_id,origin_country,destination_country,created_at";
+const presentationRunColumns = "id,created_at";
 
-function createRepository(): ShipmentRepository {
+let database: ReturnType<typeof createClient> | undefined;
+function databaseClient() {
+  if (database) return database;
   const url = Deno.env.get("SUPABASE_URL");
   const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   if (!url || !serviceRoleKey) {
     throw new Error("Supabase server environment is not configured.");
   }
-  const db = createClient(url, serviceRoleKey, {
+  database = createClient(url, serviceRoleKey, {
     auth: { autoRefreshToken: false, persistSession: false },
   });
+  return database;
+}
+
+function createRepository(): ShipmentRepository {
+  const db = databaseClient();
 
   return {
     async verifyToken(token) {
@@ -88,9 +99,58 @@ function createRepository(): ShipmentRepository {
   };
 }
 
+function createPresentationRepository(): PresentationRepository {
+  const db = databaseClient();
+  return {
+    async createRun() {
+      const { data, error } = await db.from("presentation_runs").insert({ id: crypto.randomUUID() }).select(presentationRunColumns).single();
+      if (error) throw error;
+      return data as PresentationRunRow;
+    },
+    async getRun(runId) {
+      const { data, error } = await db.from("presentation_runs").select(presentationRunColumns).eq("id", runId).maybeSingle();
+      if (error) throw error;
+      return data as PresentationRunRow | null;
+    },
+    async listShipments(runId) {
+      const rows: PresentationShipmentRow[] = [];
+      const pageSize = 500;
+      for (let offset = 0; ; offset += pageSize) {
+        const { data, error } = await db.from("presentation_shipments")
+          .select(presentationColumns)
+          .eq("run_id", runId)
+          .order("created_at", { ascending: true })
+          .order("id", { ascending: true })
+          .range(offset, offset + pageSize - 1);
+        if (error) throw error;
+        const page = (data ?? []) as PresentationShipmentRow[];
+        rows.push(...page);
+        if (page.length < pageSize) return rows;
+      }
+    },
+    async createShipment(runId, input: PresentationInput) {
+      const { data, error } = await db.from("presentation_shipments").insert({
+        run_id: runId,
+        origin_country: input.originCountry,
+        destination_country: input.destinationCountry,
+      }).select(presentationColumns).single();
+      if (error?.code === "23503") {
+        throw new AppError(404, "PRESENTATION_NOT_FOUND", "No se encontró esa presentación.");
+      }
+      if (error) throw error;
+      return data as PresentationShipmentRow;
+    },
+  };
+}
+
 let service: ReturnType<typeof createShipmentService> | undefined;
 function shipmentService() {
   return service ??= createShipmentService(createRepository());
+}
+
+let presentation: ReturnType<typeof createPresentationService> | undefined;
+function presentationService() {
+  return presentation ??= createPresentationService(createPresentationRepository());
 }
 
 function bearerToken(c: Context): string | undefined {
@@ -122,6 +182,20 @@ app.use(
 );
 
 app.get(`${base}/health`, (c) => c.json({ status: "ok" }));
+
+app.post(`${base}/presentation/runs`, async (c) => {
+  const actor = await shipmentService().authenticate(bearerToken(c));
+  return c.json(await presentationService().createRun(actor), 201);
+});
+
+app.get(`${base}/presentation/runs/:runId/shipments`, async (c) => {
+  return c.json(await presentationService().listShipments(c.req.param("runId")));
+});
+
+app.post(`${base}/presentation/runs/:runId/shipments`, async (c) => {
+  const actor = await shipmentService().authenticate(bearerToken(c));
+  return c.json(await presentationService().createShipment(actor, c.req.param("runId"), await parseJson(c)), 201);
+});
 
 app.get(`${base}/me`, async (c) => {
   const actor = await shipmentService().authenticate(bearerToken(c));

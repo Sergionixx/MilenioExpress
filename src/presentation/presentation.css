@@ -1,0 +1,69 @@
+.presentation-control .presentation-panel {
+  display: grid;
+  gap: 15px;
+  padding: 20px;
+  margin-top: 24px;
+  border: 1px solid #dce5f2;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 8px 28px #17345b0b;
+}
+.presentation-control .presentation-panel h2 { margin: 0; font: 800 18px 'Manrope', sans-serif; }
+.presentation-control .presentation-panel p { margin: 0; color: #60718c; font-size: 13px; line-height: 1.5; }
+.presentation-control .presentation-panel-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.presentation-count { padding: 5px 9px; border-radius: 99px; background: #e9f2ff; color: #0759c8; font-size: 11px; font-weight: 800; white-space: nowrap; }
+.presentation-control .presentation-panel label { display: grid; gap: 7px; color: #32435d; font-size: 12px; font-weight: 700; }
+.presentation-control .presentation-panel input,
+.presentation-control .presentation-panel select { min-width: 0; width: 100%; border: 1px solid #d8e0ea; border-radius: 12px; padding: 12px 13px; color: #132541; background: #fff; }
+.presentation-control .presentation-panel input { font-size: 11px; }
+.presentation-control .presentation-panel .primary-button { width: 100%; padding: 0 12px; }
+.presentation-control .presentation-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+.presentation-control .presentation-actions .secondary-button { padding: 0 6px; text-decoration: none; text-align: center; }
+.presentation-control .text-button { margin-top: 17px; }
+.presentation-control .form-error { margin-top: 14px; }
+.presentation-feedback { margin: 15px 0 0; padding: 11px 13px; border-radius: 11px; background: #e8f7ee; color: #16653e; font-size: 12px; line-height: 1.4; }
+.presentation-back { display: inline-block; margin-top: 22px; color: #0759c8; font-size: 12px; font-weight: 800; }
+
+.presentation-screen { height: 100dvh; overflow: hidden; display: flex; flex-direction: column; color: #f3f7ff; background: radial-gradient(circle at 70% -20%, #164d92 0, transparent 40%), #071d3b; font-family: 'DM Sans', sans-serif; }
+.presentation-screen-header { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 23px clamp(24px, 4vw, 72px) 20px; border-bottom: 1px solid #ffffff24; }
+.presentation-screen-kicker { color: #79bdff; font-size: 12px; font-weight: 800; letter-spacing: 2px; }
+.presentation-screen-header h1 { margin: 8px 0 4px; font: 800 clamp(27px, 3.3vw, 55px)/1.1 'Manrope', sans-serif; letter-spacing: -1.5px; }
+.presentation-screen-header p { margin: 0; color: #aac2e1; font-size: clamp(13px, 1.25vw, 18px); }
+.presentation-screen-stats { display: grid; min-width: 115px; justify-items: center; padding: 13px 18px; border: 1px solid #ffffff38; border-radius: 18px; background: #ffffff12; }
+.presentation-screen-stats strong { font: 800 34px/1 'Manrope', sans-serif; }
+.presentation-screen-stats span { color: #aac2e1; font-size: 12px; }
+.presentation-screen-stats small { margin-top: 8px; color: #f9c871; font-size: 11px; white-space: nowrap; }
+.presentation-screen-stats small.connected { color: #70e4ab; }
+.presentation-screen-main { flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; padding: 16px clamp(24px, 4vw, 72px); }
+.presentation-empty { display: grid; justify-items: center; align-content: center; min-height: 48vh; text-align: center; color: #aac2e1; }
+.presentation-empty > span { color: #79bdff; font-size: 58px; }
+.presentation-empty h2 { margin: 10px 0 6px; color: white; font: 800 30px 'Manrope', sans-serif; }
+.presentation-empty p { margin: 0; }
+.presentation-screen-error { border: 1px solid #ffb9ad; border-radius: 12px; padding: 16px; color: #ffe2dd; background: #8b2b2b55; }
+.presentation-journeys { display: grid; align-content: start; gap: 10px; flex: 1; min-height: 0; overflow-y: auto; padding-right: 7px; }
+.presentation-journey { border: 1px solid #ffffff24; border-radius: 18px; padding: 11px 27px 29px; background: #ffffff0e; }
+.presentation-journey-heading { display: flex; align-items: center; gap: 15px; }
+.presentation-journey-number { color: #79bdff; font: 800 15px 'Manrope', sans-serif; }
+.presentation-journey-heading strong { flex: 1; font: 700 clamp(16px, 1.6vw, 24px) 'Manrope', sans-serif; }
+.presentation-journey-heading strong span { color: #79bdff; }
+.presentation-journey-state { padding: 7px 12px; border-radius: 99px; background: #2a67b788; color: #d8eaff; font-size: 12px; font-weight: 800; white-space: nowrap; }
+.presentation-rail { position: relative; height: 5px; margin: 23px 51px 0; border-radius: 99px; background: #527197; }
+.presentation-rail-progress { position: absolute; top: 0; left: 0; height: 5px; border-radius: 99px; background: linear-gradient(90deg, #5bb8ff, #79e4d7); }
+.presentation-rail-marker { position: absolute; top: 50%; width: 20px; height: 20px; transform: translate(-50%, -50%); border: 4px solid #d4fcf8; border-radius: 50%; background: #078cbd; box-shadow: 0 0 0 7px #56c6ec36, 0 0 20px #63d8ef; }
+.presentation-checkpoint { position: absolute; top: 50%; display: grid; justify-items: center; transform: translate(-50%, -50%); }
+.presentation-checkpoint-dot { display: block; width: 12px; height: 12px; border: 2px solid #93aacc; border-radius: 50%; background: #123b68; }
+.presentation-checkpoint.reached .presentation-checkpoint-dot { border-color: #a6f6e8; background: #31c4bc; }
+.presentation-checkpoint small { position: absolute; top: 14px; color: #a9bedb; font-size: 10px; font-weight: 700; white-space: nowrap; }
+.presentation-screen-footer { padding: 12px clamp(24px, 4vw, 72px); color: #7c9abc; font-size: 11px; text-align: right; }
+@media (max-width: 700px) {
+  .presentation-screen-header { padding: 23px 17px; }
+  .presentation-screen-header h1 { letter-spacing: -.8px; }
+  .presentation-screen-stats { min-width: 86px; padding: 9px; }
+  .presentation-screen-stats strong { font-size: 25px; }
+  .presentation-screen-main { padding: 16px; }
+  .presentation-journey { padding: 15px 14px 31px; }
+  .presentation-journey-heading { gap: 8px; flex-wrap: wrap; }
+  .presentation-journey-state { font-size: 10px; padding: 5px 8px; }
+  .presentation-rail { margin-left: 37px; margin-right: 37px; }
+  .presentation-checkpoint small { font-size: 8px; }
+}

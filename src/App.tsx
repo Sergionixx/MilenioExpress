@@ -20,6 +20,8 @@ import {
 import { ApiError, apiFetch, supabase } from "./lib/supabase"
 import { loginErrorMessage } from "./lib/authErrors"
 import { SESSION_REJECTED_EVENT } from "./lib/session"
+import PresentationControl from "./presentation/Control"
+import PresentationScreen from "./presentation/Screen"
 
 type Role = "ADMIN" | "USER"
 type Account = { id: string; email: string; name: string; role: Role }
@@ -499,6 +501,18 @@ function Home() {
           />
         )}
       </section>
+      {account?.role === "ADMIN" && (
+        <section className="section">
+          <div className="section-title">
+            <div>
+              <div className="eyebrow">PARA LA PRESENTACIÓN</div>
+              <h2>Envíos entre países</h2>
+            </div>
+          </div>
+          <p className="muted-text">Simula rutas en vivo desde el celular y muéstralas en el proyector.</p>
+          <Link to="/presentacion/control" className="secondary-button">Abrir control de presentación</Link>
+        </section>
+      )}
     </main>
   )
 }
@@ -1045,8 +1059,14 @@ function Profile() {
   )
 }
 
+function PresentationControlRoute() {
+  const { account } = useAccount()
+  return <PresentationControl isAdmin={account?.role === "ADMIN"} />
+}
+
 const router = createBrowserRouter([
   { path: "/", Component: Auth },
+  { path: "/presentacion/pantalla/:runId", Component: PresentationScreen },
   {
     Component: Protected,
     children: [
@@ -1056,6 +1076,8 @@ const router = createBrowserRouter([
       { path: "/historial", Component: History },
       { path: "/registrar", Component: Register },
       { path: "/perfil", Component: Profile },
+      { path: "/presentacion/control", Component: PresentationControlRoute },
+      { path: "/presentacion/control/:runId", Component: PresentationControlRoute },
     ],
   },
   { path: "*", element: <Navigate to="/inicio" replace /> },
