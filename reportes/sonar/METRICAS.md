@@ -1,6 +1,6 @@
 # Métricas del análisis equivalente
 
-Generado automáticamente por `scripts/quality-report.mjs` el 2026-09-24T07:20:36.245Z. El dato original está en `baseline.json` y `final.json`; el dashboard está en `final.html`. No es un informe de SonarQube Server.
+Generado automáticamente por `scripts/quality-report.mjs` el 2026-09-24T08:16:45.851Z. El dato original está en `baseline.json` y `final.json`; el dashboard está en `final.html`. No es un informe de SonarQube Server.
 
 | Métrica | Inicial | Final |
 |---|---:|---:|

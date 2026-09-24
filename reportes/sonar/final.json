@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
   "label": "final",
-  "generatedAt": "2026-09-24T07:20:36.245Z",
-  "revision": "0469db39eef618e09c50c5af88bed250032e54d6",
+  "generatedAt": "2026-09-24T08:16:45.851Z",
+  "revision": "82ad3033067d5e7e896fb27a792f70575a090c87",
   "snapshot": "árbol de trabajo; los hashes del manifiesto identifican el código analizado",
-  "sourceDigest": "4b3723381684712297e98f70956293dc717b3bc8d90edc835c726575b45fb2ce",
+  "sourceDigest": "8634170e505887e8b02e9ec97bfea9b221e1b803c9d011f9dd7e16808cedcfc7",
   "configDigest": "aa87aa3f71cb273641b6ed335641658250934d7a8c3febfaf610e08c39fbfed2",
   "tools": {
-    "node": "v25.4.0",
+    "node": "v24.21.0",
     "eslint": "10.11.0",
     "sonarjs": "4.2.1",
     "typescriptParser": "8.70.1",
@@ -249,7 +249,7 @@
       "sonarjs/x-powered-by",
       "sonarjs/xml-parser-xxe"
     ],
-    "dependencyLockSha256": "3c12b79f7157d035fe8c19e964792891810544f7c860f33a11c59ac4e3957f8e",
+    "dependencyLockSha256": "eb722209428c588b0566c39717536c25bfa62821f6251bcc3c5f4dbe0b9719f6",
     "baselineNote": "Las fuentes de la referencia se analizan con las herramientas y tipos instalados actualmente, iguales a los del corte final; no se afirma una ejecución histórica del equipo."
   },
   "scope": {
@@ -292,14 +292,14 @@
     "branches": 99.07,
     "functions": 100,
     "source": "reportes/pruebas-unitarias/coverage.tap",
-    "sha256": "856eaf8b26140bfa6b7fafc4a255691b22795a56e2f0c2d67b77238ea1b2f8fa",
+    "sha256": "882e5b0bacf27eda6df9587104e84b43eceb5c5a5ca1324e921198f1d18b1595",
     "scope": "Módulo declarado por test:coverage; no equivale a cobertura de toda la aplicación."
   },
   "audit": null,
   "manifest": [
     {
       "file": "src/App.tsx",
-      "sha256": "673cbad73e9a25722e45113732c358a539204317b7b17b93ac8e4262fb0eb4e8",
+      "sha256": "cb4e042f8d653dcc2a7fead0075d085932831c299ea71ca3e74b17e405f6f55d",
       "physicalLines": 1069
     },
     {

@@ -1,0 +1,158 @@
+{
+  "schemaVersion": 1,
+  "startedAt": "2026-09-24T08:19:23.985Z",
+  "revision": "82ad3033067d5e7e896fb27a792f70575a090c87",
+  "environment": "Chromium aislado + build Vite temporal + Supabase local real",
+  "syntheticData": true,
+  "backend": "http://127.0.0.1:54321",
+  "frontend": "http://127.0.0.1:4180",
+  "viewportWidths": [
+    320,
+    375,
+    430
+  ],
+  "limitations": [
+    "Emulación de navegador; no dispositivo físico.",
+    "Vite preview se usa para el backend local. La CSP y el contenedor publicado se comprueban por separado.",
+    "Las fuentes web externas se bloquean para mantener el recorrido local."
+  ],
+  "cases": [
+    {
+      "id": "UI-01",
+      "label": "Login móvil, foco por teclado y error de credenciales incorrectas",
+      "status": "passed",
+      "durationMs": 774
+    },
+    {
+      "id": "UI-02",
+      "label": "Login ADMIN real y formulario de registro móvil",
+      "status": "passed",
+      "durationMs": 765
+    },
+    {
+      "id": "UI-03",
+      "label": "ADMIN registra paquete, recibe guía y la copia al portapapeles",
+      "status": "passed",
+      "durationMs": 364
+    },
+    {
+      "id": "UI-04",
+      "label": "Logout ADMIN y rechazo de ruta protegida tras recargar",
+      "status": "passed",
+      "durationMs": 590
+    },
+    {
+      "id": "UI-05",
+      "label": "USER consulta el paquete creado en la interfaz a tres anchos",
+      "status": "passed",
+      "durationMs": 881
+    },
+    {
+      "id": "UI-06",
+      "label": "USER conserva acceso y consulta válida tras recarga",
+      "status": "passed",
+      "durationMs": 608
+    },
+    {
+      "id": "UI-07",
+      "label": "La consulta ajena muestra rechazo y la guía inválida recibe validación",
+      "status": "passed",
+      "durationMs": 754
+    },
+    {
+      "id": "UI-08",
+      "label": "Logout USER borra la sesión y el detalle vuelve a exigir acceso",
+      "status": "passed",
+      "durationMs": 486
+    },
+    {
+      "id": "UI-09",
+      "label": "Captura del tablero global de calidad generado",
+      "status": "passed",
+      "durationMs": 366
+    }
+  ],
+  "screenshots": [
+    {
+      "file": "evidencias/ci-ui/login-320.png",
+      "width": 320,
+      "noHorizontalOverflow": true
+    },
+    {
+      "file": "evidencias/ci-ui/login-375.png",
+      "width": 375,
+      "noHorizontalOverflow": true
+    },
+    {
+      "file": "evidencias/ci-ui/login-430.png",
+      "width": 430,
+      "noHorizontalOverflow": true
+    },
+    {
+      "file": "evidencias/ci-ui/login-foco-teclado-320.png",
+      "width": 320,
+      "noHorizontalOverflow": true
+    },
+    {
+      "file": "evidencias/ci-ui/login-error-credenciales-430.png",
+      "width": 430,
+      "noHorizontalOverflow": true
+    },
+    {
+      "file": "evidencias/ci-ui/registro-320.png",
+      "width": 320,
+      "noHorizontalOverflow": true
+    },
+    {
+      "file": "evidencias/ci-ui/registro-375.png",
+      "width": 375,
+      "noHorizontalOverflow": true
+    },
+    {
+      "file": "evidencias/ci-ui/registro-430.png",
+      "width": 430,
+      "noHorizontalOverflow": true
+    },
+    {
+      "file": "evidencias/ci-ui/confirmacion-copia-375.png",
+      "width": 375,
+      "noHorizontalOverflow": true
+    },
+    {
+      "file": "evidencias/ci-ui/consulta-propia-320.png",
+      "width": 320,
+      "noHorizontalOverflow": true
+    },
+    {
+      "file": "evidencias/ci-ui/consulta-propia-375.png",
+      "width": 375,
+      "noHorizontalOverflow": true
+    },
+    {
+      "file": "evidencias/ci-ui/consulta-propia-430.png",
+      "width": 430,
+      "noHorizontalOverflow": true
+    },
+    {
+      "file": "evidencias/ci-ui/consulta-ajena-rechazada-320.png",
+      "width": 320,
+      "noHorizontalOverflow": true
+    },
+    {
+      "file": "evidencias/ci-ui/guia-invalida-320.png",
+      "width": 320,
+      "noHorizontalOverflow": true
+    },
+    {
+      "file": "evidencias/ci-ui/calidad-dashboard.png",
+      "source": "reportes/sonar/final.html"
+    }
+  ],
+  "status": "passed",
+  "finishedAt": "2026-09-24T08:19:30.859Z",
+  "summary": {
+    "passed": 9,
+    "failed": 0,
+    "totalPlanned": 9
+  }
+}

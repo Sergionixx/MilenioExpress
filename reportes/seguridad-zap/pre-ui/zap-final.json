@@ -1,8 +1,8 @@
 {
 	"@programName": "ZAP",
 	"@version": "2.17.0",
-	"@generated": "Thu, 24 Sept 2026 01:55:21",
-	"created": "2026-09-24T07:55:21.888760Z",
+	"@generated": "Thu, 24 Sept 2026 01:17:48",
+	"created": "2026-09-24T07:17:48.730411Z",
 	"insights":[
 		{
 			"level": "Low",
@@ -104,8 +104,8 @@
 					"instances":[ 
 						{
 							"id": "3",
-							"uri": "http://127.0.0.1:4174/assets/index-PVLazV2d.js",
-							"nodeName": "http:\/\/127.0.0.1:4174\/assets\/index-PVLazV2d.js",
+							"uri": "http://127.0.0.1:4174/assets/index-DFbIAQwB.js",
+							"nodeName": "http:\/\/127.0.0.1:4174\/assets\/index-DFbIAQwB.js",
 							"method": "GET",
 							"param": "",
 							"attack": "",
@@ -133,27 +133,17 @@
 					"desc": "<p>The application appears to be a modern web application. If you need to explore it automatically then the Ajax Spider may well be more effective than the standard one.</p>",
 					"instances":[ 
 						{
-							"id": "2",
-							"uri": "http://127.0.0.1:4174",
-							"nodeName": "http:\/\/127.0.0.1:4174",
-							"method": "GET",
-							"param": "",
-							"attack": "",
-							"evidence": "<script type=\"module\" crossorigin src=\"/assets/index-PVLazV2d.js\"></script>",
-							"otherinfo": "No links have been found while there are scripts, which is an indication that this is a modern web application."
-						},
-						{
 							"id": "1",
 							"uri": "http://127.0.0.1:4174/",
 							"nodeName": "http:\/\/127.0.0.1:4174\/",
 							"method": "GET",
 							"param": "",
 							"attack": "",
-							"evidence": "<script type=\"module\" crossorigin src=\"/assets/index-PVLazV2d.js\"></script>",
+							"evidence": "<script type=\"module\" crossorigin src=\"/assets/index-DFbIAQwB.js\"></script>",
 							"otherinfo": "No links have been found while there are scripts, which is an indication that this is a modern web application."
 						}
 					],
-					"count": "2",
+					"count": "1",
 					"systemic": true,
 					"solution": "<p>This is an informational alert and so no changes are required.</p>",
 					"otherinfo": "<p>No links have been found while there are scripts, which is an indication that this is a modern web application.</p>",

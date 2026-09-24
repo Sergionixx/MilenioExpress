@@ -4,7 +4,7 @@
 
 Se ejecutó ZAP 2.17.0 sobre copias locales autorizadas de Milenio Express. El plan usa el spider tradicional para obtener páginas y recursos, seguido por reglas pasivas y generación de reportes HTML/JSON. No incluye escaneo activo, credenciales ni operaciones contra el backend compartido de Supabase. Los reportes originales están en [`reportes/seguridad-zap`](../reportes/seguridad-zap/).
 
-La referencia anterior corresponde al commit `0469db3`, exportado con `git archive`, compilado sin alterar el repositorio y servido por `vite preview` en `http://127.0.0.1:4173/`. El reescaneo corresponde al build corregido servido con `scripts/serve.mjs` en `http://127.0.0.1:4174/`. El cambio de servidor forma parte de la corrección: los headers HTTP deben aplicarse donde se entregan los archivos, no solo en React.
+La referencia anterior corresponde al commit `0469db3`, exportado con `git archive`, compilado sin alterar el repositorio y servido por `vite preview` en `http://127.0.0.1:4173/`. El reescaneo final corresponde al commit [`ede06a6`](https://github.com/Sergionixx/MilenioExpress/commit/ede06a621162763f52f23ca07872b79b31b5adbe), compilado después de corregir el nombre accesible del botón Buscar y servido con `scripts/serve.mjs` en `http://127.0.0.1:4174/`. Se ejecutó el 24/09/2026 entre **07:55:15 y 07:55:28 UTC**, según [run.json](../reportes/seguridad-zap/final/run.json). El cambio de servidor forma parte de la corrección: los headers HTTP deben aplicarse donde se entregan los archivos, no solo en React.
 
 Cada ejecución conserva `plan.yaml`, `execution.log`, `run.json` (versión, horas y resultado), `http-root.json` (headers y hash del HTML) y los reportes originales. El script `scripts/zap-scan.mjs` rechaza destinos fuera de localhost/127.0.0.1, mantiene el alcance del spider en ese origen y no configura usuarios ni tokens. No se filtraron ni se rebajaron riesgos en el reporte original.
 
@@ -12,7 +12,7 @@ Cada ejecución conserva `plan.yaml`, `execution.log`, `run.json` (versión, hor
 
 Ambas ejecuciones finalizaron con código 0 y el mensaje del motor `Automation plan succeeded!`; el spider descubrió 28 URLs en cada ejecución. Se utilizaron exactamente la misma versión y reglas, detalladas en [`tool.json`](../reportes/seguridad-zap/tool.json). El alcance del contexto y de los informes se limita al origen loopback indicado.
 
-| Tipos de alerta por riesgo | Antes, commit 0469db3 | Después, build corregido |
+| Tipos de alerta por riesgo | Antes, commit 0469db3 | Después, commit ede06a6 |
 |---|---:|---:|
 | Alto | 0 | 0 |
 | Medio | 2 | 0 |
@@ -23,7 +23,9 @@ Se eliminaron los tres tipos de alerta con riesgo bajo o medio observados (3 →
 
 El reescaneo intermedio se conserva en [`post-headers`](../reportes/seguridad-zap/post-headers/): detectó además una observación informativa 10019 por ausencia de `Content-Type` en la respuesta 404 de `/sitemap.xml`. Se corrigió asignando MIME por defecto antes de responder errores y se ejecutó de nuevo el plan; la observación ya no aparece en el reporte final. Los archivos de ese directorio conservan los nombres originales `zap-final.*` de aquella ejecución, sin edición del reporte del motor.
 
-Evidencia directa: [HTML inicial](../reportes/seguridad-zap/baseline/zap-baseline.html), [JSON inicial](../reportes/seguridad-zap/baseline/zap-baseline.json), [HTML final](../reportes/seguridad-zap/final/zap-final.html), [JSON final](../reportes/seguridad-zap/final/zap-final.json) y [comparación derivada](../reportes/seguridad-zap/comparacion.json). Los manifiestos `baseline/build-sha256.json` y `final/build-sha256.json` identifican por SHA-256 los archivos compilados, y el final incluye el servidor HTTP corregido. El commit de entrega contiene esa versión; `run.json` identifica que se escaneó antes de crear el commit de cierre.
+La ejecución posterior a los headers y anterior a la corrección de accesibilidad se conserva completa en [`pre-ui`](../reportes/seguridad-zap/pre-ui/). Tras modificar `App.tsx` se volvió a compilar y escanear, de modo que los resultados en `final/` corresponden a la nueva versión `ede06a6`; mantienen 0 tipos altos, medios o bajos y 2 informativos. Los directorios históricos no se presentan como escaneos de esa versión nueva.
+
+Evidencia directa: [HTML inicial](../reportes/seguridad-zap/baseline/zap-baseline.html), [JSON inicial](../reportes/seguridad-zap/baseline/zap-baseline.json), [HTML final](../reportes/seguridad-zap/final/zap-final.html), [JSON final](../reportes/seguridad-zap/final/zap-final.json) y [comparación derivada](../reportes/seguridad-zap/comparacion.json). Los manifiestos `baseline/build-sha256.json` y [final/build-sha256.json](../reportes/seguridad-zap/final/build-sha256.json) identifican por SHA-256 los archivos compilados; el final registra la revisión completa `ede06a621162763f52f23ca07872b79b31b5adbe` y el servidor HTTP corregido. El commit posterior de documentación conserva los reportes de esa revisión identificada.
 
 ## Hallazgos iniciales y decisiones
 
@@ -37,7 +39,7 @@ Evidencia directa: [HTML inicial](../reportes/seguridad-zap/baseline/zap-baselin
 
 ## Reproducción
 
-Se requiere Node 22.6+ y Java 17+ para ZAP; la ejecución documentada utilizó Node 25.4.0 y Java 23.0.2. Descargar ZAP 2.17.0 portable desde la [página oficial](https://www.zaproxy.org/download/) y descomprimir fuera del repositorio. El paquete Linux puede ejecutarse en macOS con Java instalado según esa página.
+Para reproducir el proyecto se recomienda Node 24 y pnpm 10.34.3, como el README y CI; ZAP requiere Java 17+. La ejecución local documentada utilizó Node 25.4.0 y Java 23.0.2. Descargar ZAP 2.17.0 portable desde la [página oficial](https://www.zaproxy.org/download/) y descomprimir fuera del repositorio. El paquete Linux puede ejecutarse en macOS con Java instalado según esa página.
 
 SHA-256 verificado del archivo `ZAP_2.17.0_Linux.tar.gz`: `efe799aaa3627db683b43f00c9c210aea0b75c00cc8f0a0f0434d12bb3ddde5a`, coincide con el [manifiesto oficial de la versión](https://raw.githubusercontent.com/zaproxy/zap-admin/master/ZapVersions-2.17.xml).
 

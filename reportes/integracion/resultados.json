@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "runId": "fd7de76b-ab4c-4252-9eb8-0240aef55f04",
+  "startedAt": "2026-09-24T08:19:21.621Z",
+  "revision": "82ad3033067d5e7e896fb27a792f70575a090c87",
+  "target": "http://127.0.0.1:54321",
+  "environment": "Supabase local: Auth, PostgreSQL, RLS y Edge Function reales",
+  "syntheticData": true,
+  "status": "passed",
+  "cases": [
+    {
+      "id": "INT-01",
+      "label": "Función local disponible",
+      "status": "passed",
+      "durationMs": 44
+    },
+    {
+      "id": "INT-02",
+      "label": "Cuentas ficticias y perfiles creados por el trigger; rol confiable",
+      "status": "passed",
+      "durationMs": 357
+    },
+    {
+      "id": "INT-03",
+      "label": "Login real y roles ADMIN/USER recuperados del servidor",
+      "status": "passed",
+      "durationMs": 471
+    },
+    {
+      "id": "INT-04",
+      "label": "Ausencia de JWT y JWT inválido rechazados en rutas protegidas",
+      "status": "passed",
+      "durationMs": 78
+    },
+    {
+      "id": "INT-05",
+      "label": "JWT firmado válido aceptado y la misma identidad con JWT vencido rechazada",
+      "status": "passed",
+      "durationMs": 78
+    },
+    {
+      "id": "INT-06",
+      "label": "ADMIN crea dos paquetes y recibe guías persistidas distintas",
+      "status": "passed",
+      "durationMs": 170
+    },
+    {
+      "id": "INT-07",
+      "label": "USER consulta datos propios y ADMIN consulta datos ajenos",
+      "status": "passed",
+      "durationMs": 211
+    },
+    {
+      "id": "INT-08",
+      "label": "USER no crea, no lista propietarios y no consulta guías ajenas",
+      "status": "passed",
+      "durationMs": 203
+    },
+    {
+      "id": "INT-09",
+      "label": "Guías inválidas/inexistentes y campos adulterados reciben errores claros",
+      "status": "passed",
+      "durationMs": 207
+    },
+    {
+      "id": "INT-10",
+      "label": "RLS permite lectura propia y excluye filas ajenas en acceso directo",
+      "status": "passed",
+      "durationMs": 27
+    },
+    {
+      "id": "INT-11",
+      "label": "RLS/permisos rechazan inserción USER y elevación de rol directa",
+      "status": "passed",
+      "durationMs": 13
+    },
+    {
+      "id": "INT-12",
+      "label": "Acceso anónimo directo no obtiene ni registra paquetes",
+      "status": "passed",
+      "durationMs": 9
+    },
+    {
+      "id": "INT-13",
+      "label": "La restricción UNIQUE rechaza colisión de guía sin sobrescribir",
+      "status": "passed",
+      "durationMs": 12
+    },
+    {
+      "id": "INT-14",
+      "label": "Logout local retira la sesión usada por el cliente",
+      "status": "passed",
+      "durationMs": 86
+    }
+  ],
+  "cleanup": {
+    "status": "passed",
+    "accountsRemoved": 2
+  },
+  "ui": {
+    "status": "passed",
+    "summary": {
+      "passed": 9,
+      "failed": 0,
+      "totalPlanned": 9
+    },
+    "report": "reportes/integracion/ui-resultados.json"
+  },
+  "finishedAt": "2026-09-24T08:19:31.066Z",
+  "durationMs": 9445,
+  "summary": {
+    "passed": 14,
+    "failed": 0,
+    "totalPlanned": 14
+  }
+}
