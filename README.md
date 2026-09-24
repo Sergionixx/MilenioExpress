@@ -27,7 +27,7 @@ pnpm dev
 
 Abrir `http://localhost:8443`. El repositorio es privado: quien clone necesita acceso concedido por su propietario. El cliente conserva la URL y clave **pública** del Supabase existente. Para otro proyecto, copiar `.env.example` a `.env.local` y reemplazar `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` por valores públicos reales del entorno de pruebas. No usar los marcadores de ejemplo literalmente.
 
-Las personas pueden registrarse desde **Crear cuenta** con nombre, correo y contraseña. Si Supabase exige confirmación por correo, deben abrir el enlace recibido antes de iniciar sesión. Las cuentas se guardan en Supabase Auth. Los perfiles nuevos nacen como USER; el rol ADMIN se asigna únicamente desde administración de la base. No existe un selector de rol que conceda privilegios. ADMIN registra paquetes para un perfil existente; USER consulta únicamente sus paquetes. La guía se genera en PostgreSQL, con una secuencia y restricción UNIQUE.
+Las personas pueden registrarse desde **Crear cuenta** con nombre, correo y contraseña y entrar inmediatamente, sin confirmar el correo mediante un enlace. En el proyecto Supabase debe estar desactivada la opción **Confirm email**; el proveedor **Email** permanece habilitado para el acceso con contraseña. Las cuentas se guardan en Supabase Auth. Los perfiles nuevos nacen como USER; el rol ADMIN se asigna únicamente desde administración de la base. No existe un selector de rol que conceda privilegios. ADMIN registra paquetes para un perfil existente; USER consulta únicamente sus paquetes. La guía se genera en PostgreSQL, con una secuencia y restricción UNIQUE.
 
 ## Variables y backend
 
