@@ -1,21 +1,34 @@
-# Presentación interactiva en línea
+# Usar la presentación
 
-Rama: `feature/presentacion-interactiva`. `main` no se modificó.
+## Preparar
 
-## Preparación
+1. En la computadora, abre el enlace privado del organizador. Conserva el fragmento `#key=…`; no lo compartas con los espectadores.
+2. Pulsa **Iniciar presentación**. Esto crea una sesión vacía y separada de las anteriores.
+3. Abre **Proyector**, pulsa **Pantalla completa** y proyecta esa pestaña.
+4. Comparte el enlace para espectadores o muestra el QR del proyector. Ese QR sólo contiene el enlace público de la presentación, nunca el secreto del organizador.
 
-Supabase `rltahgouyixqquspofsf` tiene activado el acceso anónimo, las cuatro migraciones aplicadas y la función Edge desplegada. El secreto del organizador está en Supabase y en un archivo local fuera del repositorio, bajo el perfil del responsable del proyecto. Nunca compartas ese secreto ni el enlace del proyector con los espectadores.
+## Dinámica
 
-El cliente web necesita un dominio HTTPS común para la computadora y los celulares. Las rutas directas están configuradas para Vercel (`vercel.json`) y Netlify (`public/_redirects`). Un despliegue temporal de Vercel caduca aproximadamente una hora después de publicarse; para una exposición real, publícalo o reclama el despliegue desde una cuenta de hosting propia. Al cambiar de dominio, conserva la misma parte `#key=…` en el enlace privado del organizador y abre ese enlace en el dominio nuevo.
+El teléfono tiene dos acciones: **Rastrear paquete** y **Crear paquete**. Para crear, basta un nombre de paquete y los países de origen/destino. Se genera una guía de seis caracteres y aparece en el teléfono y proyector. **Mis paquetes** contiene sólo los creados desde ese navegador, incluso después de recargar.
 
-## Orden durante la exposición
+Cualquier espectador puede escribir una guía visible en el proyector para consultar su recorrido. No requiere registrarse ni crear una identidad. Rastrear un paquete ajeno no lo agrega a su lista personal.
 
-1. En la computadora, abre el enlace **privado del organizador** `/presentacion/control#key=…` e inicia una presentación.
-2. Abre en el proyector el enlace **privado del proyector** que aparece en la primera tarjeta. Puedes poner el navegador en pantalla completa para ocultar su barra de direcciones.
-3. Comparte **únicamente** el enlace de la segunda tarjeta con los espectadores. Ese enlace no contiene la clave privada.
-4. Cada espectador escribe su nombre en su celular, nombra el paquete, elige país de salida y destino y pone un código de rastreo de cuatro dígitos. Ve la línea de tiempo de su propio paquete en la misma pantalla.
-5. El proyector agrega las rutas nuevas automáticamente. Los espectadores no ven el control ni las rutas ajenas desde su enlace.
+Hay 32 países y regiones y cinco instalaciones con nombres concretos por ruta. Los envíos son ficticios; la simulación dura 90 segundos y no representa una conexión comercial real ni un envío físico.
 
-Los nombres y paquetes de esta dinámica son ficticios y visibles en el proyector. Los códigos de rastreo deben ser únicos sólo dentro de una presentación. Si dos personas eligen el mismo, la segunda debe poner otro. Borrar los datos del navegador hace que se pierda la identidad anónima y el acceso a sus paquetes anteriores. Para más de 30 espectadores detrás de la misma IP en una hora, revisa el límite de altas anónimas de Supabase antes de la exposición.
+El proyector adapta la cuadrícula al número de paquetes y a la altura de pantalla. Se verificaron 30 tarjetas sin scroll a 1280×720, 1366×768 y 1920×1080. Más de 30 usan páginas de 30 con rotación automática y botones anterior/siguiente.
 
-`pnpm test:live-guests` comprobó dos celulares simulados: cada uno ve sólo su paquete, el proyector ve ambos, un código repetido se rechaza y la tabla no permite lectura pública. También se probó en navegador el envío desde el menú oscuro del participante y su aparición en la pantalla del proyector.
+## Accesos
+
+- [Página pública](https://milenio-express-presentacion.citrus-grape-3384.chatgpt.site): abre la presentación más reciente.
+- [Administración](https://milenio-express-presentacion.citrus-grape-3384.chatgpt.site/admin): login del equipo y panel existente, sólo ADMIN.
+- Control y proyector: enlaces privados generados con la clave existente del organizador. La clave no está en Git ni en la web pública.
+
+La configuración aplicada en Supabase conserva el acceso anónimo para crear paquetes. Se añadieron las migraciones `20260927022355` y `20260927024324`, con historial remoto registrado, y se desplegó la función Edge. El rastreo público devuelve sólo guía, nombre ficticio del paquete, países, presentación y fecha; no devuelve el identificador ni nombre del participante. Los listados y la tabla siguen protegidos.
+
+Si se borran los datos del navegador se pierde su lista personal; las guías permiten seguir rastreando. Las identidades de creación están sujetas a los límites de altas anónimas de Supabase: conviene reutilizar el navegador durante la dinámica y revisar su límite antes de una exposición masiva desde una misma red.
+
+## Evidencia
+
+[Reporte de UI](evidencia/presentacion/resultados-ui.json), ocho capturas de teléfono/escritorio/proyector y las pruebas reproducibles de README. Se comprobaron guías únicas, separación de dos teléfonos, rastreo público desde un tercero, recarga, errores, actualización de progreso y login administrativo.
+
+Los avisos de los asesores de Supabase sobre funciones existentes con SECURITY DEFINER y la configuración de contraseñas no constituyen una auditoría completa del proyecto. Las políticas de lectura propia para usuarios anónimos son intencionales; las pruebas verifican su aislamiento.

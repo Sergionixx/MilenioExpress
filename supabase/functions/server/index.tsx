@@ -6,7 +6,7 @@ import { AppError } from "./domain.ts";
 import type { ProfileRow, ShipmentInput, ShipmentRow } from "./domain.ts";
 import { createShipmentService } from "./service.ts";
 import type { ShipmentRepository } from "./service.ts";
-import { createPresentationService } from "./presentation.ts";
+import { createPresentationService, generateTrackingCode } from "./presentation.ts";
 import type { PresentationInput, PresentationRepository, PresentationRunRow, PresentationShipmentRow } from "./presentation.ts";
 
 const base = "/make-server-845b49a4";
@@ -102,6 +102,18 @@ function createRepository(): ShipmentRepository {
 function createPresentationRepository(): PresentationRepository {
   const db = databaseClient();
   return {
+    async latestRun() {
+      const { data, error } = await db.from("presentation_runs").select(presentationRunColumns)
+        .order("created_at", { ascending: false }).order("id", { ascending: false }).limit(1).maybeSingle();
+      if (error) throw error;
+      return data as PresentationRunRow | null;
+    },
+    async getShipment(runId, trackingCode) {
+      const { data, error } = await db.from("presentation_shipments").select(presentationColumns)
+        .eq("run_id", runId).eq("tracking_code", trackingCode).maybeSingle();
+      if (error) throw error;
+      return data as PresentationShipmentRow | null;
+    },
     async createRun() {
       const { data, error } = await db.from("presentation_runs").insert({ id: crypto.randomUUID() }).select(presentationRunColumns).single();
       if (error) throw error;
@@ -130,6 +142,7 @@ function createPresentationRepository(): PresentationRepository {
       }
     },
     async createShipment(runId, input: PresentationInput, participant) {
+      for (let attempt = 0; attempt < 5; attempt++) {
       const { data, error } = await db.from("presentation_shipments").insert({
         run_id: runId,
         origin_country: input.originCountry,
@@ -137,16 +150,18 @@ function createPresentationRepository(): PresentationRepository {
         participant_id: participant.id,
         participant_name: participant.name,
         package_name: input.packageName,
-        tracking_code: input.trackingCode,
+        tracking_code: generateTrackingCode(),
       }).select(presentationColumns).single();
       if (error?.code === "23505") {
-        throw new AppError(409, "TRACKING_CODE_TAKEN", "Ese código de cuatro dígitos ya está en uso. Elige otro.");
+        continue;
       }
       if (error?.code === "23503") {
         throw new AppError(404, "PRESENTATION_NOT_FOUND", "No se encontró esa presentación.");
       }
       if (error) throw error;
       return data as PresentationShipmentRow;
+      }
+      throw new AppError(503, "GUIDE_CONFLICT", "No se pudo asignar una guía. Intenta de nuevo.");
     },
   };
 }
@@ -190,6 +205,14 @@ app.use(
 );
 
 app.get(`${base}/health`, (c) => c.json({ status: "ok" }));
+
+app.get(`${base}/presentation/active`, async (c) => c.json(await presentationService().latestRun()));
+
+app.get(`${base}/presentation/runs/:runId`, async (c) => c.json(await presentationService().getRun(c.req.param("runId"))));
+
+app.get(`${base}/presentation/runs/:runId/track/:code`, async (c) => {
+  return c.json(await presentationService().trackShipment(c.req.param("runId"), c.req.param("code")));
+});
 
 app.post(`${base}/presentation/runs`, async (c) => {
   return c.json(await presentationService().createRun(c.req.header("X-Presentation-Key")), 201);

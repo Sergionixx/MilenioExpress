@@ -41,13 +41,15 @@ assert.notEqual(a.id, b.id)
 
 const ownBefore = await request(`/presentation/runs/${run.id}/shipments`, 200, { token: a.token })
 assert.deepEqual(ownBefore, [])
-const orderA = { originCountry: "MX", destinationCountry: "JP", packageName: "Regalo A", trackingCode: "4826" }
-const orderB = { originCountry: "CO", destinationCountry: "ES", packageName: "Regalo B", trackingCode: "7391" }
+const orderA = { originCountry: "MX", destinationCountry: "HK", packageName: "Regalo A" }
+const orderB = { originCountry: "CO", destinationCountry: "ES", packageName: "Regalo B" }
 const routeA = await request(`/presentation/runs/${run.id}/shipments`, 201, { token: a.token, method: "POST", body: orderA })
 const routeB = await request(`/presentation/runs/${run.id}/shipments`, 201, { token: b.token, method: "POST", body: orderB })
 assert.equal(routeA.participantId, a.id)
 assert.equal(routeB.participantId, b.id)
-assert.equal(routeA.trackingCode, "4826")
+assert.match(routeA.trackingCode, /^[A-HJ-NP-Z2-9]{6}$/)
+assert.match(routeB.trackingCode, /^[A-HJ-NP-Z2-9]{6}$/)
+assert.notEqual(routeA.trackingCode, routeB.trackingCode)
 assert.equal(routeB.packageName, "Regalo B")
 
 const [ownA, ownB, projection] = await Promise.all([
@@ -61,10 +63,17 @@ assert.deepEqual(projection.map((item) => item.id), [routeA.id, routeB.id])
 await request(`/presentation/runs/${run.id}/shipments`, 401)
 await request(`/presentation/runs/${run.id}/shipments`, 403, { key: "incorrect" })
 
-const collision = await request(`/presentation/runs/${run.id}/shipments`, 409, {
-  token: b.token, method: "POST", body: { ...orderB, trackingCode: "4826" },
+const untrusted = await request(`/presentation/runs/${run.id}/shipments`, 400, {
+  token: b.token, method: "POST", body: { ...orderB, trackingCode: routeA.trackingCode },
 })
-assert.equal(collision.code, "TRACKING_CODE_TAKEN")
+assert.equal(untrusted.code, "VALIDATION_ERROR")
+const tracked = await request(`/presentation/runs/${run.id}/track/${routeB.trackingCode}`, 200)
+assert.equal(tracked.packageName, orderB.packageName)
+assert.equal("participantId" in tracked, false)
+assert.equal("participantName" in tracked, false)
+assert.equal("id" in tracked, false)
+await request(`/presentation/runs/${run.id}/track/------`, 400)
+await request(`/presentation/runs/${run.id}/track/ZZZZZZ`, 404)
 
 const directA = await a.client.from("presentation_shipments").select("id").eq("run_id", run.id)
 assert.ifError(directA.error)
@@ -76,5 +85,9 @@ const publicClient = createClient(projectUrl, publicKey, { auth: { autoRefreshTo
 const publicRows = await publicClient.from("presentation_shipments").select("id").eq("run_id", run.id)
 assert.ok(publicRows.error, "La tabla de presentación no debe permitir lectura pública")
 
-console.log(`OK: presentación privada ${run.id}; dos paquetes y códigos de cuatro dígitos.`)
-console.log("OK: cada celular ve sólo lo suyo; el proyector ve ambos; código repetido rechazado.")
+await request("/shipments", 403, { token: a.token, method: "POST", body: { ownerId: a.id, recipient: "Prueba", address: "Calle ficticia", city: "Madrid", description: "Simulación" } })
+const unauthorizedWrite = await a.client.from("shipments").insert({ owner_id: a.id, recipient: "Prueba", address: "Calle ficticia", city: "Madrid", description: "Simulación" })
+assert.ok(unauthorizedWrite.error, "La tabla administrativa no debe permitir creación por espectadores")
+
+console.log(`OK: presentación ${run.id}; dos guías automáticas de seis caracteres.`)
+console.log("OK: rastreo público, listas privadas por teléfono y proyector privado con ambos paquetes.")

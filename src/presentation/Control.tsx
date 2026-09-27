@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react"
 import { useLocation, useNavigate, useParams } from "react-router"
-import { apiFetch } from "../lib/supabase"
+import { presentationFetch } from "./api"
 import type { PresentationShipment } from "./model"
 import "./presentation.css"
+import ParticipantQr from "./Qr"
 
 export default function PresentationControl() {
   const { runId } = useParams()
@@ -22,7 +23,7 @@ export default function PresentationControl() {
     let active = true
     async function load() {
       try {
-        const rows = await apiFetch(`/presentation/runs/${encodeURIComponent(runId!)}/shipments`, {
+        const rows = await presentationFetch(`/runs/${encodeURIComponent(runId!)}/shipments`, {
           headers: { "X-Presentation-Key": organizerKey },
         }) as PresentationShipment[]
         if (active) { setShipments(rows); setError("") }
@@ -39,7 +40,7 @@ export default function PresentationControl() {
     setSaving(true)
     setError("")
     try {
-      const run = await apiFetch("/presentation/runs", {
+      const run = await presentationFetch("/runs", {
         method: "POST",
         headers: organizerHeaders,
       }) as { id: string }
@@ -61,7 +62,7 @@ export default function PresentationControl() {
   }
 
   return (
-    <main className="screen presentation-control presentation-host">
+    <main className="presentation-control">
       <div className="eyebrow">SOLO ORGANIZADOR</div>
       <h1>Presentación en vivo</h1>
       {!organizerKey ? (
@@ -93,7 +94,8 @@ export default function PresentationControl() {
           </section>
           <section className="presentation-panel">
             <h2>2. Espectadores</h2>
-            <p>Este es el único enlace que debes compartir. Cada persona escribe su nombre y crea su paquete desde su celular.</p>
+            <ParticipantQr url={participantUrl}/>
+            <p>Comparte este enlace. Cada persona puede crear paquetes y rastrear cualquier guía sin registrarse. Su lista muestra solo los paquetes creados desde su navegador.</p>
             <label className="presentation-url-label">
               Enlace para los celulares
               <input readOnly value={participantUrl} onFocus={(event) => event.currentTarget.select()} />

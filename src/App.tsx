@@ -1,6 +1,6 @@
 import {
   createContext,
-  FormEvent,
+  SubmitEvent,
   ReactNode,
   useContext,
   useEffect,
@@ -14,16 +14,19 @@ import {
   NavLink,
   Outlet,
   RouterProvider,
-  useLocation,
   useNavigate,
   useParams,
 } from "react-router"
 import { ApiError, apiFetch, supabase } from "./lib/supabase"
+import { loginErrorMessage } from "./lib/authErrors"
 import { SESSION_REJECTED_EVENT } from "./lib/session"
 import PresentationControl from "./presentation/Control"
 import PresentationScreen from "./presentation/Screen"
 import PresentationParticipant from "./presentation/Participant"
-import { participantCode } from "./presentation/model"
+import {
+  registrationErrorMessage,
+  validateRegistration,
+} from "./lib/registration"
 
 type Role = "ADMIN" | "USER"
 type Account = { id: string; email: string; name: string; role: Role }
@@ -95,7 +98,9 @@ function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
   async function logout() {
-    const { error: signOutError } = await supabase.auth.signOut({ scope: "local" })
+    const { error: signOutError } = await supabase.auth.signOut({
+      scope: "local",
+    })
     if (signOutError) throw signOutError
     sessionVersion.current++
     setAccount(null)
@@ -221,44 +226,207 @@ function EmptyState({
   )
 }
 
-function Auth() {
+const accessCopy = {
+  login: {
+    eyebrow: "BIENVENIDO A MILENIO EXPRESS", title: "Bienvenido de nuevo",
+    intro: "Inicia sesión para consultar y gestionar tus paquetes.",
+    switchPrompt: "¿Es tu primera vez aquí?", switchLabel: "Crear cuenta", switchPath: "/crear-cuenta",
+    help: "Tus paquetes, disponibles para ti desde cualquier dispositivo.",
+    action: "Iniciar sesión", pending: "Ingresando…",
+  },
+  signup: {
+    eyebrow: "TU ESPACIO EN MILENIO", title: "Crea tu cuenta",
+    intro: "Regístrate para consultar los paquetes asociados a tu cuenta.",
+    switchPrompt: "¿Ya tienes una cuenta?", switchLabel: "Iniciar sesión", switchPath: "/",
+    help: "Tu cuenta te permitirá consultar tus propios paquetes. El equipo administra los registros y permisos.",
+    action: "Crear cuenta", pending: "Creando cuenta…",
+  },
+}
+type AccessFields = { name: string; email: string; password: string; confirmation: string }
+function AccessForm({ registration, pending, error, fields, onChange, onSubmit }: Readonly<{
+  registration: boolean
+  pending: boolean
+  error: string
+  fields: AccessFields
+  onChange: (field: keyof AccessFields, value: string) => void
+  onSubmit: (event: SubmitEvent<HTMLFormElement>) => void
+}>) {
+  const [showPassword, setShowPassword] = useState(false)
+  const copy = registration ? accessCopy.signup : accessCopy.login
+  const errorDescription = error ? "login-error" : undefined
+  const passwordDescription = registration ? "password-help" : errorDescription
+  return (
+    <form className="form-stack" onSubmit={onSubmit} aria-busy={pending}>
+      {registration && (
+        <label>
+          Nombre completo
+          <input
+            autoComplete="name"
+            required
+            minLength={2}
+            maxLength={120}
+            value={fields.name}
+            disabled={pending}
+            onChange={(event) => onChange("name", event.target.value)}
+            placeholder="Tu nombre y apellido"
+          />
+        </label>
+      )}
+      <label>
+        Correo electrónico
+        <input
+          type="email"
+          id="login-email"
+          autoComplete="username"
+          autoCapitalize="none"
+          spellCheck={false}
+          required
+          maxLength={254}
+          disabled={pending}
+          aria-invalid={!!error}
+          aria-describedby={error ? "login-error" : undefined}
+          value={fields.email}
+          onChange={(event) => onChange("email", event.target.value)}
+          placeholder="nombre@ejemplo.com"
+        />
+      </label>
+      <div className="password-field">
+        <label htmlFor="login-password">Contraseña</label>
+        <div className="password-control">
+          <input
+            type={showPassword ? "text" : "password"}
+            id="login-password"
+            autoComplete={
+              registration ? "new-password" : "current-password"
+            }
+            required
+            minLength={registration ? 8 : undefined}
+            disabled={pending}
+            aria-invalid={!!error}
+            aria-describedby={
+              passwordDescription
+            }
+            value={fields.password}
+            onChange={(event) => onChange("password", event.target.value)}
+            placeholder={
+              registration ? "Elige una contraseña" : "Tu contraseña"
+            }
+          />
+          <button
+            type="button"
+            className="password-toggle"
+            aria-label={
+              showPassword ? "Ocultar contraseña" : "Mostrar contraseña"
+            }
+            aria-pressed={showPassword}
+            onClick={() => setShowPassword(!showPassword)}
+          >
+            {showPassword ? "Ocultar" : "Mostrar"}
+          </button>
+        </div>
+        {registration && (
+          <small id="password-help" className="field-help">
+            Utiliza al menos 8 caracteres.
+          </small>
+        )}
+      </div>
+      {registration && (
+        <label>
+          Confirmar contraseña
+          <input
+            type="password"
+            autoComplete="new-password"
+            required
+            disabled={pending}
+            value={fields.confirmation}
+            aria-invalid={!!error}
+            aria-describedby={error ? "login-error" : undefined}
+            onChange={(event) => onChange("confirmation", event.target.value)}
+            placeholder="Escribe de nuevo tu contraseña"
+          />
+        </label>
+      )}
+      {error && (
+        <p className="form-error" id="login-error" role="alert">
+          {error}
+        </p>
+      )}
+      <button
+        className="primary-button"
+        disabled={pending}
+        type="submit"
+      >
+        {pending ? copy.pending : copy.action}
+        <Icon name="arrow" />
+      </button>
+    </form>
+  )
+}
+
+function Auth({ registration = false }: Readonly<{ registration?: boolean }>) {
+  const copy = registration ? accessCopy.signup : accessCopy.login
   const { account, checking, refresh } = useAccount()
   const navigate = useNavigate()
-  const location = useLocation()
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
   const [name, setName] = useState("")
+  const [confirmation, setConfirmation] = useState("")
   const [pending, setPending] = useState(false)
   const [error, setError] = useState("")
-  const destinationRef = useRef<string | null>(null)
-  if (!destinationRef.current) {
-    const requested = new URLSearchParams(location.search).get("next")
-    destinationRef.current = requested?.startsWith("/") && !requested.startsWith("//") ? requested : "/inicio"
-  }
-  const destination = destinationRef.current
   if (checking) return <Loading label="Comprobando acceso…" />
-  if (account) return <Navigate to={destination} replace />
-  async function submit(event: FormEvent<HTMLFormElement>) {
+  if (account) return <Navigate to="/inicio" replace />
+  async function submit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault()
+    if (pending) return
     setError("")
-    const displayName = name.replace(/\s+/g, " ").trim()
-    if (!displayName || displayName.length > 40) {
-      setError("Escribe un nombre de hasta 40 caracteres.")
-      return
+    if (registration) {
+      const validation = validateRegistration({
+        name,
+        email,
+        password,
+        confirmation,
+      })
+      if (validation) {
+        setError(validation)
+        return
+      }
     }
     setPending(true)
     try {
-      const { error: signInError } = await supabase.auth.signInAnonymously({
-        options: { data: { full_name: displayName } },
-      })
-      if (signInError) {
-        setError("No se pudo entrar. Intenta de nuevo en unos momentos.")
-        return
+      if (registration) {
+        const { data, error: signupError } = await supabase.auth.signUp({
+          email: email.trim(),
+          password,
+          options: {
+            data: { full_name: name.trim() },
+          },
+        })
+        if (signupError) {
+          setError(registrationErrorMessage(signupError))
+          return
+        }
+        if (!data.session) {
+          setError("No se pudo iniciar la sesión con la nueva cuenta. Intenta iniciar sesión.")
+          return
+        }
+        setPassword("")
+        setConfirmation("")
+      } else {
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email: email.trim(),
+          password,
+        })
+        if (signInError) {
+          setError(loginErrorMessage(signInError))
+          return
+        }
       }
       const current = await refresh()
       if (!current)
         throw new Error(
-          "No se pudo preparar tu espacio. Intenta de nuevo.",
+          "No se pudo cargar el perfil de acceso. Intenta de nuevo.",
         )
-      navigate(destination, { replace: true })
+      navigate("/inicio", { replace: true })
     } catch (cause) {
       setError(errorMessage(cause))
     } finally {
@@ -266,50 +434,56 @@ function Auth() {
     }
   }
   return (
-    <main className="auth-shell presentation-auth">
-      <section className="auth-top">
-        <div className="brand-mark">
-          <Icon name="box" />
+    <main className="auth-shell">
+      <section className="auth-top" aria-label="Milenio Express">
+        <div className="auth-brand">
+          <div className="brand-mark">
+            <Icon name="box" />
+          </div>
+          <span className="brand-name">
+            milenio<span>express</span>
+          </span>
         </div>
-        <span className="brand-name">
-          milenio<span>express</span>
+        <div className="auth-story">
+          <span className="eyebrow">CONECTAMOS CADA ENTREGA</span>
+          <h2>
+            Cada paquete,
+            <br />
+            un paso más cerca.
+          </h2>
+          <p>
+            Un solo espacio para consultar tus guías y mantener la información
+            de tus paquetes en orden.
+          </p>
+          <div className="route-illustration" aria-hidden="true">
+            <div className="route-station">
+              <Icon name="box" />
+              <span>Origen</span>
+            </div>
+            <div className="route-line">
+              <span />
+              <Icon name="arrow" />
+              <span />
+            </div>
+            <div className="route-station">
+              <Icon name="pin" />
+              <span>Destino</span>
+            </div>
+          </div>
+        </div>
+        <span className="auth-caption">
+          TU PAQUETE. TU GUÍA. TU TRANQUILIDAD.
         </span>
-        <div className="auth-orbit orbit-one" />
-        <div className="auth-orbit orbit-two" />
       </section>
       <section className="auth-card">
-        <div className="eyebrow">PRESENTACIÓN INTERACTIVA</div>
-        <h1>¿Cómo te llamas?</h1>
-        <p>Escribe tu nombre o apodo para participar desde este celular.</p>
-        <form className="form-stack" onSubmit={submit}>
-          <label>
-            Tu nombre
-            <input
-              type="text"
-              id="entry-name"
-              autoComplete="nickname"
-              maxLength={40}
-              required
-              aria-invalid={!!error}
-              aria-describedby={error ? "entry-error" : undefined}
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              placeholder="Ej. Ana"
-            />
-          </label>
-          {error && (
-            <p className="form-error" id="entry-error" role="alert">
-              {error}
-            </p>
-          )}
-          <button className="primary-button" disabled={pending} type="submit">
-            {pending ? "Preparando…" : "Entrar"}
-            <Icon name="arrow" />
-          </button>
-        </form>
-        <p className="auth-help">
-          Este navegador conservará una identidad distinta. Tu nombre o apodo podrá aparecer en el proyector.
-        </p>
+        <div className="eyebrow">{copy.eyebrow}</div>
+        <h1>{copy.title}</h1>
+        <p>{copy.intro}</p>
+        <AccessForm registration={registration} pending={pending} error={error}
+          fields={{ name, email, password, confirmation }} onSubmit={submit}
+          onChange={(field, value) => ({ name: setName, email: setEmail, password: setPassword, confirmation: setConfirmation }[field])(value)} />
+        <div className="auth-switch"><span>Acceso del equipo</span><Link to="/">Volver al rastreo público</Link></div>
+        <p className="auth-help">{copy.help}</p>
       </section>
     </main>
   )
@@ -317,12 +491,11 @@ function Auth() {
 
 function Protected() {
   const { account, checking, error, refresh, logout } = useAccount()
-  const location = useLocation()
   if (checking) return <Loading label="Preparando tu espacio…" />
   if (error)
     return (
       <main className="screen state-screen">
-        <h1>No se pudo preparar tu espacio</h1>
+        <h1>No se pudo verificar tu acceso</h1>
         <p className="form-error" role="alert">
           {error}
         </p>
@@ -330,11 +503,12 @@ function Protected() {
           Reintentar
         </button>
         <button className="text-button" onClick={() => void logout()}>
-          Volver a entrar
+          Cerrar sesión
         </button>
       </main>
     )
-  if (!account) return <Navigate to={`/?next=${encodeURIComponent(location.pathname + location.search)}`} replace />
+  if (!account) return <Navigate to="/admin" replace />
+  if (account.role !== "ADMIN") return <main className="screen state-screen"><h1>Acceso de administración</h1><p>Esta cuenta no tiene permisos de administrador.</p><Link to="/">Abrir rastreo público</Link><button className="secondary-button" onClick={() => void logout()}>Cerrar sesión</button></main>
   return <Shell />
 }
 
@@ -347,6 +521,9 @@ function Shell() {
     .join("")
   return (
     <div className="app-shell">
+      <a className="skip-link" href="#contenido">
+        Saltar al contenido
+      </a>
       <header className="app-header">
         <Link to="/inicio" className="mini-brand">
           <div>
@@ -356,12 +533,32 @@ function Shell() {
             milenio<span>express</span>
           </b>
         </Link>
-        <Link to="/perfil" className="avatar" aria-label="Abrir perfil">
-          {initials}
-        </Link>
+        <div className="workspace-label">
+          <span>Espacio de trabajo</span>
+          <strong>
+            {account?.role === "ADMIN" ? "Gestión de paquetes" : "Mis envíos"}
+          </strong>
+        </div>
+        <div className="header-account">
+          <span className="header-role">
+            {account?.role === "ADMIN" ? "Administrador" : "Mi cuenta"}
+          </span>
+          <Link to="/perfil" className="avatar" aria-label="Abrir perfil">
+            {initials}
+          </Link>
+        </div>
       </header>
-      <Outlet />
+      <div className="workspace-content" id="contenido" tabIndex={-1}>
+        <Outlet />
+      </div>
       <nav className="bottom-nav" aria-label="Navegación principal">
+        <div className="sidebar-brand">
+          <Icon name="box" />
+          <span>
+            milenio<strong>express</strong>
+          </span>
+        </div>
+        <span className="nav-label">ESPACIO DE TRABAJO</span>
         <NavLink to="/inicio">
           <Icon name="box" />
           <span>Inicio</span>
@@ -374,14 +571,23 @@ function Shell() {
           <Icon name="clock" />
           <span>Paquetes</span>
         </NavLink>
-        <NavLink to="/registrar">
-          <Icon name="plus" />
-          <span>Registrar</span>
-        </NavLink>
+        {account?.role === "ADMIN" && (
+          <NavLink to="/registrar">
+            <Icon name="plus" />
+            <span>Registrar</span>
+          </NavLink>
+        )}
         <NavLink to="/perfil">
           <Icon name="user" />
           <span>Perfil</span>
         </NavLink>
+        <div className="sidebar-note">
+          <span className="sidebar-note-mark">ME</span>
+          <div>
+            <strong>Todo en un lugar</strong>
+            <p>Consulta tus paquetes con su número de guía.</p>
+          </div>
+        </div>
       </nav>
     </div>
   )
@@ -431,7 +637,7 @@ function Home() {
   const navigate = useNavigate()
   const [guide, setGuide] = useState("")
   const { items, loading, error, reload } = useShipments()
-  function search(event: FormEvent<HTMLFormElement>) {
+  function search(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault()
     navigate(`/consulta?guia=${encodeURIComponent(guide.trim().toUpperCase())}`)
   }
@@ -439,10 +645,57 @@ function Home() {
     <main className="screen home-screen">
       <div className="greeting">
         <div>
-          <div className="eyebrow">OPERACIONES · HOY</div>
+          <div className="eyebrow">RESUMEN GENERAL</div>
           <h1>Hola, {account?.name.split(" ")[0] || "equipo"}.</h1>
         </div>
-        <span className="online-dot">En línea</span>
+        {account?.role === "ADMIN" ? (
+          <Link to="/registrar" className="primary-button new-shipment">
+            <Icon name="plus" />
+            Registrar paquete
+          </Link>
+        ) : (
+          <span className="session-label">
+            <Icon name="check" />
+            Sesión iniciada
+          </span>
+        )}
+      </div>
+      <p className="muted-text home-intro">
+        {account?.role === "ADMIN"
+          ? "Organiza los registros y encuentra cada paquete desde aquí."
+          : "Consulta tus paquetes y encuentra la información de cada envío."}
+      </p>
+      <div className="overview-grid" aria-label="Resumen de paquetes">
+        <div className="overview-item">
+          <span>Paquetes disponibles</span>
+          <strong>{loading || error ? "—" : items.length}</strong>
+          <small>
+            {account?.role === "ADMIN"
+              ? "Registrados en el sistema"
+              : "Asociados a tu cuenta"}
+          </small>
+          <Icon name="box" />
+        </div>
+        <div className="overview-item">
+          <span>Ciudades de destino</span>
+          <strong>
+            {loading || error
+              ? "—"
+              : new Set(
+                  items.map((item) => item.city.trim().toLocaleLowerCase()),
+                ).size}
+          </strong>
+          <small>En tus paquetes disponibles</small>
+          <Icon name="pin" />
+        </div>
+        <Link className="overview-item overview-action" to="/consulta">
+          <span>¿Tienes una guía?</span>
+          <strong>Encuentra tu paquete</strong>
+          <small>
+            Consultar por número de guía <Icon name="arrow" />
+          </small>
+          <Icon name="search" />
+        </Link>
       </div>
       <form className="tracking-search" onSubmit={search}>
         <Icon name="search" />
@@ -486,7 +739,13 @@ function Home() {
           <EmptyState
             title="Sin paquetes todavía"
             detail="Cuando se registre un paquete aparecerá aquí."
-            action={<Link to="/registrar" className="secondary-button">Registrar paquete</Link>}
+            action={
+              account?.role === "ADMIN" ? (
+                <Link to="/registrar" className="secondary-button">
+                  Registrar paquete
+                </Link>
+              ) : undefined
+            }
           />
         )}
       </section>
@@ -530,7 +789,7 @@ function Lookup() {
   useEffect(() => {
     if (initial) void lookup(initial)
   }, [])
-  function submit(event: FormEvent<HTMLFormElement>) {
+  function submit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault()
     const normalized = guide.trim().toUpperCase()
     navigate(`/consulta?guia=${encodeURIComponent(normalized)}`, {
@@ -556,7 +815,12 @@ function Lookup() {
             placeholder="ME-2026-00000001"
             autoCapitalize="characters"
           />
-          <button className="primary-button" type="submit" disabled={loading}>
+          <button
+            className="primary-button"
+            type="submit"
+            disabled={loading}
+            aria-label="Buscar"
+          >
             <Icon name="search" />
             <span>Buscar</span>
           </button>
@@ -746,6 +1010,7 @@ function History() {
         {statuses.map((status) => (
           <button
             key={status}
+            aria-pressed={filter === status}
             onClick={() => setFilter(status)}
             className={filter === status ? "active" : ""}
           >
@@ -787,7 +1052,7 @@ function Register() {
   const [ownersError, setOwnersError] = useState("")
   const [ownersLoading, setOwnersLoading] = useState(true)
   const [form, setForm] = useState({
-    ownerId: account?.id ?? "",
+    ownerId: "",
     recipient: "",
     address: "",
     city: "",
@@ -798,12 +1063,6 @@ function Register() {
   const [created, setCreated] = useState<Shipment | null>(null)
   const [copyState, setCopyState] = useState("")
   useEffect(() => {
-    if (!account) return
-    if (account.role !== "ADMIN") {
-      setForm((current) => ({ ...current, ownerId: account.id }))
-      setOwnersLoading(false)
-      return
-    }
     apiFetch("/users")
       .then((users: Owner[]) => {
         setOwners(users)
@@ -811,15 +1070,15 @@ function Register() {
       })
       .catch((cause) => setOwnersError(errorMessage(cause)))
       .finally(() => setOwnersLoading(false))
-  }, [account?.id, account?.role])
+  }, [])
+  if (account?.role !== "ADMIN") return <Navigate to="/inicio" replace />
   function update(field: keyof typeof form, value: string) {
     setForm((current) => ({ ...current, [field]: value }))
   }
-  async function submit(event: FormEvent<HTMLFormElement>) {
+  async function submit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault()
     setError("")
-    const ownerId = account?.role === "ADMIN" ? form.ownerId : account?.id ?? ""
-    if (!ownerId || [form.recipient, form.address, form.city, form.description].some((value) => !value.trim())) {
+    if (Object.values(form).some((value) => !value.trim())) {
       setError("Completa todos los campos antes de registrar el paquete.")
       return
     }
@@ -828,7 +1087,7 @@ function Register() {
       const shipment = (await apiFetch("/shipments", {
         method: "POST",
         body: JSON.stringify({
-          ownerId,
+          ownerId: form.ownerId,
           recipient: form.recipient.trim(),
           address: form.address.trim(),
           city: form.city.trim(),
@@ -900,7 +1159,7 @@ function Register() {
           onClick={() => {
             setCreated(null)
             setForm({
-              ownerId: account?.role === "ADMIN" ? owners[0]?.id ?? "" : account?.id ?? "",
+              ownerId: owners[0]?.id ?? "",
               recipient: "",
               address: "",
               city: "",
@@ -914,38 +1173,41 @@ function Register() {
     )
   return (
     <main className="screen">
-      <div className="eyebrow">NUEVO PAQUETE</div>
+      <div className="eyebrow">ADMINISTRACIÓN</div>
       <h1>Registrar paquete</h1>
       <p className="muted-text">La guía se genera al guardar el paquete.</p>
       <form className="register-form" onSubmit={submit}>
-        {account?.role === "ADMIN" ? (
-          <label>
-            Propietario
-            <select
-              value={form.ownerId}
-              onChange={(event) => update("ownerId", event.target.value)}
-              required
-              disabled={ownersLoading || !!ownersError}
-            >
-              <option value="">
-                {ownersLoading ? "Cargando usuarios…" : "Selecciona un usuario"}
+        <div className="form-section-heading">
+          <span>01</span>
+          <div>
+            <h2>Información del paquete</h2>
+            <p>Completa los datos para generar una guía única.</p>
+          </div>
+        </div>
+        <label>
+          Propietario
+          <select
+            value={form.ownerId}
+            onChange={(event) => update("ownerId", event.target.value)}
+            required
+            disabled={ownersLoading || !!ownersError}
+          >
+            <option value="">
+              {ownersLoading ? "Cargando usuarios…" : "Selecciona un usuario"}
+            </option>
+            {owners.map((owner) => (
+              <option key={owner.id} value={owner.id}>
+                {owner.name} · {owner.email}
               </option>
-              {owners.map((owner) => (
-                <option key={owner.id} value={owner.id}>
-                  {owner.name} · {owner.email || "sin correo"}
-                </option>
-              ))}
-            </select>
-          </label>
-        ) : (
-          <p className="muted-text">Este paquete quedará a nombre de {account?.name} en este celular.</p>
-        )}
+            ))}
+          </select>
+        </label>
         {ownersError && (
           <p className="form-error" role="alert">
             {ownersError}
           </p>
         )}
-        <label>
+        <label className="full-width">
           Destinatario
           <input
             required
@@ -994,7 +1256,7 @@ function Register() {
         <button
           className="primary-button"
           type="submit"
-          disabled={saving || ownersLoading || !!ownersError || (account?.role === "ADMIN" && !owners.length)}
+          disabled={saving || ownersLoading || !!ownersError || !owners.length}
         >
           {saving ? "Guardando…" : "Guardar y generar guía"}
           <Icon name="arrow" />
@@ -1011,7 +1273,7 @@ function Profile() {
   async function signOut() {
     try {
       await logout()
-      navigate("/", { replace: true })
+      navigate("/admin", { replace: true })
     } catch (cause) {
       setError(errorMessage(cause))
     }
@@ -1025,10 +1287,9 @@ function Profile() {
           {account?.name[0]?.toUpperCase() || "M"}
         </div>
         <strong>{account?.name}</strong>
-        {account?.email && <span>{account.email}</span>}
-        {account?.id && <span>Código de este navegador: {participantCode(account.id)}</span>}
+        <span>{account?.email}</span>
         <span className="role-badge">
-          {account?.role === "ADMIN" ? "Organizador" : "Participante"}
+          {account?.role === "ADMIN" ? "Administrador" : "Usuario"}
         </span>
       </div>
       {error && (
@@ -1038,35 +1299,21 @@ function Profile() {
       )}
       <button
         onClick={() => void signOut()}
-        className="secondary-button"
-        style={{ marginTop: 20 }}
+        className="secondary-button profile-signout"
       >
-        Cambiar participante
+        Cerrar sesión
       </button>
-      <p className="muted-text">Al cambiar de participante aquí se perderá el acceso a los paquetes anteriores de este navegador.</p>
     </main>
   )
 }
 
-function PresentationControlRoute() {
-  return <PresentationControl />
-}
-
-function PresentationParticipantRoute() {
-  const { account, checking, error, refresh } = useAccount()
-  const location = useLocation()
-  if (checking) return <Loading label="Preparando tu espacio…" />
-  if (error) return <main className="presentation-guest"><p className="form-error" role="alert">{error}</p><button onClick={() => void refresh()}>Reintentar</button></main>
-  if (!account) return <Navigate to={`/?next=${encodeURIComponent(location.pathname)}`} replace />
-  return <PresentationParticipant participant={account} />
-}
-
 const router = createBrowserRouter([
-  { path: "/", Component: Auth },
+  { path: "/", Component: PresentationParticipant },
+  { path: "/admin", element: <Auth key="login" /> },
+  { path: "/presentacion/participar/:runId", Component: PresentationParticipant },
   { path: "/presentacion/pantalla/:runId", Component: PresentationScreen },
-  { path: "/presentacion/control", Component: PresentationControlRoute },
-  { path: "/presentacion/control/:runId", Component: PresentationControlRoute },
-  { path: "/presentacion/participar/:runId", Component: PresentationParticipantRoute },
+  { path: "/presentacion/control", Component: PresentationControl },
+  { path: "/presentacion/control/:runId", Component: PresentationControl },
   {
     Component: Protected,
     children: [
@@ -1078,7 +1325,7 @@ const router = createBrowserRouter([
       { path: "/perfil", Component: Profile },
     ],
   },
-  { path: "*", element: <Navigate to="/inicio" replace /> },
+  { path: "*", element: <Navigate to="/" replace /> },
 ])
 
 export default function App() {

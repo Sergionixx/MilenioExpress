@@ -1,21 +1,40 @@
-# Milenio Express
+# Milenio Express · Presentación pública
 
-`main` se reserva para cambios revisados por Sergionix mediante Pull Request. Esta versión está en `feature/presentacion-interactiva`.
+Rastreo y creación de paquetes ficticios para la dinámica de exposición. El módulo administrativo conserva la interfaz de `dev-maxi`, con acceso mediante correo/contraseña y operaciones de registro exclusivas ADMIN.
 
-## Ejecutar
+## Pantallas
 
-Instala Node y pnpm según `.mise.toml`, ejecuta `pnpm install` y `pnpm dev`. Antes de entregar cambios, ejecuta `pnpm test:coverage`, `pnpm exec tsc --noEmit` y `pnpm build`.
+- **Público:** `/` abre la presentación más reciente. `/presentacion/participar/:runId` fija una presentación concreta. Dos acciones: rastrear y crear paquetes, sin nombre obligatorio, cuenta, correo ni contraseña.
+- **Mis paquetes:** muestra únicamente lo creado desde ese navegador. Supabase emite una identidad anónima al crear el primer paquete; no se crea identidad para rastrear. La sesión se guarda separada de la administrativa.
+- **Administración:** `/admin`; las rutas anteriores de gestión siguen protegidas y sólo ADMIN entra al panel.
+- **Organizador:** enlace privado `/presentacion/control#key=…`. Inicia una presentación y obtiene enlaces independientes para público y proyector.
+- **Proyector:** enlace privado `/presentacion/pantalla/:runId#key=…`. Se actualiza cada dos segundos. Destaca cada guía y adapta filas/columnas a la cantidad de paquetes y altura de pantalla. Hasta 30 paquetes permanecen visibles sin scroll; más de 30 se rotan en páginas cada 12 segundos, con controles manuales.
 
-La aplicación pide **sólo un nombre** a los participantes. Supabase crea una identidad anónima diferente en cada navegador, sin correo ni contraseña. Si se borran los datos del navegador, se pierde el acceso a los paquetes asociados a esa identidad. Las claves `VITE_` son públicas; jamás coloques una clave de servicio u organizador en el cliente o en Git.
+Las guías nuevas se generan en el servidor con seis caracteres, omitiendo caracteres confusos. Se conserva la consulta de guías antiguas de cuatro dígitos. El índice UNIQUE impide duplicados por presentación; las colisiones se reintentan automáticamente. Los participantes no eligen ni envían la guía.
 
-## Presentación en vivo
+32 países y regiones comparten un catálogo de ciudades y aeropuertos con el servidor. Las cinco escalas muestran nombres como Almacén Madrid, Aeropuerto Madrid-Barajas o Aeropuerto de Hong Kong. Los trayectos son simulados y avanzan durante 90 segundos desde la fecha persistida del paquete; recargar no reinicia el recorrido.
 
-Hay tres pantallas oscuras y separadas:
+## Ejecutar y verificar
 
-1. **Organizador, en computadora:** abre su enlace privado `/presentacion/control#key=…`, inicia una presentación y recibe dos enlaces. Sólo este enlace permite iniciar presentaciones.
-2. **Espectador, en celular:** recibe únicamente `/presentacion/participar/:runId`. Escribe su nombre, ve un menú sencillo, nombra su paquete, elige dos países y pone un código de rastreo de **cuatro dígitos**. El código debe ser único en esa presentación. Después ve avanzar su propio paquete por Salida, Clasificación, Tránsito, Aduana y Destino. No tiene menú de organización ni acceso a los paquetes de otros espectadores.
-3. **Proyector:** abre el otro enlace privado `/presentacion/pantalla/:runId#key=…`. Muestra todas las líneas, nombres de paquetes, participantes y códigos; los datos se actualizan automáticamente. El enlace y la clave no se comparten con los espectadores.
+Con Node 24 y pnpm:
 
-Esta dinámica usa paquetes ficticios separados del módulo académico: no contiene dirección, destinatario ni guía `ME-…`. El organizador puede iniciar una presentación nueva sin mezclar rutas previas. `/presentacion/pantalla/vista-previa` muestra datos de ejemplo sólo durante desarrollo.
+```sh
+pnpm install --frozen-lockfile
+pnpm dev
+pnpm test:coverage
+pnpm exec tsc --noEmit
+pnpm build
+```
 
-`pnpm test:live-auth` verifica la función desplegada. `pnpm test:live-presentation` verifica que la pantalla completa no tenga lectura pública. `pnpm test:live-guests` necesita `MILENIO_ORGANIZER_KEY` en el entorno y crea una presentación y dos paquetes ficticios en el proyecto configurado para probar los permisos. La configuración y el contrato del servidor están en [supabase/README.md](supabase/README.md); la publicación web, en [docs/PRESENTACION_EN_LINEA.md](docs/PRESENTACION_EN_LINEA.md).
+Las variables públicas `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` pueden reemplazar el proyecto configurado. Nunca incluir claves de servicio u organizador en `VITE_`.
+
+`pnpm test:live-guests` comprueba dos identidades, guías automáticas, rastreo público sin identidad, aislamiento de listas, RLS y rechazo de creación administrativa por espectadores. `pnpm test:ui-presentation` ejecuta el flujo real en tres navegadores y comprueba el proyector con 30 paquetes en 1280×720, 1366×768 y 1920×1080. Ambos requieren `MILENIO_ORGANIZER_KEY` en el entorno y crean presentaciones ficticias de prueba. La prueba de UI admite `MILENIO_UI_URL` y `MILENIO_BROWSER`; su navegador predeterminado es Edge en Windows.
+
+28 unitarias pasan. Cobertura de los seis módulos declarados: 98.35% líneas, 96.43% ramas, 96.97% funciones; no equivale a cubrir toda la UI. [Evidencias de navegador](docs/evidencia/presentacion/resultados-ui.json).
+
+## En línea
+
+[Abrir la página pública](https://milenio-express-presentacion.citrus-grape-3384.chatgpt.site).
+La publicación usa Sites y `.openai/hosting.json`, con fallback de rutas SPA. La función Edge y los datos permanecen en Supabase. [Orden para la exposición](docs/PRESENTACION_EN_LINEA.md) y [contrato del backend](supabase/README.md).
+
+Esta actualización se trabaja en `codex/presentacion-publica`, derivada de `feature/presentacion-interactiva`. El `main` del repositorio del equipo y la entrega académica de `dev-maxi` no se fusionan automáticamente.

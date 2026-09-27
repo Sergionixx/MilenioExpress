@@ -29,7 +29,7 @@ export function createShipmentService(repo: ShipmentRepository) {
   return {
     async authenticate(token: string | undefined): Promise<Actor> {
       if (!token) {
-        throw new AppError(401, "UNAUTHENTICATED", "Entra con tu nombre para continuar.");
+        throw new AppError(401, "UNAUTHENTICATED", "Debes iniciar sesión.");
       }
       const verified = await fromRepository(() => repo.verifyToken(token));
       if (!verified) {
@@ -79,10 +79,10 @@ export function createShipmentService(repo: ShipmentRepository) {
     },
 
     async createShipment(actor: Actor, value: unknown) {
-      const input = validateShipmentInput(value);
-      if (actor.role !== "ADMIN" && input.ownerId !== actor.id) {
-        throw new AppError(403, "FORBIDDEN", "Sólo puedes registrar paquetes para ti.");
+      if (actor.role !== "ADMIN") {
+        throw new AppError(403, "FORBIDDEN", "Sólo ADMIN puede registrar paquetes.");
       }
+      const input = validateShipmentInput(value);
       const owner = await fromRepository(() => repo.getProfile(input.ownerId));
       if (!owner) {
         throw new AppError(400, "OWNER_NOT_FOUND", "El propietario no existe.");

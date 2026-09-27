@@ -1,27 +1,31 @@
-# Supabase: paquetes académicos y presentación
+# Backend de administración y presentación
 
-El cliente pide un nombre y llama a `signInAnonymously`. Supabase asigna un `auth.users.id` distinto por navegador y el trigger `handle_auth_user_insert` crea el perfil. La opción `[auth] enable_anonymous_sign_ins = true` de `config.toml` debe estar activa en el proyecto remoto. El navegador sólo recibe la URL y la clave publicable; la clave de servicio nunca sale de la función Edge.
+La función `make-server-845b49a4` verifica los tokens con Supabase Auth antes de acceder a perfiles o listas privadas. La clave de servicio permanece en sus secretos.
 
-Las migraciones se aplican en orden: `20260922000000_shipments_and_roles.sql`, `20260924051741_presentation_simulation.sql`, `20260924061348_audience_name_entry.sql` y `20260924063626_presentation_guest_orders.sql`. La última agrega nombre y código de cuatro dígitos a cada paquete simulado, exige unicidad del código por presentación y limita con RLS la lectura directa a las filas propias. Antes de cambiar configuración remota, revisa `supabase config diff --project-ref <ref>`.
+Administración usa correo/contraseña. Los espectadores usan una sesión anónima independiente, creada en segundo plano sólo al crear paquetes. La lectura pública por guía no requiere sesión. El proyecto debe permitir `enable_anonymous_sign_ins`.
 
-El proyecto remoto debe tener el secreto `PRESENTATION_ORGANIZER_KEY`, un valor largo y aleatorio que **no** se guarda en Git ni en variables `VITE_`. La función Edge lo compara con el encabezado `X-Presentation-Key` de los enlaces privados del organizador y del proyector. La clave está en el fragmento `#key=…` de esos enlaces, que no se envía en la solicitud de página; el cliente la transmite sólo a la función Edge en ese encabezado. El enlace del espectador no incluye la clave. Si se pierde, el responsable del proyecto debe fijar un nuevo secreto y generar los nuevos enlaces privados.
-
-## API
-
-Todas las rutas usan el prefijo `/make-server-845b49a4`.
+Todas las rutas usan el prefijo `/make-server-845b49a4`:
 
 | Método | Ruta | Acceso |
-| --- | --- | --- |
+|---|---|---|
 | GET | `/health` | Público |
-| GET | `/me` | Participante identificado |
-| GET | `/users` | `ADMIN` antiguo |
-| GET | `/shipments` | Propios; `ADMIN` ve todos |
-| POST | `/shipments` | Propios; `ADMIN` puede asignar otro propietario |
-| GET | `/shipments/:guide` | Propietario o `ADMIN` |
-| POST | `/presentation/runs` | Sólo clave de organizador |
-| GET | `/presentation/runs/:runId/shipments` | Con clave: todos; con identidad: sólo propios |
-| POST | `/presentation/runs/:runId/shipments` | Participante identificado |
+| GET | `/me` | Sesión verificada |
+| GET | `/users` | ADMIN |
+| GET | `/shipments` | Propietario o ADMIN |
+| POST | `/shipments` | ADMIN, también protegido por RLS |
+| GET | `/shipments/:guide` | Propietario o ADMIN |
+| GET | `/presentation/active` | Público, sólo metadatos de la presentación más reciente |
+| GET | `/presentation/runs/:runId` | Público, sólo metadatos |
+| POST | `/presentation/runs` | Clave del organizador |
+| GET | `/presentation/runs/:runId/track/:code` | Público, un paquete ficticio por guía |
+| GET | `/presentation/runs/:runId/shipments` | Sesión: sólo propios; clave del organizador: todos |
+| POST | `/presentation/runs/:runId/shipments` | Sesión anónima verificada |
 
-Para crear un paquete de la presentación se envía `{ "packageName": "Regalo", "originCountry": "MX", "destinationCountry": "JP", "trackingCode": "4826" }`. El código acepta exactamente cuatro dígitos, incluidos ceros iniciales. Si otra persona ya lo usó en esa presentación, la función responde `409 TRACKING_CODE_TAKEN`. El nombre del participante se toma del perfil verificado y el identificador de la sesión; no del cuerpo enviado por el navegador.
+Para crear: `{ "packageName": "Libros", "originCountry": "HK", "destinationCountry": "ES" }`.
+El servidor asigna una guía de seis caracteres con aleatoriedad criptográfica. PostgreSQL exige unicidad por presentación; el repositorio reintenta hasta cinco veces una colisión. Campos como `trackingCode`, rol o propietario enviados por el cliente se rechazan. El catálogo compartido valida 32 países/regiones.
 
-El proyector consulta la función cada dos segundos. La tabla no concede lectura pública y RLS permite a cada espectador ver sólo sus filas. La función usa la clave de servicio para construir la vista completa **únicamente** después de validar el secreto del organizador. Los paquetes académicos de `shipments` mantienen su propio contrato y guía `ME-…`.
+El rastreo público excluye `id`, `participantId` y `participantName`. No hay listado público. La tabla permite SELECT con RLS sólo al propietario; el organizador obtiene la vista completa mediante la función y su clave privada.
+
+`PRESENTATION_ORGANIZER_KEY` permanece en secretos de Supabase. Los enlaces privados llevan `#key=…` y envían el valor sólo como encabezado `X-Presentation-Key` a la función. No incluirlo en variables públicas ni en enlaces/QR para espectadores.
+
+Las migraciones se aplican en orden. `20260927022355_public_presentation_tracking.sql` admite las nuevas guías y conserva las antiguas; `20260927024324_separate_admin_and_public_packages.sql` restaura la creación exclusiva ADMIN en paquetes académicos. La dinámica crea en `presentation_shipments`, sin alterar las guías académicas `ME-…`.

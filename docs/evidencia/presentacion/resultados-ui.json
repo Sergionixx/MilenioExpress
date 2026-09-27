@@ -1,0 +1,25 @@
+{
+  "checkedAt": "2026-09-27T02:41:50.404Z",
+  "base": "http://localhost:8444",
+  "runId": "9c1a6063-f56d-4233-addf-287fe2e70d61",
+  "checks": [
+    "Página pública sin formulario de acceso",
+    "Guías automáticas únicas y lista personal persistente al recargar",
+    "Un teléfono rastrea el paquete de otro sin incorporarlo a su lista",
+    "Rastreo desde un tercer navegador sin crear identidad; guía inexistente explicada",
+    "30 paquetes y sus guías visibles sin scroll en 1280×720, 1366×768 y 1920×1080",
+    "El progreso avanza automáticamente",
+    "La interfaz administrativa sigue protegida por login"
+  ],
+  "screenshots": [
+    "rastreo-375",
+    "creacion-375",
+    "rastreo-publico-320",
+    "proyector-30-1280",
+    "proyector-30-1366",
+    "proyector-30-1920",
+    "rastreo-escritorio",
+    "creacion-escritorio"
+  ],
+  "status": "passed"
+}

@@ -1,5 +1,6 @@
 import { AppError } from "./domain.ts";
 import type { Actor } from "./domain.ts";
+import { countryCodes } from "./presentation-countries.ts";
 
 export interface PresentationRunRow {
   id: string;
@@ -22,18 +23,18 @@ export interface PresentationInput {
   originCountry: string;
   destinationCountry: string;
   packageName: string;
-  trackingCode: string;
 }
 
 export interface PresentationRepository {
   createRun(): Promise<PresentationRunRow>;
   getRun(runId: string): Promise<PresentationRunRow | null>;
+  latestRun(): Promise<PresentationRunRow | null>;
+  getShipment(runId: string, trackingCode: string): Promise<PresentationShipmentRow | null>;
   listShipments(runId: string, participantId?: string): Promise<PresentationShipmentRow[]>;
   createShipment(runId: string, input: PresentationInput, participant: { id: string; name: string }): Promise<PresentationShipmentRow>;
 }
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const COUNTRY = /^[A-Z]{2}$/;
 
 export function validateRunId(runId: string): string {
   if (!UUID.test(runId)) {
@@ -47,27 +48,28 @@ export function validatePresentationInput(value: unknown): PresentationInput {
     throw new AppError(400, "VALIDATION_ERROR", "El cuerpo debe ser un objeto JSON.");
   }
   const body = value as Record<string, unknown>;
-  const unexpected = Object.keys(body).filter((key) => !["originCountry", "destinationCountry", "packageName", "trackingCode"].includes(key));
+  const unexpected = Object.keys(body).filter((key) => !["originCountry", "destinationCountry", "packageName"].includes(key));
   if (unexpected.length) {
     throw new AppError(400, "VALIDATION_ERROR", `Campos no permitidos: ${unexpected.join(", ")}.`);
   }
   const originCountry = typeof body.originCountry === "string" ? body.originCountry.trim().toUpperCase() : "";
   const destinationCountry = typeof body.destinationCountry === "string" ? body.destinationCountry.trim().toUpperCase() : "";
-  if (!COUNTRY.test(originCountry) || !COUNTRY.test(destinationCountry)) {
+  if (!countryCodes.has(originCountry) || !countryCodes.has(destinationCountry)) {
     throw new AppError(400, "VALIDATION_ERROR", "Selecciona países de origen y destino válidos.");
   }
   if (originCountry === destinationCountry) {
     throw new AppError(400, "VALIDATION_ERROR", "El destino debe ser distinto del origen.");
   }
   const packageName = typeof body.packageName === "string" ? body.packageName.replace(/\s+/g, " ").trim() : "";
-  const trackingCode = typeof body.trackingCode === "string" ? body.trackingCode.trim() : "";
   if (!packageName || packageName.length > 40) {
     throw new AppError(400, "VALIDATION_ERROR", "Ponle un nombre al paquete de hasta 40 caracteres.");
   }
-  if (!/^[0-9]{4}$/.test(trackingCode)) {
-    throw new AppError(400, "VALIDATION_ERROR", "El código de rastreo debe tener exactamente cuatro dígitos.");
-  }
-  return { originCountry, destinationCountry, packageName, trackingCode };
+  return { originCountry, destinationCountry, packageName };
+}
+
+export function generateTrackingCode(): string {
+  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  return [...crypto.getRandomValues(new Uint8Array(6))].map((byte) => alphabet[byte % alphabet.length]).join("");
 }
 
 export function toPresentationShipment(row: PresentationShipmentRow) {
@@ -100,6 +102,30 @@ export function createPresentationService(repo: PresentationRepository, organize
     }
   }
   return {
+    async getRun(runId: string) {
+      const row = await fromRepository(() => repo.getRun(validateRunId(runId)));
+      if (!row) throw new AppError(404, "PRESENTATION_NOT_FOUND", "No se encontró esa presentación.");
+      return { id: row.id, createdAt: row.created_at };
+    },
+    async latestRun() {
+      const run = await fromRepository(() => repo.latestRun());
+      if (!run) throw new AppError(404, "PRESENTATION_NOT_FOUND", "La presentación aún no ha comenzado.");
+      return { id: run.id, createdAt: run.created_at };
+    },
+
+    // Deliberately public: a guide reveals only the fictional route, never the
+    // phone identity, participant name or a list of other people's shipments.
+    async trackShipment(runId: string, guide: string) {
+      const validId = validateRunId(runId);
+      const code = guide.trim().toUpperCase();
+      if (!/^(?:[A-Z2-9]{6}|[0-9]{4})$/.test(code)) {
+        throw new AppError(400, "INVALID_TRACKING_CODE", "Escribe una guía válida de hasta seis caracteres.");
+      }
+      const row = await fromRepository(() => repo.getShipment(validId, code));
+      if (!row) throw new AppError(404, "SHIPMENT_NOT_FOUND", "No encontramos esa guía en esta presentación.");
+      return { runId: row.run_id, originCountry: row.origin_country, destinationCountry: row.destination_country,
+        packageName: row.package_name, trackingCode: row.tracking_code, createdAt: row.created_at };
+    },
     async createRun(key: string | undefined) {
       requireOrganizer(key);
       const row = await fromRepository(() => repo.createRun());

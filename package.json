@@ -12,11 +12,13 @@
     "test:live-auth": "node scripts/live-auth-smoke.mjs",
     "test:live-presentation": "node scripts/live-presentation-smoke.mjs",
     "test:live-guests": "node scripts/live-guest-smoke.mjs",
+    "test:ui-presentation": "node scripts/ui-presentation.mjs",
     "test:live-roles": "node scripts/live-role-smoke.mjs",
     "test:coverage": "node --experimental-strip-types --test --experimental-test-coverage --test-coverage-include=src/lib/http.ts --test-coverage-include=src/lib/session.ts --test-coverage-include=supabase/functions/server/domain.ts --test-coverage-include=supabase/functions/server/service.ts --test-coverage-include=supabase/functions/server/presentation.ts --test-coverage-include=src/presentation/model.ts --test-coverage-lines=80 --test-coverage-branches=80 --test-coverage-functions=80 tests/*.test.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.112.4",
+    "qrcode": "1.5.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router": "^7.9.4"
@@ -24,10 +26,12 @@
   "devDependencies": {
     "@tailwindcss/vite": "^4.0.0",
     "@types/node": "^22.0.0",
+    "@types/qrcode": "1.5.6",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^6.0.0",
     "oxfmt": "^0.2.0",
+    "playwright": "1.63.0",
     "tailwindcss": "^4.0.0",
     "typescript": "^5.7.0",
     "vite": "^8.0.5"
