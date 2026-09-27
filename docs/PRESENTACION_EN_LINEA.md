@@ -19,11 +19,13 @@ El proyector adapta la cuadrícula al número de paquetes y a la altura de panta
 
 ## Accesos
 
-- [Página pública](https://milenio-express-presentacion.citrus-grape-3384.chatgpt.site): abre la presentación más reciente.
-- [Administración](https://milenio-express-presentacion.citrus-grape-3384.chatgpt.site/admin): login del equipo y panel existente, sólo ADMIN.
+- [Página pública](https://milenio-express-presentacion.lospollso123.chatgpt.site): abre la presentación más reciente.
+- [Administración](https://milenio-express-presentacion.lospollso123.chatgpt.site/admin): login del equipo y panel existente, sólo ADMIN.
 - Control y proyector: enlaces privados generados con la clave existente del organizador. La clave no está en Git ni en la web pública.
 
 La configuración aplicada en Supabase conserva el acceso anónimo para crear paquetes. Se añadieron las migraciones `20260927022355` y `20260927024324`, con historial remoto registrado, y se desplegó la función Edge. El rastreo público devuelve sólo guía, nombre ficticio del paquete, países, presentación y fecha; no devuelve el identificador ni nombre del participante. Los listados y la tabla siguen protegidos.
+
+El límite de altas anónimas se amplió de 30 a 100 para dar margen a los participantes desde una red compartida. Se aplicó sólo ese parámetro de Auth y se verificó con el diff remoto; las demás propiedades se conservaron.
 
 Si se borran los datos del navegador se pierde su lista personal; las guías permiten seguir rastreando. Las identidades de creación están sujetas a los límites de altas anónimas de Supabase: conviene reutilizar el navegador durante la dinámica y revisar su límite antes de una exposición masiva desde una misma red.
 

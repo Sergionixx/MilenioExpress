@@ -34,7 +34,7 @@ Las variables públicas `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` pueden re
 
 ## En línea
 
-[Abrir la página pública](https://milenio-express-presentacion.citrus-grape-3384.chatgpt.site).
+[Abrir la página pública](https://milenio-express-presentacion.lospollso123.chatgpt.site).
 La publicación usa Sites y `.openai/hosting.json`, con fallback de rutas SPA. La función Edge y los datos permanecen en Supabase. [Orden para la exposición](docs/PRESENTACION_EN_LINEA.md) y [contrato del backend](supabase/README.md).
 
 Esta actualización se trabaja en `codex/presentacion-publica`, derivada de `feature/presentacion-interactiva`. El `main` del repositorio del equipo y la entrega académica de `dev-maxi` no se fusionan automáticamente.

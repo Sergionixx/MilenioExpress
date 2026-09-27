@@ -1,6 +1,9 @@
 [auth]
 enable_anonymous_sign_ins = true
 
+[auth.rate_limit]
+anonymous_users = 100
+
 [functions.make-server-845b49a4]
 # Keep the URL used by the Figma Make client while publishing the existing source.
 entrypoint = "./functions/server/index.tsx"
