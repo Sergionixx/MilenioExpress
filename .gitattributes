@@ -144,3 +144,7 @@
 *.stl                filter=lfs diff=lfs merge=lfs -text
 *.nc                 filter=lfs diff=lfs merge=lfs -text
 *.mat                filter=lfs diff=lfs merge=lfs -text
+
+# Sites source hosting has no LFS endpoint. Keep this branch's PNG snapshots
+# self-contained; the legacy LFS history remains available on the team remote.
+*.png                -filter -diff -merge -text
