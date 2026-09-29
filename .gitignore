@@ -3,6 +3,7 @@ dist/
 build/
 .cache/
 .env*
+supabase/.temp/
 .vite/
 vite.config.*.timestamp-*
 *.tsbuildinfo
@@ -18,3 +19,9 @@ logs/
 # beside it.
 /.plugins/
 /.opencode-skills/
+
+# Public examples and generated delivery files
+!.env.example
+coverage/
+output/
+reportes/sonar/.work/

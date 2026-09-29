@@ -1,0 +1,391 @@
+[
+  {
+    "filePath": "src/App.tsx",
+    "messages": [
+      {
+        "ruleId": "sonarjs/deprecation",
+        "severity": 2,
+        "message": "'FormEvent' is deprecated.",
+        "line": 3,
+        "column": 3,
+        "messageId": "deprecation",
+        "endLine": 3,
+        "endColumn": 12
+      },
+      {
+        "ruleId": "sonarjs/prefer-read-only-props",
+        "severity": 2,
+        "message": "Mark the props of the component as read-only.",
+        "line": 60,
+        "column": 23,
+        "messageId": "readOnlyProps",
+        "endLine": 60,
+        "endColumn": 60,
+        "suggestions": [
+          {
+            "messageId": "readOnlyPropsFix",
+            "fix": {
+              "range": [
+                1518,
+                1541
+              ],
+              "text": "Readonly<{ children: ReactNode }>"
+            },
+            "desc": "Mark the props as read-only"
+          }
+        ]
+      },
+      {
+        "ruleId": "sonarjs/prefer-read-only-props",
+        "severity": 2,
+        "message": "Mark the props of the component as read-only.",
+        "line": 127,
+        "column": 15,
+        "messageId": "readOnlyProps",
+        "endLine": 127,
+        "endColumn": 79,
+        "suggestions": [
+          {
+            "messageId": "readOnlyPropsFix",
+            "fix": {
+              "range": [
+                3517,
+                3555
+              ],
+              "text": "Readonly<{ name: IconName; className?: string }>"
+            },
+            "desc": "Mark the props as read-only"
+          }
+        ]
+      },
+      {
+        "ruleId": "sonarjs/prefer-read-only-props",
+        "severity": 2,
+        "message": "Mark the props of the component as read-only.",
+        "line": 191,
+        "column": 18,
+        "messageId": "readOnlyProps",
+        "endLine": 191,
+        "endColumn": 46,
+        "suggestions": [
+          {
+            "messageId": "readOnlyPropsFix",
+            "fix": {
+              "range": [
+                4969,
+                4986
+              ],
+              "text": "Readonly<{ label: string }>"
+            },
+            "desc": "Mark the props as read-only"
+          }
+        ]
+      },
+      {
+        "ruleId": "sonarjs/prefer-read-only-props",
+        "severity": 2,
+        "message": "Mark the props of the component as read-only.",
+        "line": 199,
+        "column": 21,
+        "messageId": "readOnlyProps",
+        "endLine": 207,
+        "endColumn": 2,
+        "suggestions": [
+          {
+            "messageId": "readOnlyPropsFix",
+            "fix": {
+              "range": [
+                5191,
+                5248
+              ],
+              "text": "Readonly<{\n  title: string\n  detail: string\n  action?: ReactNode\n}>"
+            },
+            "desc": "Mark the props as read-only"
+          }
+        ]
+      },
+      {
+        "ruleId": "sonarjs/deprecation",
+        "severity": 2,
+        "message": "'FormEvent' is deprecated.",
+        "line": 229,
+        "column": 32,
+        "messageId": "deprecation",
+        "endLine": 229,
+        "endColumn": 58
+      },
+      {
+        "ruleId": "sonarjs/prefer-read-only-props",
+        "severity": 2,
+        "message": "Mark the props of the component as read-only.",
+        "line": 393,
+        "column": 22,
+        "messageId": "readOnlyProps",
+        "endLine": 393,
+        "endColumn": 50,
+        "suggestions": [
+          {
+            "messageId": "readOnlyPropsFix",
+            "fix": {
+              "range": [
+                10781,
+                10799
+              ],
+              "text": "Readonly<{ item: Shipment }>"
+            },
+            "desc": "Mark the props as read-only"
+          }
+        ]
+      },
+      {
+        "ruleId": "sonarjs/deprecation",
+        "severity": 2,
+        "message": "'FormEvent' is deprecated.",
+        "line": 437,
+        "column": 26,
+        "messageId": "deprecation",
+        "endLine": 437,
+        "endColumn": 52
+      },
+      {
+        "ruleId": "sonarjs/no-nested-conditional",
+        "severity": 2,
+        "message": "Extract this nested ternary operation into an independent statement.",
+        "line": 475,
+        "column": 13,
+        "messageId": "extractTernary",
+        "endLine": 500,
+        "endColumn": 10
+      },
+      {
+        "ruleId": "sonarjs/no-nested-conditional",
+        "severity": 2,
+        "message": "Extract this nested ternary operation into an independent statement.",
+        "line": 482,
+        "column": 13,
+        "messageId": "extractTernary",
+        "endLine": 500,
+        "endColumn": 10
+      },
+      {
+        "ruleId": "sonarjs/deprecation",
+        "severity": 2,
+        "message": "'FormEvent' is deprecated.",
+        "line": 542,
+        "column": 26,
+        "messageId": "deprecation",
+        "endLine": 542,
+        "endColumn": 52
+      },
+      {
+        "ruleId": "sonarjs/no-nested-conditional",
+        "severity": 2,
+        "message": "Extract this nested ternary operation into an independent statement.",
+        "line": 585,
+        "column": 13,
+        "messageId": "extractTernary",
+        "endLine": 623,
+        "endColumn": 10
+      },
+      {
+        "ruleId": "sonarjs/no-nested-conditional",
+        "severity": 2,
+        "message": "Extract this nested ternary operation into an independent statement.",
+        "line": 590,
+        "column": 13,
+        "messageId": "extractTernary",
+        "endLine": 623,
+        "endColumn": 10
+      },
+      {
+        "ruleId": "sonarjs/no-nested-conditional",
+        "severity": 2,
+        "message": "Extract this nested ternary operation into an independent statement.",
+        "line": 605,
+        "column": 13,
+        "messageId": "extractTernary",
+        "endLine": 623,
+        "endColumn": 10
+      },
+      {
+        "ruleId": "sonarjs/no-nested-conditional",
+        "severity": 2,
+        "message": "Extract this nested ternary operation into an independent statement.",
+        "line": 671,
+        "column": 11,
+        "messageId": "extractTernary",
+        "endLine": 736,
+        "endColumn": 8
+      },
+      {
+        "ruleId": "sonarjs/no-nested-conditional",
+        "severity": 2,
+        "message": "Extract this nested ternary operation into an independent statement.",
+        "line": 770,
+        "column": 11,
+        "messageId": "extractTernary",
+        "endLine": 788,
+        "endColumn": 8
+      },
+      {
+        "ruleId": "sonarjs/no-nested-conditional",
+        "severity": 2,
+        "message": "Extract this nested ternary operation into an independent statement.",
+        "line": 777,
+        "column": 11,
+        "messageId": "extractTernary",
+        "endLine": 788,
+        "endColumn": 8
+      },
+      {
+        "ruleId": "sonarjs/deprecation",
+        "severity": 2,
+        "message": "'FormEvent' is deprecated.",
+        "line": 822,
+        "column": 32,
+        "messageId": "deprecation",
+        "endLine": 822,
+        "endColumn": 58
+      }
+    ],
+    "suppressedMessages": [],
+    "errorCount": 18,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "src/lib/authErrors.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "src/lib/http.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "src/lib/session.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "src/lib/supabase.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "src/main.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "src/vite-env.d.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "supabase/functions/server/domain.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "supabase/functions/server/index.tsx",
+    "messages": [
+      {
+        "ruleId": "sonarjs/no-nested-assignment",
+        "severity": 2,
+        "message": "Extract the assignment of \"service\" from this expression.",
+        "line": 93,
+        "column": 18,
+        "messageId": "extractAssignment",
+        "endLine": 93,
+        "endColumn": 21
+      }
+    ],
+    "suppressedMessages": [],
+    "errorCount": 1,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "supabase/functions/server/kv_store.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "supabase/functions/server/service.ts",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "utils/supabase/info.tsx",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  }
+]

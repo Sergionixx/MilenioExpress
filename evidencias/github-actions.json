@@ -1,0 +1,535 @@
+{
+  "id": 35974266905,
+  "head_branch": "dev-maxi",
+  "head_sha": "82ad3033067d5e7e896fb27a792f70575a090c87",
+  "status": "completed",
+  "conclusion": "success",
+  "html_url": "https://github.com/Sergionixx/MilenioExpress/actions/runs/35974266905",
+  "created_at": "2026-09-24T08:16:20Z",
+  "updated_at": "2026-09-24T08:20:05Z",
+  "jobs": [
+    {
+      "id": 107550904223,
+      "name": "pruebas",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-09-24T08:16:23Z",
+      "completed_at": "2026-09-24T08:16:49Z",
+      "html_url": "https://github.com/Sergionixx/MilenioExpress/actions/runs/35974266905/job/107550904223",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-09-24T08:16:24Z",
+          "completed_at": "2026-09-24T08:16:27Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-09-24T08:16:27Z",
+          "completed_at": "2026-09-24T08:16:29Z"
+        },
+        {
+          "name": "Run pnpm/action-setup@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-09-24T08:16:29Z",
+          "completed_at": "2026-09-24T08:16:33Z"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-09-24T08:16:33Z",
+          "completed_at": "2026-09-24T08:16:35Z"
+        },
+        {
+          "name": "Run pnpm install --frozen-lockfile",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-09-24T08:16:35Z",
+          "completed_at": "2026-09-24T08:16:37Z"
+        },
+        {
+          "name": "Run pnpm test:coverage",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-09-24T08:16:37Z",
+          "completed_at": "2026-09-24T08:16:38Z"
+        },
+        {
+          "name": "Run pnpm typecheck",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-09-24T08:16:38Z",
+          "completed_at": "2026-09-24T08:16:41Z"
+        },
+        {
+          "name": "Run pnpm quality",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-09-24T08:16:41Z",
+          "completed_at": "2026-09-24T08:16:45Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-09-24T08:16:45Z",
+          "completed_at": "2026-09-24T08:16:47Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16,
+          "started_at": "2026-09-24T08:16:47Z",
+          "completed_at": "2026-09-24T08:16:47Z"
+        },
+        {
+          "name": "Post Run pnpm/action-setup@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17,
+          "started_at": "2026-09-24T08:16:47Z",
+          "completed_at": "2026-09-24T08:16:47Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 18,
+          "started_at": "2026-09-24T08:16:47Z",
+          "completed_at": "2026-09-24T08:16:47Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 19,
+          "started_at": "2026-09-24T08:16:47Z",
+          "completed_at": "2026-09-24T08:16:47Z"
+        }
+      ]
+    },
+    {
+      "id": 107551059887,
+      "name": "construccion",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-09-24T08:16:53Z",
+      "completed_at": "2026-09-24T08:17:11Z",
+      "html_url": "https://github.com/Sergionixx/MilenioExpress/actions/runs/35974266905/job/107551059887",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-09-24T08:16:54Z",
+          "completed_at": "2026-09-24T08:16:56Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-09-24T08:16:56Z",
+          "completed_at": "2026-09-24T08:16:57Z"
+        },
+        {
+          "name": "Run pnpm/action-setup@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-09-24T08:16:57Z",
+          "completed_at": "2026-09-24T08:16:58Z"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-09-24T08:16:58Z",
+          "completed_at": "2026-09-24T08:17:03Z"
+        },
+        {
+          "name": "Run pnpm install --frozen-lockfile",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-09-24T08:17:03Z",
+          "completed_at": "2026-09-24T08:17:04Z"
+        },
+        {
+          "name": "Run pnpm build",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-09-24T08:17:04Z",
+          "completed_at": "2026-09-24T08:17:05Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-09-24T08:17:05Z",
+          "completed_at": "2026-09-24T08:17:07Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-09-24T08:17:07Z",
+          "completed_at": "2026-09-24T08:17:07Z"
+        },
+        {
+          "name": "Post Run pnpm/action-setup@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-09-24T08:17:07Z",
+          "completed_at": "2026-09-24T08:17:07Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14,
+          "started_at": "2026-09-24T08:17:07Z",
+          "completed_at": "2026-09-24T08:17:08Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15,
+          "started_at": "2026-09-24T08:17:08Z",
+          "completed_at": "2026-09-24T08:17:08Z"
+        }
+      ]
+    },
+    {
+      "id": 107551059906,
+      "name": "integracion",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-09-24T08:16:53Z",
+      "completed_at": "2026-09-24T08:19:48Z",
+      "html_url": "https://github.com/Sergionixx/MilenioExpress/actions/runs/35974266905/job/107551059906",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-09-24T08:16:54Z",
+          "completed_at": "2026-09-24T08:16:57Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-09-24T08:16:57Z",
+          "completed_at": "2026-09-24T08:16:58Z"
+        },
+        {
+          "name": "Recuperar el análisis global de esta ejecución",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-09-24T08:16:58Z",
+          "completed_at": "2026-09-24T08:16:59Z"
+        },
+        {
+          "name": "Run pnpm/action-setup@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-09-24T08:16:59Z",
+          "completed_at": "2026-09-24T08:17:01Z"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-09-24T08:17:01Z",
+          "completed_at": "2026-09-24T08:17:04Z"
+        },
+        {
+          "name": "Run pnpm install --frozen-lockfile",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-09-24T08:17:04Z",
+          "completed_at": "2026-09-24T08:17:06Z"
+        },
+        {
+          "name": "Preparar Chromium para el recorrido móvil",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-09-24T08:17:06Z",
+          "completed_at": "2026-09-24T08:17:34Z"
+        },
+        {
+          "name": "Run supabase/setup-cli@v1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-09-24T08:17:34Z",
+          "completed_at": "2026-09-24T08:17:37Z"
+        },
+        {
+          "name": "Crear base y Auth aislados con las migraciones de esta rama",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-09-24T08:17:37Z",
+          "completed_at": "2026-09-24T08:19:17Z"
+        },
+        {
+          "name": "Probar JWT real, roles, persistencia, RLS y guías únicas",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-09-24T08:19:17Z",
+          "completed_at": "2026-09-24T08:19:31Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-09-24T08:19:31Z",
+          "completed_at": "2026-09-24T08:19:33Z"
+        },
+        {
+          "name": "Detener Supabase aislado",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-09-24T08:19:33Z",
+          "completed_at": "2026-09-24T08:19:45Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 22,
+          "started_at": "2026-09-24T08:19:45Z",
+          "completed_at": "2026-09-24T08:19:45Z"
+        },
+        {
+          "name": "Post Run pnpm/action-setup@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 23,
+          "started_at": "2026-09-24T08:19:45Z",
+          "completed_at": "2026-09-24T08:19:45Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 24,
+          "started_at": "2026-09-24T08:19:45Z",
+          "completed_at": "2026-09-24T08:19:45Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 25,
+          "started_at": "2026-09-24T08:19:45Z",
+          "completed_at": "2026-09-24T08:19:46Z"
+        }
+      ]
+    },
+    {
+      "id": 107551982184,
+      "name": "despliegue-pruebas",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-09-24T08:19:51Z",
+      "completed_at": "2026-09-24T08:20:04Z",
+      "html_url": "https://github.com/Sergionixx/MilenioExpress/actions/runs/35974266905/job/107551982184",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-09-24T08:19:52Z",
+          "completed_at": "2026-09-24T08:19:53Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-09-24T08:19:53Z",
+          "completed_at": "2026-09-24T08:19:54Z"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-09-24T08:19:54Z",
+          "completed_at": "2026-09-24T08:19:55Z"
+        },
+        {
+          "name": "Run actions/download-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-09-24T08:19:55Z",
+          "completed_at": "2026-09-24T08:19:55Z"
+        },
+        {
+          "name": "Desplegar artefacto probado en contenedor aislado",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-09-24T08:19:55Z",
+          "completed_at": "2026-09-24T08:20:01Z"
+        },
+        {
+          "name": "Verificar HTTP, rutas, bundle y cabeceras del despliegue",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-09-24T08:20:01Z",
+          "completed_at": "2026-09-24T08:20:01Z"
+        },
+        {
+          "name": "Registrar versión y ciclo de vida",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-09-24T08:20:01Z",
+          "completed_at": "2026-09-24T08:20:01Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-09-24T08:20:01Z",
+          "completed_at": "2026-09-24T08:20:02Z"
+        },
+        {
+          "name": "Detener entorno de pruebas",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-09-24T08:20:02Z",
+          "completed_at": "2026-09-24T08:20:02Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17,
+          "started_at": "2026-09-24T08:20:02Z",
+          "completed_at": "2026-09-24T08:20:02Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 18,
+          "started_at": "2026-09-24T08:20:02Z",
+          "completed_at": "2026-09-24T08:20:02Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 19,
+          "started_at": "2026-09-24T08:20:02Z",
+          "completed_at": "2026-09-24T08:20:03Z"
+        }
+      ]
+    }
+  ],
+  "artifacts": [
+    {
+      "id": 10797497923,
+      "name": "integracion-supabase-local",
+      "digest": "sha256:0aa6bf9351ad2ac80afeea07706bbec9b18494208e7c62c4515304b62eba6e06",
+      "created_at": "2026-09-24T08:19:33Z",
+      "expires_at": "2026-10-24T08:19:32Z"
+    },
+    {
+      "id": 10797123940,
+      "name": "aplicacion",
+      "digest": "sha256:cc77207342bc2691b4295940af942c9cab0d3179fa78d035aeb6ba6c6cc6b24c",
+      "created_at": "2026-09-24T08:17:07Z",
+      "expires_at": "2026-10-24T08:17:06Z"
+    },
+    {
+      "id": 10797008095,
+      "name": "evidencia-despliegue",
+      "digest": "sha256:93daa97ec68d425d89cf32851ce9193d04681aef5266440fa1dad0777b4742a7",
+      "created_at": "2026-09-24T08:20:02Z",
+      "expires_at": "2026-10-24T08:20:01Z"
+    },
+    {
+      "id": 10796779712,
+      "name": "pruebas-y-calidad",
+      "digest": "sha256:5c5593d85e9b7a81c04dc0abf1ebea0dc1e61028417476566dbeca9ae1f5cf94",
+      "created_at": "2026-09-24T08:16:46Z",
+      "expires_at": "2026-10-24T08:16:46Z"
+    }
+  ],
+  "downloadedFiles": [
+    "evidencias/ci-ui/calidad-dashboard.png",
+    "evidencias/ci-ui/confirmacion-copia-375.png",
+    "evidencias/ci-ui/consulta-ajena-rechazada-320.png",
+    "evidencias/ci-ui/consulta-propia-320.png",
+    "evidencias/ci-ui/consulta-propia-375.png",
+    "evidencias/ci-ui/consulta-propia-430.png",
+    "evidencias/ci-ui/guia-invalida-320.png",
+    "evidencias/ci-ui/login-320.png",
+    "evidencias/ci-ui/login-375.png",
+    "evidencias/ci-ui/login-430.png",
+    "evidencias/ci-ui/login-error-credenciales-430.png",
+    "evidencias/ci-ui/login-foco-teclado-320.png",
+    "evidencias/ci-ui/registro-320.png",
+    "evidencias/ci-ui/registro-375.png",
+    "evidencias/ci-ui/registro-430.png",
+    "evidencias/contenedor.json",
+    "evidencias/contenedor.log",
+    "evidencias/despliegue.json",
+    "reportes/integracion/resultados.json",
+    "reportes/integracion/ui-resultados.json",
+    "reportes/pruebas-unitarias/coverage.tap",
+    "reportes/pruebas-unitarias/lcov.info",
+    "reportes/sonar/METRICAS.md",
+    "reportes/sonar/baseline-eslint.json",
+    "reportes/sonar/baseline-jscpd.json",
+    "reportes/sonar/baseline.html",
+    "reportes/sonar/baseline.json",
+    "reportes/sonar/final-eslint.json",
+    "reportes/sonar/final-jscpd.json",
+    "reportes/sonar/final.html",
+    "reportes/sonar/final.json"
+  ]
+}

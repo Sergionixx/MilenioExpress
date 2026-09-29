@@ -1,0 +1,252 @@
+TAP version 13
+# Subtest: login explains invalid credentials, confirmation, throttling and connectivity
+ok 1 - login explains invalid credentials, confirmation, throttling and connectivity
+  ---
+  duration_ms: 1.535979
+  type: 'test'
+  ...
+# Subtest: unrecognized auth failures never disclose provider error details
+ok 2 - unrecognized auth failures never disclose provider error details
+  ---
+  duration_ms: 0.253889
+  type: 'test'
+  ...
+# Subtest: normalizes the agreed shipment fields before registration
+ok 3 - normalizes the agreed shipment fields before registration
+  ---
+  duration_ms: 1.916817
+  type: 'test'
+  ...
+# Subtest: rejects malformed bodies, untrusted fields and invalid owner IDs
+ok 4 - rejects malformed bodies, untrusted fields and invalid owner IDs
+  ---
+  duration_ms: 0.779091
+  type: 'test'
+  ...
+# Subtest: rejects missing, blank, nontext and overlong shipment details
+ok 5 - rejects missing, blank, nontext and overlong shipment details
+  ---
+  duration_ms: 0.474908
+  type: 'test'
+  ...
+# Subtest: accepts only guide syntax and authorizes a shipment's owner or ADMIN
+ok 6 - accepts only guide syntax and authorizes a shipment's owner or ADMIN
+  ---
+  duration_ms: 0.25467
+  type: 'test'
+  ...
+# Subtest: returns the guide, owner, status and deterministic event data for the UI
+ok 7 - returns the guide, owner, status and deterministic event data for the UI
+  ---
+  duration_ms: 29.043766
+  type: 'test'
+  ...
+# Subtest: health and preflight require no database and carry safe response headers
+ok 8 - health and preflight require no database and carry safe response headers
+  ---
+  duration_ms: 39.965647
+  type: 'test'
+  ...
+# Subtest: an explicit CORS allowlist permits only configured browser origins
+ok 9 - an explicit CORS allowlist permits only configured browser origins
+  ---
+  duration_ms: 4.067906
+  type: 'test'
+  ...
+# Subtest: every protected HTTP operation rejects absent, malformed and invalid tokens
+ok 10 - every protected HTTP operation rejects absent, malformed and invalid tokens
+  ---
+  duration_ms: 11.712484
+  type: 'test'
+  ...
+# Subtest: HTTP returns only the server profile and enforces ADMIN operations
+ok 11 - HTTP returns only the server profile and enforces ADMIN operations
+  ---
+  duration_ms: 24.301424
+  type: 'test'
+  ...
+# Subtest: HTTP lists owner-scoped shipments and refuses another user's guide
+ok 12 - HTTP lists owner-scoped shipments and refuses another user's guide
+  ---
+  duration_ms: 2.363152
+  type: 'test'
+  ...
+# Subtest: HTTP validates JSON media type, syntax and untrusted registration fields
+ok 13 - HTTP validates JSON media type, syntax and untrusted registration fields
+  ---
+  duration_ms: 2.904788
+  type: 'test'
+  ...
+# Subtest: HTTP rejects oversized bodies with and without a declared byte count
+ok 14 - HTTP rejects oversized bodies with and without a declared byte count
+  ---
+  duration_ms: 0.839421
+  type: 'test'
+  ...
+# Subtest: HTTP uses stable route/method errors and masks server infrastructure failures
+ok 15 - HTTP uses stable route/method errors and masks server infrastructure failures
+  ---
+  duration_ms: 2.144476
+  type: 'test'
+  ...
+# Subtest: sends the session token and returns the server-confirmed guide
+ok 16 - sends the session token and returns the server-confirmed guide
+  ---
+  duration_ms: 32.46558
+  type: 'test'
+  ...
+# Subtest: distinguishes an absent session and a connection failure
+ok 17 - distinguishes an absent session and a connection failure
+  ---
+  duration_ms: 1.129843
+  type: 'test'
+  ...
+# Subtest: preserves safe HTTP errors and provides a fallback for malformed error bodies
+ok 18 - preserves safe HTTP errors and provides a fallback for malformed error bodies
+  ---
+  duration_ms: 1.481498
+  type: 'test'
+  ...
+# Subtest: non-object and malformed error fields retain HTTP status without crashing
+ok 19 - non-object and malformed error fields retain HTTP status without crashing
+  ---
+  duration_ms: 3.854228
+  type: 'test'
+  ...
+# Subtest: a malformed success response is reported as an actionable API error
+ok 20 - a malformed success response is reported as an actionable API error
+  ---
+  duration_ms: 1.176138
+  type: 'test'
+  ...
+# Subtest: repository sends each JWT to Supabase Auth for verification
+ok 21 - repository sends each JWT to Supabase Auth for verification
+  ---
+  duration_ms: 49.19463
+  type: 'test'
+  ...
+# Subtest: verification rejects invalid/expired JWTs and preserves service outages
+ok 22 - verification rejects invalid/expired JWTs and preserves service outages
+  ---
+  duration_ms: 4.577051
+  type: 'test'
+  ...
+# Subtest: profile lookup scopes by verified id and handles missing/error rows
+ok 23 - profile lookup scopes by verified id and handles missing/error rows
+  ---
+  duration_ms: 4.020441
+  type: 'test'
+  ...
+# Subtest: owner listing retrieves every page in stable name/id order
+ok 24 - owner listing retrieves every page in stable name/id order
+  ---
+  duration_ms: 3.480978
+  type: 'test'
+  ...
+# Subtest: shipment listing pages consistently and keeps USER scope on every page
+ok 25 - shipment listing pages consistently and keeps USER scope on every page
+  ---
+  duration_ms: 4.092553
+  type: 'test'
+  ...
+# Subtest: guide lookup uses an equality filter and preserves storage errors
+ok 26 - guide lookup uses an equality filter and preserves storage errors
+  ---
+  duration_ms: 1.572333
+  type: 'test'
+  ...
+# Subtest: registration writes only validated details and reads the database-generated guide
+ok 27 - registration writes only validated details and reads the database-generated guide
+  ---
+  duration_ms: 2.873523
+  type: 'test'
+  ...
+# Subtest: registration maps unique/FK conflicts and propagates unexpected database errors
+ok 28 - registration maps unique/FK conflicts and propagates unexpected database errors
+  ---
+  duration_ms: 1.79832
+  type: 'test'
+  ...
+# Subtest: authentication requires a verified token and a trusted authorized profile
+ok 29 - authentication requires a verified token and a trusted authorized profile
+  ---
+  duration_ms: 3.030035
+  type: 'test'
+  ...
+# Subtest: authentication masks identity/profile infrastructure errors
+ok 30 - authentication masks identity/profile infrastructure errors
+  ---
+  duration_ms: 1.950026
+  type: 'test'
+  ...
+# Subtest: only ADMIN can list owners, and profiles expose no role or internal fields
+ok 31 - only ADMIN can list owners, and profiles expose no role or internal fields
+  ---
+  duration_ms: 0.446105
+  type: 'test'
+  ...
+# Subtest: USER shipment list is owner scoped and filters any improperly returned rows
+ok 32 - USER shipment list is owner scoped and filters any improperly returned rows
+  ---
+  duration_ms: 16.546938
+  type: 'test'
+  ...
+# Subtest: guide lookup distinguishes invalid, absent and unauthorized shipments
+ok 33 - guide lookup distinguishes invalid, absent and unauthorized shipments
+  ---
+  duration_ms: 0.79191
+  type: 'test'
+  ...
+# Subtest: ADMIN registers a shipment for an existing owner; USER cannot register
+ok 34 - ADMIN registers a shipment for an existing owner; USER cannot register
+  ---
+  duration_ms: 1.179648
+  type: 'test'
+  ...
+# Subtest: registration preserves guide conflicts and reports storage outages
+ok 35 - registration preserves guide conflicts and reports storage outages
+  ---
+  duration_ms: 0.985889
+  type: 'test'
+  ...
+# Subtest: a rejected session clears access without replacing the server error
+ok 36 - a rejected session clears access without replacing the server error
+  ---
+  duration_ms: 1.461338
+  type: 'test'
+  ...
+# Subtest: permissions and temporary failures keep the current session
+ok 37 - permissions and temporary failures keep the current session
+  ---
+  duration_ms: 0.322751
+  type: 'test'
+  ...
+1..37
+# tests 37
+# suites 0
+# pass 37
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1238.109929
+# start of coverage report
+# -----------------------------------------------------------------
+# file             | line % | branch % | funcs % | uncovered lines
+# -----------------------------------------------------------------
+# src              |        |          |         | 
+#  lib             |        |          |         | 
+#   authErrors.ts  | 100.00 |   100.00 |  100.00 | 
+#   http.ts        | 100.00 |   100.00 |  100.00 | 
+#   session.ts     | 100.00 |   100.00 |  100.00 | 
+# supabase         |        |          |         | 
+#  functions       |        |          |         | 
+#   server         |        |          |         | 
+#    domain.ts     | 100.00 |   100.00 |  100.00 | 
+#    handler.ts    | 100.00 |   100.00 |  100.00 | 
+#    repository.ts | 100.00 |    95.12 |  100.00 | 
+#    service.ts    | 100.00 |   100.00 |  100.00 | 
+# -----------------------------------------------------------------
+# all files        | 100.00 |    99.07 |  100.00 | 
+# -----------------------------------------------------------------
+# end of coverage report

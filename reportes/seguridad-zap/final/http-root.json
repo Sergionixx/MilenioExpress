@@ -1,0 +1,18 @@
+{
+  "target": "http://127.0.0.1:4174/",
+  "status": 200,
+  "headers": {
+    "cache-control": "no-store",
+    "connection": "keep-alive",
+    "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; img-src 'self' data:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+    "content-type": "text/html; charset=utf-8",
+    "date": "Thu, 24 Sep 2026 07:55:15 GMT",
+    "keep-alive": "timeout=5",
+    "permissions-policy": "camera=(), microphone=(), geolocation=()",
+    "referrer-policy": "no-referrer",
+    "transfer-encoding": "chunked",
+    "x-content-type-options": "nosniff",
+    "x-frame-options": "DENY"
+  },
+  "bodySha256": "512342edd91a486e87b541173a464e49f1d6fca32dfb0deb9542320972187d62"
+}

@@ -1,28 +1,42 @@
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import { projectId, publicAnonKey } from "../../utils/supabase/info";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js"
+
+import { requestJson } from "./http"
+import { SESSION_REJECTED_EVENT, withSessionInvalidation } from "./session"
+
+export { ApiError } from "./http"
 
 declare global {
   interface Window {
-    __milenioSupabaseClient?: SupabaseClient;
+    __milenioSupabaseClient?: SupabaseClient
   }
 }
 
-const supabaseUrl = `https://${projectId}.supabase.co`;
+// Public client configuration for the team's Supabase project. Local overrides
+// can target another project without changing the generated Figma Make file.
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL?.trim() || "https://rltahgouyixqquspofsf.supabase.co"
+const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY?.trim() || "sb_publishable_8dC_SpYmjgaIhK2O6mviGA_jiSU9qGB"
 
 // Keep exactly one client during Vite hot reloads and normal browser navigation.
-export const supabase = window.__milenioSupabaseClient ?? createClient(supabaseUrl, publicAnonKey, {
-  auth: { storageKey: "milenio-express-session" },
-});
-window.__milenioSupabaseClient = supabase;
 
-export const apiUrl = `${supabaseUrl}/functions/v1/make-server-845b49a4`;
+export const supabase =
+  window.__milenioSupabaseClient ??
+  createClient(supabaseUrl, anonKey, {
+    auth: { storageKey: "milenio-express-session" },
+  })
+
+window.__milenioSupabaseClient = supabase
+
+export const apiUrl = `${supabaseUrl}/functions/v1/make-server-845b49a4`
 
 export async function apiFetch(path: string, init: RequestInit = {}) {
-  const { data: { session } } = await supabase.auth.getSession();
-  const response = await fetch(`${apiUrl}${path}`, {
-    ...init,
-    headers: { "Content-Type": "application/json", ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}), ...init.headers },
-  });
-  if (!response.ok) throw new Error((await response.json().catch(() => ({}))).error || "No se pudo completar la solicitud.");
-  return response.json();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+  return withSessionInvalidation(
+    () => requestJson(`${apiUrl}${path}`, session?.access_token, init, fetch, anonKey),
+    () => {
+      window.dispatchEvent(new Event(SESSION_REJECTED_EVENT))
+      void supabase.auth.signOut({ scope: "local" }).catch(() => undefined)
+    },
+  )
 }

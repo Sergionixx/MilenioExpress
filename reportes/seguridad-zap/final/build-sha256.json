@@ -1,0 +1,25 @@
+{
+  "sourceVersion": "ede06a621162763f52f23ca07872b79b31b5adbe",
+  "artifacts": [
+    {
+      "path": "assets/index-DzouCYjN.css",
+      "sha256": "f298822958af124c9cd151dfc7404bc041d08150284e4bf76cfcf90f3f7fefcb"
+    },
+    {
+      "path": "assets/index-PVLazV2d.js",
+      "sha256": "1b3a47e97678166111e50f0ec9330199410e3d9b770d6137cfad4c0c9c1f1abe"
+    },
+    {
+      "path": "index.html",
+      "sha256": "512342edd91a486e87b541173a464e49f1d6fca32dfb0deb9542320972187d62"
+    },
+    {
+      "path": "robots.txt",
+      "sha256": "331ea9090db0c9f6f597bd9840fd5b171830f6e0b3ba1cb24dfa91f0c95aedc1"
+    },
+    {
+      "path": "scripts/serve.mjs",
+      "sha256": "ec6606924fe3dc5fcd071593f600c3e2f56e90681d8b5831229925f690b7312d"
+    }
+  ]
+}

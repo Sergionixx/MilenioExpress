@@ -1,0 +1,24 @@
+{
+  "tool": "ZAP",
+  "version": "2.17.0",
+  "label": "final",
+  "target": "http://127.0.0.1:4174/",
+  "startedAt": "2026-09-24T07:13:46.427Z",
+  "finishedAt": "2026-09-24T07:13:59.166Z",
+  "exitCode": 0,
+  "sourceVersion": "dev-maxi-working-tree-2026-09-24",
+  "command": [
+    "bash",
+    "<ZAP_HOME>/zap.sh",
+    "-cmd",
+    "-host",
+    "127.0.0.1",
+    "-port",
+    "8098",
+    "-dir",
+    "<TEMP_SESSION>",
+    "-autorun",
+    "/Users/maximo/Documents/ChatGPT/Milenio-Express/MilenioExpress/reportes/seguridad-zap/final/plan.yaml"
+  ],
+  "scope": "Frontend HTTP local, spider tradicional y reglas pasivas; sin backend remoto, login ni pruebas activas"
+}
